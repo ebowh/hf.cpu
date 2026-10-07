@@ -390,25 +390,25 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 - Runtime and byte-heavy tools are C. Everyday offline tooling is Perl. Your Perl preference is a preference, not a ban: Python is acceptable for the rarely run capture kit on rented machines (§9).
 - **Batched fan-out** is in scope (§4.4).
 - Resident, load-once, many-requests process with two stdin modes: argv-lines and RS-separated records (§11).
-- Platforms: Linux on the EliteBook, macOS on the MacBook, FreeBSD should also work (§14).
+- Platforms: Linux on the EliteBook, macOS **12.7.6 (Monterey)** on the MacBook, FreeBSD should also work (§14).
 - Hardware: EliteBook i7-8665U (4C/8T, 8 MB L3), 2 x 16 GB DDR4 (dual channel), ~512 GB NVMe. MacBook 256 GB SSD. Cache budget is a setting (§15).
 - `llama-quantize` is fine for offline quantizing. Reuse existing GGUFs and rewrite them into our layout (§7). Rented machines are available for one-off jobs.
+- **Vision can be deferred.** v1 is text-only.
+- Items you could not answer are decided by me, below.
 
 **Decided (by me, say if you disagree):**
 - macOS, Linux and FreeBSD behave **identically in results** (bit-identical logits on the same ISA) and differ only in the platform layer (§14).
 - Sidecar building is a C mode of the engine, orchestrated by Perl, and defaults to **lossless re-layout** only (§7).
-- Vision is **core**, no longer a later phase: five of your models need it (§4.8).
-- Chat templates: capture the Jinja AST on the rented machine and interpret a small subset in the engine, validated against golden vectors (§9, §11).
+- **Vision is deferred in implementation but not in design.** The spec vocabulary, the protocol (`--image PATH`, repeatable) and the cache key format reserve room for it now, so adding it later is additive. The vision tower stays out of the sidecar for text-only runs. Order: text, cache, hybrids, then vision (§16).
+- **Quality-gate request types are first-class** (`classify`, `score`, logprob output, repetition-loop stop). They are cheap to build on the same prefill path and are exactly what your gated pipeline needs.
+- **Cancellation and control:** `SIGINT` always cancels the current request and keeps the process alive. In argv mode, a stdin line starting with `!` is a control line (`!cancel`, `!stats`, `!quit`). In record mode, an **optional `--control-fd N`** carries the same control lines, so record bodies never need reserved bytes. Emacs can ignore it and just send `SIGINT`.
+- **Gemma sizes**, in priority order: **Gemma 3 270M** (a tiny, fast classifier and a draft-model candidate, though its 262k vocab makes the output layer dominate), **Gemma 3 1B**, then **Gemma 4 E2B and E4B** (the interesting ones: per-layer embeddings, KV sharing, sliding windows). Gemma 3 4B is skipped initially, since E4B supersedes it. The two Gemma 3 models are text-only and need only the dense-with-sliding-window blocks, so they come before E2B/E4B, which need the PLE region and KV-sharing map.
+- **Config files you couldn't provide** (Ornith-1.5-9B, Qwen3.8, Bonsai 2 sizes): not blocking. `inspect` reads architecture and layer pattern straight from each GGUF's metadata, and the rented-machine capture kit will pull the HF `config.json` later. Until then those models are tracked as "architecture unconfirmed" and scheduled after Qwen3.5, whose block set they most likely reuse.
 
-**Still open:**
-1. **Bonsai 2 members**: I could only confirm the 27B. Which sizes are in the collection? Paste the list (HF and prismml.com are blocked from my sandbox). The 27B is ~5.9 GB but compute-heavy, so a slow, cache-mandatory stage, not a fast one (§4.9).
-2. **PrismML format spec** for `PTQ1_0` / `PQ2_0`: the fork's source or a GGUF header dump (I can write the Perl dump tool first).
-3. **Ornith-1.5-9B `config.json`** (layer pattern) and **Qwen3.8 `config.json`**.
-4. **Quality-gate request types**: are `classify` / `score` / logprob outputs wanted first-class (my assumption: yes)?
-5. **Control channel in record mode**: reserved leading byte for `!cancel`, or a second file descriptor (`--control-fd 3`)? The fd is cleaner but less portable to simple pipelines.
-6. **Which Gemma sizes**: 270M, 1B, 4B, Gemma 3n/4 E2B/E4B, all?
-7. **MacBook details**: exact CPU (I assume i7-5557U from "dual-core i7, 4 MB L3") and macOS version (Monterey 12 is the last official release for a 2015 MBP, as I recall).
-8. **Rented machine**: when you are ready, I will write the capture kit and a runbook with the exact commands. What GPU or RAM class is easy for you to rent? (The 27B needs ~54 GB in bf16 to trace, the others far less.)
+**Still open (none blocks the start):**
+1. **PrismML format spec** for `PTQ1_0` / `PQ2_0`. A GGUF header dump of any Bonsai 2 file is enough, and I can write the Perl dump tool in the first phase. Bonsai 2 27B is deliberately late in the schedule.
+2. **MacBook CPU**: I assume an i7-5557U (the 2015 13-inch with Iris 6100), from "dual-core i7, 4 MB L3". The probe will report the truth at first run, so this only affects my estimates.
+3. **Rented machine class** for the capture kit (needed only when phase 7 starts).
 
 ---
 
@@ -437,7 +437,7 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 **Build:** plain C99, POSIX `make` subset (BSD make and GNU make both work, so no GNU-isms), `cc` = clang or gcc, per-ISA files compiled with explicit `-m` flags selected by a tiny `make` variable or script. The build must **not** need Perl. Only the offline tools do (Perl ships with macOS, and on FreeBSD is `pkg install perl5`). No third-party libraries at all.
 
 **Per-platform notes:**
-- **macOS on the 2015 MBP:** Intel x86_64. Last officially supported macOS is, as I recall, Monterey, so keep the toolchain compatible with Xcode 14-era clang and avoid newer SDK-only APIs. Thermal throttling is severe, and macOS gives less control, so the calibrator's sustained-throughput test and the "good-citizen" mode matter more here. Apple's compressed memory can make `RSS` misleading.
+- **macOS 12.7.6 on the 2015 MBP (confirmed Monterey, the last release this model gets):** Intel x86_64, Darwin 21.x. The newest Xcode that runs on Monterey is 14.2 [M], so the toolchain is Apple clang 14-era: C99 is fine, intrinsics for AVX2/FMA/F16C work, set `-mmacosx-version-min=12.0`, and avoid anything in newer SDKs. Avoid private APIs (`__ulock_*`), and use pthread condition variables plus short spin loops for barriers. `clock_gettime` and `pthread_set_qos_class_self_np` are available. Do not rely on `MAP_POPULATE`, `posix_fadvise`, or `O_DIRECT` (use `F_NOCACHE`, `F_RDADVISE`, `madvise`). Thermal throttling is severe on this machine and macOS exposes little control, so the calibrator's sustained-throughput test and the "good-citizen" low-priority mode matter most here. Apple's memory compressor makes `RSS` misleading, so budget from `host_statistics64` (free + inactive) and watch for compressor growth. Dev workflow: build natively on the MacBook, and test the strict-overcommit and cgroup paths on the Linux machine.
 - **FreeBSD:** similar to Linux for mmap and fadvise, no sysfs, so rely on CPUID plus `sysctl`. ZFS is common on FreeBSD, and ZFS's ARC **double-caches** mmapped files and does not play well with `mmap` + page cache. Prefer UFS (or accept a larger memory reserve) for the weights/cache directory. Not an issue for your two machines, but a thing to note when it is tested.
 - **Linux (EliteBook):** strict overcommit testing happens here (VM or cgroup), plus perf counters. The same tests run on macOS where the mechanisms exist.
 - **CI matrix:** Linux x86_64 (primary), macOS x86_64, FreeBSD x86_64 in a VM, and a scalar-only build to prove the fallback.
@@ -468,8 +468,8 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 3. **Persistent prefix cache** and sidecar prepared models.
 4. **Hybrid blocks**: short conv (LFM), GDN (Qwen3.5), recurrent checkpoints.
 5. **Spec decoding** (n-gram first, then draft), constrained decoding, thinking budget, classify/score modes.
-6. **MoE and Ling** (KDA, MLA).
-7. **Vision** (ViT blocks, image decode, embedding cache) moves up next to step 4, because five of your models need it. LightOnOCR is a good first VLM (1B decoder, fan-out over pages).
+6. **Gemma 3 270M/1B, then Gemma 4 E2B/E4B** (PLE region, KV sharing, SWA ring KV), **MoE and Ling** (KDA, MLA).
+7. **Vision (deferred past v1)**: ViT blocks, image decode, embedding cache. The spec vocabulary, protocol (`--image`) and cache keys reserve room from phase 0. LightOnOCR is a good first VLM (1B decoder, fan-out over pages).
 8. **Spec linter, `inspect` coverage report and validation harness** (Perl) for new architectures. Gemma (sandwich norms, SWA ring KV, PLE tables, KV sharing, 262k vocab) is a good test of the spec vocabulary.
 9. **Online tuning** from the run log.
 
