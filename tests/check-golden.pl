@@ -85,6 +85,7 @@ for my $p (@prompts) {
             defined $gen_tps ? sprintf("  decode %.1f t/s", $gen_tps) : '';
         if ($agree < $total && $agree < $n) {
             printf "           first difference at token %d: golden %s, ours %s\n", $agree, $p->{gen}[$agree] // '-', $tok[4 * $agree + 1] // '-';
+            printf "             golden top: %s\n             ours   top: %s\n", $p->{lp}[$agree]{top} // '-', $tok[4 * $agree + 3] // '-';
         }
     }
 }
