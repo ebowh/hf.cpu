@@ -688,7 +688,8 @@ static int seq_feed(gseq *g, hfc_out *o, const char *sq, const unsigned char *da
     }
     if (safe) emit_text(o, sq, g->hb, safe);
     if (hit) g->hb_len = 0;
-    else { memmove(g->hb, g->hb + safe, g->hb_len - safe); g->hb_len -= safe; }
+    else if (g->hb_len > safe) { memmove(g->hb, g->hb + safe, g->hb_len - safe); g->hb_len -= safe; }
+    else g->hb_len = 0;
     return hit;
 }
 
