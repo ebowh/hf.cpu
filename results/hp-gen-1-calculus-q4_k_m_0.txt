@@ -1,0 +1,369 @@
+@begin id="" op=generate
+@prompt tokens=39 threads=4
+@prefill tokens=39 cached=0 ms=1209.4 tok_per_s=32.25 kv_bytes=786432
+@token pos=0 id=95456
+@text len=9
+Certainly
+@token pos=1 id=0
+@text len=1
+!
+@token pos=2 id=31359
+@text len=7
+ Calcul
+@token pos=3 id=355
+@text len=2
+us
+@token pos=4 id=374
+@text len=3
+ is
+@token pos=5 id=264
+@text len=2
+ a
+@token pos=6 id=15811
+@text len=12
+ fundamental
+@token pos=7 id=3308
+@text len=7
+ course
+@token pos=8 id=304
+@text len=3
+ in
+@token pos=9 id=37596
+@text len=12
+ mathematics
+@token pos=10 id=429
+@text len=5
+ that
+@token pos=11 id=22111
+@text len=7
+ builds
+@token pos=12 id=389
+@text len=3
+ on
+@token pos=13 id=279
+@text len=4
+ the
+@token pos=14 id=18940
+@text len=9
+ concepts
+@token pos=15 id=315
+@text len=3
+ of
+@token pos=16 id=46876
+@text len=8
+ algebra
+@token pos=17 id=323
+@text len=4
+ and
+@token pos=18 id=17047
+@text len=9
+ geometry
+@token pos=19 id=13
+@text len=1
+.
+@token pos=20 id=2014
+@text len=3
+ To
+@token pos=21 id=1492
+@text len=5
+ help
+@token pos=22 id=498
+@text len=4
+ you
+@token pos=23 id=3535
+@text len=11
+ understand
+@token pos=24 id=323
+@text len=4
+ and
+@token pos=25 id=7341
+@text len=7
+ master
+@token pos=26 id=82668
+@text len=9
+ calculus
+@token pos=27 id=11
+@text len=1
+,
+@token pos=28 id=358
+@text len=2
+ I
+@token pos=29 id=3278
+@text len=3
+'ll
+@token pos=30 id=3410
+@text len=8
+ provide
+@token pos=31 id=458
+@text len=3
+ an
+@token pos=32 id=23251
+@text len=9
+ overview
+@token pos=33 id=315
+@text len=3
+ of
+@token pos=34 id=1181
+@text len=4
+ its
+@token pos=35 id=1376
+@text len=4
+ key
+@token pos=36 id=18940
+@text len=9
+ concepts
+@token pos=37 id=323
+@text len=4
+ and
+@token pos=38 id=10295
+@text len=9
+ examples
+@token pos=39 id=13
+@text len=1
+.
+@token pos=40 id=5692
+@text len=5
+ Here
+@token pos=41 id=525
+@text len=4
+ are
+@token pos=42 id=1045
+@text len=5
+ some
+@token pos=43 id=7354
+@text len=6
+ steps
+@token pos=44 id=498
+@text len=4
+ you
+@token pos=45 id=646
+@text len=4
+ can
+@token pos=46 id=1795
+@text len=7
+ follow
+@token pos=47 id=1447
+@text len=3
+:
+
+
+@token pos=48 id=16
+@text len=1
+1
+@token pos=49 id=13
+@text len=1
+.
+@token pos=50 id=3070
+@text len=3
+ **
+@token pos=51 id=16250
+@text len=5
+Under
+@token pos=52 id=2685
+@text len=5
+stand
+@token pos=53 id=279
+@text len=4
+ the
+@token pos=54 id=67176
+@text len=7
+ Basics
+@token pos=55 id=334
+@text len=2
+**
+@token pos=56 id=510
+@text len=2
+:
+
+@token pos=57 id=256
+@text len=2
+  
+@token pos=58 id=481
+@text len=2
+ -
+@token pos=59 id=3070
+@text len=3
+ **
+@token pos=60 id=94588
+@text len=6
+Limits
+@token pos=61 id=323
+@text len=4
+ and
+@token pos=62 id=20297
+@text len=7
+ Contin
+@token pos=63 id=34494
+@text len=4
+uity
+@token pos=64 id=95518
+@text len=3
+**:
+@token pos=65 id=5145
+@text len=6
+ Start
+@token pos=66 id=553
+@text len=3
+ by
+@token pos=67 id=8660
+@text len=14
+ understanding
+@token pos=68 id=1128
+@text len=5
+ what
+@token pos=69 id=264
+@text len=2
+ a
+@token pos=70 id=3930
+@text len=6
+ limit
+@token pos=71 id=374
+@text len=3
+ is
+@token pos=72 id=323
+@text len=4
+ and
+@token pos=73 id=1246
+@text len=4
+ how
+@token pos=74 id=432
+@text len=3
+ it
+@token pos=75 id=35616
+@text len=8
+ relates
+@token pos=76 id=311
+@text len=3
+ to
+@token pos=77 id=49006
+@text len=11
+ continuity
+@token pos=78 id=13
+@text len=1
+.
+@token pos=79 id=21149
+@text len=6
+ Think
+@token pos=80 id=911
+@text len=6
+ about
+@token pos=81 id=1128
+@text len=5
+ what
+@token pos=82 id=432
+@text len=3
+ it
+@token pos=83 id=3363
+@text len=6
+ means
+@token pos=84 id=369
+@text len=4
+ for
+@token pos=85 id=264
+@text len=2
+ a
+@token pos=86 id=729
+@text len=9
+ function
+@token pos=87 id=311
+@text len=3
+ to
+@token pos=88 id=387
+@text len=3
+ be
+@token pos=89 id=19259
+@text len=11
+ continuous
+@token pos=90 id=518
+@text len=3
+ at
+@token pos=91 id=264
+@text len=2
+ a
+@token pos=92 id=1459
+@text len=6
+ point
+@token pos=93 id=624
+@text len=2
+.
+
+@token pos=94 id=256
+@text len=2
+  
+@token pos=95 id=481
+@text len=2
+ -
+@token pos=96 id=3070
+@text len=3
+ **
+@token pos=97 id=22171
+@text len=3
+Der
+@token pos=98 id=344
+@text len=2
+iv
+@token pos=99 id=5859
+@text len=6
+atives
+@token pos=100 id=95518
+@text len=3
+**:
+@token pos=101 id=12741
+@text len=4
+ Der
+@token pos=102 id=344
+@text len=2
+iv
+@token pos=103 id=5859
+@text len=6
+atives
+@token pos=104 id=525
+@text len=4
+ are
+@token pos=105 id=279
+@text len=4
+ the
+@token pos=106 id=7813
+@text len=6
+ rates
+@token pos=107 id=315
+@text len=3
+ of
+@token pos=108 id=2297
+@text len=7
+ change
+@token pos=109 id=315
+@text len=3
+ of
+@token pos=110 id=264
+@text len=2
+ a
+@token pos=111 id=729
+@text len=9
+ function
+@token pos=112 id=13
+@text len=1
+.
+@token pos=113 id=2379
+@text len=5
+ They
+@token pos=114 id=525
+@text len=4
+ are
+@token pos=115 id=1483
+@text len=5
+ used
+@token pos=116 id=311
+@text len=3
+ to
+@token pos=117 id=1477
+@text len=5
+ find
+@token pos=118 id=279
+@text len=4
+ the
+@token pos=119 id=30232
+@text len=6
+ slope
+@gen tokens=120 ms=2678.5 tok_per_s=44.80 stop=length
+@done status=ok ms=3933.6
