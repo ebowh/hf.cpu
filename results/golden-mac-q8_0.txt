@@ -1,0 +1,12 @@
+plain    ids   FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+plain    text  FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+code     ids   FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+code     text  FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+chatml   ids   FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+chatml   text  FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+unicode  ids   FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+unicode  text  FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+long     ids   FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+long     text  FAIL  agree  0/48 tokens, max |dlogprob| 0.0000
+
+10 check(s) failed
