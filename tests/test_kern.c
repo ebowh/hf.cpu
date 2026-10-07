@@ -253,6 +253,28 @@ static void test_norm_softmax(void)
     CHECK_NEAR(s[3] / s[2], exp(1.0), 1e-5);
 }
 
+/* the vector quantizers must match the portable ones byte for byte, including odd blocks */
+static void test_quantizers_equal(const hfc_kernels *k, const hfc_kernels *g)
+{
+    int trial;
+    for (trial = 0; trial < 400; trial++) {
+        size_t nb = 1 + (size_t)(rnd() % 5), n = nb * 256, i;
+        float *x = (float *)malloc(n * sizeof(float));
+        unsigned char *a = (unsigned char *)malloc(nb * 292), *b = (unsigned char *)malloc(nb * 292);
+        int kind = trial % 5;
+        for (i = 0; i < n; i++) {
+            x[i] = frand() * (kind == 1 ? 1e-3f : kind == 2 ? 300.0f : 1.0f);
+            if (kind == 3) x[i] = (float)((int)(rnd() % 9) - 4);                 /* many exact ties, including equal magnitudes of both signs */
+            if (kind == 4 && i / 256 % 2 == 0) x[i] = 0.0f;                      /* all-zero blocks */
+        }
+        g->quantize_q8_K(x, a, n); k->quantize_q8_K(x, b, n);
+        CHECK(memcmp(a, b, nb * 292) == 0);
+        g->quantize_q8_0(x, a, n); k->quantize_q8_0(x, b, n);
+        CHECK(memcmp(a, b, n / 32 * 34) == 0);
+        free(x); free(a); free(b);
+    }
+}
+
 /* the four-token kernels must reproduce the single-row kernels bit for bit */
 static void test_dot4(const hfc_kernels *k, const char *label)
 {
@@ -305,6 +327,6 @@ int main(void)
     test_q8(g, g);
     test_f32(g);
     test_quant_dot(g, "generic"); test_dot4(g, "generic");
-    if (k != g) { test_f16(k); test_q8(k, g); test_f32(k); test_quant_dot(k, k->isa); test_dot4(k, k->isa); }
+    if (k != g) { test_f16(k); test_q8(k, g); test_f32(k); test_quant_dot(k, k->isa); test_dot4(k, k->isa); test_quantizers_equal(k, g); }
     return t_report("test_kern");
 }

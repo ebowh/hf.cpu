@@ -522,6 +522,92 @@ static void dot4_q6_K_avx2(const void *w, const void *a, size_t as, size_t nb, f
     for (t = 0; t < NT; t++) out[t] = hsum256(acc[t]) - corr[t];
 }
 
+/* ---- activation quantizers: same arithmetic as the portable versions, eight lanes at a time ---- */
+
+static inline __m256i pack_i32x4_to_i8(__m256i a, __m256i b, __m256i c, __m256i d)     /* values already within int8 */
+{
+    __m256i ab = _mm256_packs_epi32(a, b), cd = _mm256_packs_epi32(c, d);
+    __m256i r = _mm256_packs_epi16(ab, cd);
+    return _mm256_permutevar8x32_epi32(r, _mm256_setr_epi32(0, 4, 1, 5, 2, 6, 3, 7));
+}
+
+static void quantize_q8_0_avx2(const float *x, void *y, size_t n)
+{
+    unsigned char *out = (unsigned char *)y;
+    const __m256 sign = _mm256_set1_ps(-0.0f);
+    size_t nb = n / 32, b;
+    for (b = 0; b < nb; b++, x += 32, out += HFC_Q8_0_BLOCK) {
+        __m256 v0 = _mm256_loadu_ps(x), v1 = _mm256_loadu_ps(x + 8), v2 = _mm256_loadu_ps(x + 16), v3 = _mm256_loadu_ps(x + 24);
+        __m256 m = _mm256_max_ps(_mm256_max_ps(_mm256_andnot_ps(sign, v0), _mm256_andnot_ps(sign, v1)),
+                                 _mm256_max_ps(_mm256_andnot_ps(sign, v2), _mm256_andnot_ps(sign, v3)));
+        float amax, d, id;
+        uint16_t h;
+        __m256 vid;
+        __m256i q;
+        __m128 t = _mm_max_ps(_mm256_castps256_ps128(m), _mm256_extractf128_ps(m, 1));
+        t = _mm_max_ps(t, _mm_movehl_ps(t, t));
+        t = _mm_max_ss(t, _mm_shuffle_ps(t, t, 1));
+        amax = _mm_cvtss_f32(t);
+        d = amax / 127.0f;
+        id = d != 0.0f ? 1.0f / d : 0.0f;
+        h = (uint16_t)_cvtss_sh(d, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+        out[0] = (unsigned char)(h & 0xff);
+        out[1] = (unsigned char)(h >> 8);
+        vid = _mm256_set1_ps(id);
+        q = pack_i32x4_to_i8(_mm256_cvtps_epi32(_mm256_mul_ps(v0, vid)), _mm256_cvtps_epi32(_mm256_mul_ps(v1, vid)),
+                             _mm256_cvtps_epi32(_mm256_mul_ps(v2, vid)), _mm256_cvtps_epi32(_mm256_mul_ps(v3, vid)));
+        _mm256_storeu_si256((__m256i *)(out + 2), q);
+    }
+}
+
+static void quantize_q8_K_avx2(const float *x, void *y, size_t n)
+{
+    unsigned char *out = (unsigned char *)y;
+    const __m256 sign = _mm256_set1_ps(-0.0f);
+    const __m256i hi = _mm256_set1_epi32(127);
+    size_t nb = n / 256, b;
+    int j;
+    for (b = 0; b < nb; b++, x += 256, out += HFC_Q8_K_BLOCK) {
+        __m256 m = _mm256_setzero_ps();
+        float amax, max = 0.0f, iscale, d;
+        int8_t *qs = (int8_t *)(out + 4);
+        __m128 t;
+        __m256 vs;
+        for (j = 0; j < 256; j += 8) m = _mm256_max_ps(m, _mm256_andnot_ps(sign, _mm256_loadu_ps(x + j)));
+        t = _mm_max_ps(_mm256_castps256_ps128(m), _mm256_extractf128_ps(m, 1));
+        t = _mm_max_ps(t, _mm_movehl_ps(t, t));
+        t = _mm_max_ss(t, _mm_shuffle_ps(t, t, 1));
+        amax = _mm_cvtss_f32(t);
+        if (amax == 0.0f) { memset(out, 0, HFC_Q8_K_BLOCK); continue; }
+        for (j = 0; j < 256; j++) { float a = x[j] < 0 ? -x[j] : x[j]; if (a == amax) { max = x[j]; break; } }   /* first element of largest magnitude */
+        iscale = -127.0f / max;
+        vs = _mm256_set1_ps(iscale);
+        for (j = 0; j < 256; j += 32) {
+            __m256i a0 = _mm256_min_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(vs, _mm256_loadu_ps(x + j))), hi);
+            __m256i a1 = _mm256_min_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(vs, _mm256_loadu_ps(x + j + 8))), hi);
+            __m256i a2 = _mm256_min_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(vs, _mm256_loadu_ps(x + j + 16))), hi);
+            __m256i a3 = _mm256_min_epi32(_mm256_cvtps_epi32(_mm256_mul_ps(vs, _mm256_loadu_ps(x + j + 24))), hi);
+            _mm256_storeu_si256((__m256i *)(qs + j), pack_i32x4_to_i8(a0, a1, a2, a3));
+        }
+        for (j = 0; j < 16; j++) {
+            __m128i v = _mm_loadu_si128((const __m128i *)(qs + 16 * j));
+            __m256i w16 = _mm256_cvtepi8_epi16(v);
+            __m128i s = _mm_add_epi16(_mm256_castsi256_si128(w16), _mm256_extracti128_si256(w16, 1));    /* 8 x int16 */
+            int s32;
+            int16_t bs;
+            s = _mm_madd_epi16(s, _mm_set1_epi16(1));                         /* 4 x int32 */
+            s = _mm_add_epi32(s, _mm_shuffle_epi32(s, 0x4E));
+            s = _mm_add_epi32(s, _mm_shuffle_epi32(s, 0xB1));
+            s32 = _mm_cvtsi128_si32(s);
+            bs = (int16_t)s32;
+            out[260 + 2 * j] = (unsigned char)(bs & 0xff);
+            out[261 + 2 * j] = (unsigned char)((bs >> 8) & 0xff);
+        }
+        d = 1.0f / iscale;
+        memcpy(out, &d, 4);
+    }
+}
+
 /* 10 vectors x 8 lanes x 2 flops; quantization still uses the portable code */
 static hfc_kernels k_avx2;
 
@@ -534,6 +620,7 @@ const hfc_kernels *hfc_kernels_avx2(void)
         k_avx2.read_sum = read_sum_avx2;
         k_avx2.fma_burn = fma_burn_avx2;
         k_avx2.flops_per_iter = 160.0;
+        k_avx2.quantize_q8_0 = quantize_q8_0_avx2; k_avx2.quantize_q8_K = quantize_q8_K_avx2;
         k_avx2.dot_q8_0 = dot_q8_0_avx2;
         k_avx2.dot_f32 = dot_f32_avx2;
         k_avx2.dot_f32_f16 = dot_f32_f16_avx2;
