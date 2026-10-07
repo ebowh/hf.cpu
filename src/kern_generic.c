@@ -111,10 +111,179 @@ static void f32_to_f16_generic(const float *x, uint16_t *y, size_t n)
     for (i = 0; i < n; i++) y[i] = hfc_f32_to_f16(x[i]);
 }
 
+
+/* ---- K-quants and 4/5-bit legacy dots (portable C) ---- */
+
+static float rd_f16(const unsigned char *p) { return f16f((uint16_t)(p[0] | (p[1] << 8))); }
+
+static void quantize_q8_K_generic(const float *x, void *y, size_t n)
+{
+    unsigned char *out = (unsigned char *)y;
+    size_t nb = n / 256, b;
+    int j;
+    for (b = 0; b < nb; b++, x += 256, out += HFC_Q8_K_BLOCK) {
+        float amax = 0.0f, max = 0.0f, iscale, d;
+        int8_t *qs = (int8_t *)(out + 4);
+        for (j = 0; j < 256; j++) {
+            float a = x[j] < 0 ? -x[j] : x[j];
+            if (a > amax) { amax = a; max = x[j]; }
+        }
+        if (amax == 0.0f) { memset(out, 0, HFC_Q8_K_BLOCK); continue; }
+        iscale = -127.0f / max;
+        for (j = 0; j < 256; j++) {
+            int v = (int)rne(iscale * x[j]);
+            qs[j] = (int8_t)(v > 127 ? 127 : v);
+        }
+        for (j = 0; j < 16; j++) {
+            int s = 0, i;
+            int16_t bs;
+            for (i = 0; i < 16; i++) s += qs[16 * j + i];
+            bs = (int16_t)s;
+            out[260 + 2 * j] = (unsigned char)(bs & 0xff);
+            out[261 + 2 * j] = (unsigned char)((bs >> 8) & 0xff);
+        }
+        d = 1.0f / iscale;
+        memcpy(out, &d, 4);
+    }
+}
+
+static int16_t rd_i16(const unsigned char *p) { return (int16_t)(p[0] | (p[1] << 8)); }
+
+static float dot_q4_0_generic(const void *w, const void *a, size_t nb)
+{
+    const unsigned char *pw = (const unsigned char *)w, *pa = (const unsigned char *)a;
+    float sum = 0.0f;
+    size_t b;
+    int j;
+    for (b = 0; b < nb; b++, pw += 18, pa += HFC_Q8_0_BLOCK) {
+        int isum = 0;
+        for (j = 0; j < 16; j++)
+            isum += ((pw[2 + j] & 0xF) - 8) * (int)(int8_t)pa[2 + j] + ((pw[2 + j] >> 4) - 8) * (int)(int8_t)pa[18 + j];
+        sum += (rd_f16(pw) * rd_f16(pa)) * (float)isum;
+    }
+    return sum;
+}
+
+static float dot_q5_0_generic(const void *w, const void *a, size_t nb)
+{
+    const unsigned char *pw = (const unsigned char *)w, *pa = (const unsigned char *)a;
+    float sum = 0.0f;
+    size_t b;
+    int j;
+    for (b = 0; b < nb; b++, pw += 22, pa += HFC_Q8_0_BLOCK) {
+        uint32_t qh = (uint32_t)pw[2] | ((uint32_t)pw[3] << 8) | ((uint32_t)pw[4] << 16) | ((uint32_t)pw[5] << 24);
+        int isum = 0;
+        for (j = 0; j < 16; j++) {
+            int x0 = (int)(((pw[6 + j] & 0xF) | (((qh >> j) & 1u) << 4))) - 16;
+            int x1 = (int)(((pw[6 + j] >> 4) | (((qh >> (j + 16)) & 1u) << 4))) - 16;
+            isum += x0 * (int)(int8_t)pa[2 + j] + x1 * (int)(int8_t)pa[18 + j];
+        }
+        sum += (rd_f16(pw) * rd_f16(pa)) * (float)isum;
+    }
+    return sum;
+}
+
+/* 8 six-bit scales and 8 six-bit mins packed in 12 bytes (ggml's get_scale_min_k4) */
+static void unpack_scales_k4(const unsigned char *q, unsigned char *sc, unsigned char *mn)
+{
+    int j;
+    for (j = 0; j < 8; j++) {
+        if (j < 4) { sc[j] = q[j] & 63; mn[j] = q[j + 4] & 63; }
+        else {
+            sc[j] = (unsigned char)((q[j + 4] & 0xF) | ((q[j - 4] >> 6) << 4));
+            mn[j] = (unsigned char)((q[j + 4] >> 4) | ((q[j] >> 6) << 4));
+        }
+    }
+}
+
+static float dot_q4_K_generic(const void *w, const void *a, size_t nb)
+{
+    const unsigned char *pw = (const unsigned char *)w, *pa = (const unsigned char *)a;
+    float sumf = 0.0f;
+    size_t b;
+    for (b = 0; b < nb; b++, pw += 144, pa += HFC_Q8_K_BLOCK) {
+        unsigned char sc[8], mn[8];
+        const unsigned char *q4 = pw + 16;
+        const int8_t *q8 = (const int8_t *)(pa + 4);
+        float yd, d, dmin;
+        int isum = 0, imin = 0, jj, l, j;
+        memcpy(&yd, pa, 4);
+        d = yd * rd_f16(pw);
+        dmin = yd * rd_f16(pw + 2);
+        unpack_scales_k4(pw + 4, sc, mn);
+        for (jj = 0; jj < 4; jj++, q4 += 32, q8 += 64) {
+            int lo = 0, hi = 0;
+            for (l = 0; l < 32; l++) { lo += (q4[l] & 0xF) * q8[l]; hi += (q4[l] >> 4) * q8[32 + l]; }
+            isum += sc[2 * jj] * lo + sc[2 * jj + 1] * hi;
+        }
+        for (j = 0; j < 8; j++) imin += mn[j] * (rd_i16(pa + 260 + 4 * j) + rd_i16(pa + 262 + 4 * j));
+        sumf += d * (float)isum - dmin * (float)imin;
+    }
+    return sumf;
+}
+
+static float dot_q5_K_generic(const void *w, const void *a, size_t nb)
+{
+    const unsigned char *pw = (const unsigned char *)w, *pa = (const unsigned char *)a;
+    float sumf = 0.0f;
+    size_t b;
+    for (b = 0; b < nb; b++, pw += 176, pa += HFC_Q8_K_BLOCK) {
+        unsigned char sc[8], mn[8];
+        const unsigned char *qh = pw + 16, *ql = pw + 48;
+        const int8_t *q8 = (const int8_t *)(pa + 4);
+        float yd, d, dmin;
+        int isum = 0, imin = 0, jj, l, j;
+        unsigned u1 = 1, u2 = 2;
+        memcpy(&yd, pa, 4);
+        d = yd * rd_f16(pw);
+        dmin = yd * rd_f16(pw + 2);
+        unpack_scales_k4(pw + 4, sc, mn);
+        for (jj = 0; jj < 4; jj++, ql += 32, q8 += 64, u1 <<= 2, u2 <<= 2) {
+            int lo = 0, hi = 0;
+            for (l = 0; l < 32; l++) {
+                lo += ((ql[l] & 0xF) + ((qh[l] & u1) ? 16 : 0)) * q8[l];
+                hi += ((ql[l] >> 4) + ((qh[l] & u2) ? 16 : 0)) * q8[32 + l];
+            }
+            isum += sc[2 * jj] * lo + sc[2 * jj + 1] * hi;
+        }
+        for (j = 0; j < 8; j++) imin += mn[j] * (rd_i16(pa + 260 + 4 * j) + rd_i16(pa + 262 + 4 * j));
+        sumf += d * (float)isum - dmin * (float)imin;
+    }
+    return sumf;
+}
+
+static float dot_q6_K_generic(const void *w, const void *a, size_t nb)
+{
+    const unsigned char *pw = (const unsigned char *)w, *pa = (const unsigned char *)a;
+    float sumf = 0.0f;
+    size_t b;
+    for (b = 0; b < nb; b++, pw += 210, pa += HFC_Q8_K_BLOCK) {
+        const unsigned char *ql = pw, *qh = pw + 128;
+        const int8_t *sc = (const int8_t *)(pw + 192), *q8 = (const int8_t *)(pa + 4);
+        float yd, d;
+        int isum = 0, n, l;
+        memcpy(&yd, pa, 4);
+        d = yd * rd_f16(pw + 208);
+        for (n = 0; n < 2; n++, ql += 64, qh += 32, sc += 8, q8 += 128) {
+            for (l = 0; l < 32; l++) {
+                int is = l / 16;
+                int q1 = (int)((ql[l] & 0xF) | (((qh[l] >> 0) & 3) << 4)) - 32;
+                int q2 = (int)((ql[l + 32] & 0xF) | (((qh[l] >> 2) & 3) << 4)) - 32;
+                int q3 = (int)((ql[l] >> 4) | (((qh[l] >> 4) & 3) << 4)) - 32;
+                int q4 = (int)((ql[l + 32] >> 4) | (((qh[l] >> 6) & 3) << 4)) - 32;
+                isum += sc[is] * q1 * q8[l] + sc[is + 2] * q2 * q8[l + 32] + sc[is + 4] * q3 * q8[l + 64] + sc[is + 6] * q4 * q8[l + 96];
+            }
+        }
+        sumf += d * (float)isum;
+    }
+    return sumf;
+}
+
 static const hfc_kernels k_generic = {
     "generic", read_sum_generic, fma_burn_generic, 16.0,
     quantize_q8_0_generic, dot_q8_0_generic, dot_f32_generic, dot_f32_f16_generic,
-    axpy_f32_f16_generic, f32_to_f16_generic
+    axpy_f32_f16_generic, f32_to_f16_generic,
+    quantize_q8_K_generic, dot_q4_0_generic, dot_q5_0_generic, dot_q4_K_generic, dot_q5_K_generic, dot_q6_K_generic
 };
 
 const hfc_kernels *hfc_kernels_generic(void) { return &k_generic; }

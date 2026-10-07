@@ -14,8 +14,9 @@ end to end on one thread. What exists and is tested:
   model between requests. Checked against an independent double-precision Perl
   implementation on tiny random models of every layout and weight type, and
   (on your machines) against llama.cpp via `tests/check-golden.pl`
-* Q8_0, F32, F16 weights with AVX2 kernels; every other type works through the
-  slower dequantizing path until its kernel is written
+* Q8_0, Q4_0, Q5_0, Q4_K, Q5_K, Q6_K, F32, F16 weights with AVX2 kernels (Q8_0/Q8_K
+  activation quantization); every other type works through the slower
+  dequantizing path until its kernel is written
 
 Phase 0 foundations, also tested:
 

@@ -8,6 +8,9 @@
 use strict;
 use warnings;
 use Getopt::Long;
+use FindBin qw($Bin);
+use lib $Bin;
+use GGQ qw(dequant_blocks type_info);
 
 my $steps = 4;
 GetOptions('steps=i' => \$steps) or die;
@@ -49,18 +52,9 @@ sub load_tensor {
     my $t = $T{$_[0]} or die "missing tensor $_[0]\n";
     my $n = 1; $n *= $_ for @{$t->{ne}};
     my $o = $dstart + $t->{off};
-    if ($t->{type} == 0) { return [ unpack('f<*', substr($data, $o, 4 * $n)) ]; }
-    if ($t->{type} == 1) { return [ map { half2f($_) } unpack('v*', substr($data, $o, 2 * $n)) ]; }
-    if ($t->{type} == 8) {
-        my @r;
-        for my $b (0 .. $n / 32 - 1) {
-            my $blk = substr($data, $o + 34 * $b, 34);
-            my $d = half2f(unpack('v', substr($blk, 0, 2)));
-            push @r, map { $_ * $d } unpack('c32', substr($blk, 2, 32));
-        }
-        return \@r;
-    }
-    die "unsupported tensor type $t->{type}\n";
+    my $ti = type_info($t->{type}) or die "unsupported tensor type $t->{type}\n";
+    my $bytes = $n / $ti->[0] * $ti->[1];
+    return dequant_blocks($t->{type}, substr($data, $o, $bytes));
 }
 
 my $arch = $kv{'general.architecture'};

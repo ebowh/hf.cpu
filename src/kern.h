@@ -30,10 +30,22 @@ typedef struct {
     float (*dot_f32_f16)(const float *a, const uint16_t *b, size_t n);
     void  (*axpy_f32_f16)(float *y, float a, const uint16_t *x, size_t n);   /* y += a*x */
     void  (*f32_to_f16)(const float *x, uint16_t *y, size_t n);
+
+    /* K-quants and 4/5-bit legacy types: weights x quantized activations.
+     * Q4_0/Q5_0 pair with Q8_0 activations; Q4_K/Q5_K/Q6_K with Q8_K activations
+     * (block = { float d; int8 qs[256]; int16 bsums[16] } = 292 bytes). */
+    void  (*quantize_q8_K)(const float *x, void *y, size_t n);          /* n multiple of 256 */
+    float (*dot_q4_0)(const void *w, const void *a, size_t nblocks);    /* nblocks of 32 */
+    float (*dot_q5_0)(const void *w, const void *a, size_t nblocks);
+    float (*dot_q4_K)(const void *w, const void *a, size_t nblocks);    /* nblocks of 256 */
+    float (*dot_q5_K)(const void *w, const void *a, size_t nblocks);
+    float (*dot_q6_K)(const void *w, const void *a, size_t nblocks);
 } hfc_kernels;
 
 #define HFC_Q8_0_BLOCK 34
 #define HFC_Q8_0_QK    32
+#define HFC_Q8_K_BLOCK 292
+#define HFC_Q8_K_QK    256
 
 const hfc_kernels *hfc_kernels_for(const struct hfc_cpu *cpu);
 const hfc_kernels *hfc_kernels_generic(void);

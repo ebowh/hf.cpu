@@ -19,13 +19,15 @@ my @cases = (
     ['qwen2', 'f32', 70, 0.004], ['qwen3', 'f32', 70, 0.004], ['llama', 'f32', 70, 0.004],
     ['qwen2', 'f16', 20, 0.004], ['qwen2', 'q8_0', 70, 0.12], ['llama', 'q8_0', 33, 0.12],
     ['qwen3', 'q8_0', 150, 0.12],            # 150 tokens: three KV blocks
+    ['qwen2', 'mix', 40, 0.12, 'kq'],     # q4_K, q6_K, q5_K, q4_0, q5_0, q8_0 in one model
 );
 my $seed = 11;
 for my $c (@cases) {
-    my ($arch, $wt, $n, $tol) = @$c;
+    my ($arch, $wt, $n, $tol, $size) = @$c;
+    $size //= 'tiny';
     my $g = "$tmp/m-$arch-$wt.gguf";
     my $deqf = "$tmp/m-$arch-$wt-deq.gguf";
-    system("perl '$root/tools/mkmodel.pl' '$g' --arch $arch --wtype $wt --seed " . $seed++ . " --deq '$deqf' >/dev/null") == 0 or die;
+    system("perl '$root/tools/mkmodel.pl' '$g' --arch $arch --wtype $wt --size $size --seed " . $seed++ . " --deq '$deqf' >/dev/null") == 0 or die;
     srand($seed);
     my $ids = join(' ', map { int(rand(300)) } 1 .. $n);
     my $steps = 5;
@@ -48,14 +50,15 @@ for my $c (@cases) {
         }
     }
     ok($same_ids, "$label: greedy tokens identical");
-    if ($wt eq 'q8_0') {          # exact weights, f32 activations: isolates weight handling from activation quantization
+    if ($wt eq 'q8_0' || $wt eq 'mix') {          # exact weights, f32 activations: isolates weight handling from activation quantization
         my @dq = grep { /^\@token / } split /\n/, `'$bin' --stdin-mode none --op generate --model '$deqf' --prompt-ids '$ids' --temp 0 --max-tokens $steps --logprobs 5 2>/dev/null`;
         my $w2 = 0;
         for my $i (0 .. $steps - 1) { my ($rlp) = $ref[$i] =~ /^gen \d+ \d+ (\S+) top:/; my ($glp) = $dq[$i] =~ /logprob=(\S+)/; my $d = abs($rlp - $glp); $w2 = $d if $d > $w2; }
         ok($w2 < 0.004, sprintf("$label: q8_0 weights vs dequantized f32 copy (max diff %.5f)", $w2));
     }
     ok($worst < $tol, sprintf("$label: max logprob difference %.5f < %g", $worst, $tol));
-    ok($worst_c < 3 * $tol, sprintf("$label: top-5 candidate logprobs agree (max diff %.5f < %g)", $worst_c, 3 * $tol));
+    my $cl = ($wt eq "mix" ? 10 : 3) * $tol;   # tail candidates of a peaked random model amplify activation-quantization noise
+    ok($worst_c < $cl, sprintf("$label: top-5 candidate logprobs agree (max diff %.5f < %g)", $worst_c, $cl));
     printf "  %-14s max |dlogprob| = %.5f, candidates %.5f\n", $label, $worst, $worst_c;
 }
 printf "oracle: %d passed, %d failed\n", $pass, $fail;

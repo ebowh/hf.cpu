@@ -204,9 +204,9 @@ struct hfc_ctx {
     /* scratch */
     float *x, *xn, *q, *kk, *vv, *att, *o, *gate, *up, *cs;      /* [max_batch * dim] */
     float *scores;                                              /* [nth][ctx_max + 1] */
-    unsigned char *qa;                                          /* quantized activations */
+    unsigned char *qa, *qk;                                     /* quantized activations: Q8_0 and Q8_K forms */
     float *rowbuf;                                              /* [nth][widest + 64] dequantized weight row */
-    size_t qa_bytes, widest;
+    size_t qa_bytes, qk_bytes, widest;
     hfc_status err[64];                                         /* per-thread task status */
 };
 
@@ -223,7 +223,7 @@ void hfc_ctx_free(hfc_ctx *c)
     }
     hfc_free(c->x); hfc_free(c->xn); hfc_free(c->q); hfc_free(c->kk); hfc_free(c->vv); hfc_free(c->att);
     hfc_free(c->o); hfc_free(c->gate); hfc_free(c->up); hfc_free(c->cs); hfc_free(c->scores);
-    hfc_free(c->qa); hfc_free(c->rowbuf);
+    hfc_free(c->qa); hfc_free(c->qk); hfc_free(c->rowbuf);
     hfc_free(c);
 }
 
@@ -254,9 +254,11 @@ hfc_status hfc_ctx_new(hfc_ctx **out, const hfc_model *m, size_t ctx_max, size_t
     c->widest = widest;
     c->qa_bytes = max_batch * (widest / 32 + 1) * HFC_Q8_0_BLOCK;
     c->qa = (unsigned char *)hfc_malloc(c->qa_bytes);
+    c->qk_bytes = max_batch * (widest / 256 + 1) * HFC_Q8_K_BLOCK;
+    c->qk = (unsigned char *)hfc_malloc(c->qk_bytes);
     if (hfc_mul_size(nth, widest + 64, &sz)) c->rowbuf = xmalloc_f(sz);
     if (!c->blk || !c->x || !c->xn || !c->q || !c->kk || !c->vv || !c->att || !c->o || !c->gate || !c->up ||
-        !c->cs || !c->scores || !c->qa || !c->rowbuf) { hfc_ctx_free(c); return HFC_ENOMEM; }
+        !c->cs || !c->scores || !c->qa || !c->qk || !c->rowbuf) { hfc_ctx_free(c); return HFC_ENOMEM; }
     *out = c;
     return HFC_OK;
 }
@@ -304,6 +306,7 @@ typedef struct {
     int            njobs;
     const float   *xf;               /* f32 activations [n][cols] */
     const unsigned char *xq;         /* Q8_0 copy */
+    const unsigned char *xk;         /* Q8_K copy */
     size_t         n;
 } mm_task;
 
@@ -322,13 +325,27 @@ static void mm_run(void *vp, int tid, int nth)
         const float *bias = tk->jobs[j].bias;
         float *y = tk->jobs[j].y;
         size_t rows = (size_t)w->rows, cols = (size_t)w->cols, nblk = cols / 32, qstride = nblk * HFC_Q8_0_BLOCK;
+        size_t nkb = cols / 256, kstride = nkb * HFC_Q8_K_BLOCK;
+        float (*kdot)(const void *, const void *, size_t) = NULL;
+        int use_k = 0;
+        switch (w->type) {
+        case 8:  kdot = k->dot_q8_0; break;
+        case 2:  kdot = k->dot_q4_0; break;
+        case 6:  kdot = k->dot_q5_0; break;
+        case 12: kdot = k->dot_q4_K; use_k = 1; break;
+        case 13: kdot = k->dot_q5_K; use_k = 1; break;
+        case 14: kdot = k->dot_q6_K; use_k = 1; break;
+        default: break;
+        }
         size_t lo, hi, r, t, n = tk->n;
         hfc_split(rows, tid, nth, &lo, &hi);
         for (r = lo; r < hi; r++) {
             const unsigned char *wr = w->data + r * (size_t)w->row_bytes;
             float b = bias ? bias[r] : 0.0f;
-            if (w->type == 8) {                                   /* Q8_0 */
-                for (t = 0; t < n; t++) y[t * rows + r] = k->dot_q8_0(wr, tk->xq + t * qstride, nblk) + b;
+            if (kdot && !use_k) {                                /* Q8_0, Q4_0, Q5_0: Q8_0 activations */
+                for (t = 0; t < n; t++) y[t * rows + r] = kdot(wr, tk->xq + t * qstride, nblk) + b;
+            } else if (kdot) {                                    /* K-quants: Q8_K activations */
+                for (t = 0; t < n; t++) y[t * rows + r] = kdot(wr, tk->xk + t * kstride, nkb) + b;
             } else {                                              /* any other type: dequantize the row once */
                 if (hfc_dequant_row(w->type, wr, rowbuf, cols) != HFC_OK) { c->err[tid] = HFC_ENOTSUP; return; }
                 for (t = 0; t < n; t++) y[t * rows + r] = k->dot_f32(rowbuf, tk->xf + t * cols, cols) + b;
@@ -337,20 +354,36 @@ static void mm_run(void *vp, int tid, int nth)
     }
 }
 
-static hfc_status matmat(hfc_ctx *c, const mm_job *jobs, int njobs, const float *xf, const unsigned char *xq, size_t n)
-{
-    mm_task tk;
-    int i;
-    tk.c = c; tk.jobs = jobs; tk.njobs = njobs; tk.xf = xf; tk.xq = xq; tk.n = n;
-    hfc_pool_run(c->pool, mm_run, &tk);
-    for (i = 0; i < c->nth; i++) if (c->err[i] != HFC_OK) return c->err[i];
-    return HFC_OK;
-}
-
 static void quantize_rows(hfc_ctx *c, const float *x, size_t n, size_t cols, unsigned char *dst)
 {
     size_t t, stride = cols / 32 * HFC_Q8_0_BLOCK;
     for (t = 0; t < n; t++) c->k->quantize_q8_0(x + t * cols, dst + t * stride, cols);
+}
+
+static void quantize_rows_k(hfc_ctx *c, const float *x, size_t n, size_t cols, unsigned char *dst)
+{
+    size_t t, stride = cols / 256 * HFC_Q8_K_BLOCK;
+    for (t = 0; t < n; t++) c->k->quantize_q8_K(x + t * cols, dst + t * stride, cols);
+}
+
+/* Quantizes the activations into whichever forms the weight types in the job group need
+ * (once per group, not once per weight), then runs the products on all threads. */
+static hfc_status matmat(hfc_ctx *c, const mm_job *jobs, int njobs, const float *xf, size_t n)
+{
+    mm_task tk;
+    int i, need8 = 0, needk = 0;
+    size_t cols = (size_t)jobs[0].w->cols;
+    for (i = 0; i < njobs; i++) {
+        uint32_t ty = jobs[i].w->type;
+        if (ty == 8 || ty == 2 || ty == 6) need8 = 1;
+        else if (ty == 12 || ty == 13 || ty == 14) needk = 1;
+    }
+    if (need8) quantize_rows(c, xf, n, cols, c->qa);
+    if (needk) quantize_rows_k(c, xf, n, cols, c->qk);
+    tk.c = c; tk.jobs = jobs; tk.njobs = njobs; tk.xf = xf; tk.xq = c->qa; tk.xk = c->qk; tk.n = n;
+    hfc_pool_run(c->pool, mm_run, &tk);
+    for (i = 0; i < c->nth; i++) if (c->err[i] != HFC_OK) return c->err[i];
+    return HFC_OK;
 }
 
 /* ---- RoPE ------------------------------------------------------------------------------------ */
@@ -455,11 +488,10 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
         silu_task st;
 
         for (t = 0; t < n; t++) hfc_rmsnorm(c->x + t * E, L->attn_norm, c->xn + t * E, E, hp->rms_eps);
-        quantize_rows(c, c->xn, n, E, c->qa);
         qkv[0].w = &L->wq; qkv[0].bias = L->bq; qkv[0].y = c->q;
         qkv[1].w = &L->wk; qkv[1].bias = L->bk; qkv[1].y = c->kk;
         qkv[2].w = &L->wv; qkv[2].bias = L->bv; qkv[2].y = c->vv;
-        if ((rc = matmat(c, qkv, 3, c->xn, c->qa, n)) != HFC_OK) return rc;
+        if ((rc = matmat(c, qkv, 3, c->xn, n)) != HFC_OK) return rc;
         for (t = 0; t < n; t++) {
             float *q = c->q + t * QD, *kx = c->kk + t * KD;
             size_t pos = pos0 + t, bi = pos / HFC_KV_BLOCK_TOKENS, off = pos % HFC_KV_BLOCK_TOKENS;
@@ -476,21 +508,18 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
         }
         at.c = c; at.l = l; at.n = n; at.pos0 = pos0;
         hfc_pool_run(c->pool, attn_run, &at);
-        quantize_rows(c, c->att, n, QD, c->qa);
         one.w = &L->wo; one.bias = NULL; one.y = c->o;
-        if ((rc = matmat(c, &one, 1, c->att, c->qa, n)) != HFC_OK) return rc;
+        if ((rc = matmat(c, &one, 1, c->att, n)) != HFC_OK) return rc;
         { size_t i; for (i = 0; i < n * E; i++) c->x[i] += c->o[i]; }
 
         for (t = 0; t < n; t++) hfc_rmsnorm(c->x + t * E, L->ffn_norm, c->xn + t * E, E, hp->rms_eps);
-        quantize_rows(c, c->xn, n, E, c->qa);
         gu[0].w = &L->gate; gu[0].bias = NULL; gu[0].y = c->gate;
         gu[1].w = &L->up;   gu[1].bias = NULL; gu[1].y = c->up;
-        if ((rc = matmat(c, gu, 2, c->xn, c->qa, n)) != HFC_OK) return rc;
+        if ((rc = matmat(c, gu, 2, c->xn, n)) != HFC_OK) return rc;
         st.gate = c->gate; st.up = c->up; st.count = n * F;
         hfc_pool_run(c->pool, silu_run, &st);
-        quantize_rows(c, c->gate, n, F, c->qa);
         one.w = &L->down; one.bias = NULL; one.y = c->o;
-        if ((rc = matmat(c, &one, 1, c->gate, c->qa, n)) != HFC_OK) return rc;
+        if ((rc = matmat(c, &one, 1, c->gate, n)) != HFC_OK) return rc;
         { size_t i; for (i = 0; i < n * E; i++) c->x[i] += c->o[i]; }
     }
     c->n_pos = pos0 + n;
@@ -498,9 +527,8 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
     if (logits_last) {
         mm_job lj;
         hfc_rmsnorm(c->x + (n - 1) * E, m->out_norm, c->xn, E, hp->rms_eps);
-        quantize_rows(c, c->xn, 1, E, c->qa);
         lj.w = &m->output; lj.bias = NULL; lj.y = logits_last;
-        return matmat(c, &lj, 1, c->xn, c->qa, 1);
+        return matmat(c, &lj, 1, c->xn, 1);
     }
     return HFC_OK;
 }

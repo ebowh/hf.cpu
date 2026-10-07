@@ -7,17 +7,23 @@
 # --size big: embed 512, 8 heads (2 KV, head_dim 64), FFN 2048, for speed tests.use strict;
 use warnings;
 use Getopt::Long;
+use FindBin qw($Bin);
+use lib $Bin;
+use GGQ qw(dequant_blocks type_info);
 
-my ($arch, $wtype, $layers, $vocab, $seed, $deq, $size) = ('qwen2', 'f32', 2, 300, 1, undef, 'tiny');
+our $wtype = 'f32';
+my ($arch, $layers, $vocab, $seed, $deq, $size) = ('qwen2', 2, 300, 1, undef, 'tiny');
 GetOptions('size=s' => \$size, 'deq=s' => \$deq, 'arch=s' => \$arch, 'wtype=s' => \$wtype, 'layers=i' => \$layers, 'vocab=i' => \$vocab, 'seed=i' => \$seed)
     or die "bad options\n";
 my $out = shift or die "usage: $0 OUT.gguf [options]\n";
 die "unknown arch\n" unless $arch =~ /^(qwen2|qwen3|llama)$/;
-die "unknown wtype\n" unless $wtype =~ /^(f32|f16|q8_0)$/;
+die "unknown wtype\n" unless $wtype =~ /^(f32|f16|q8_0|q4_0|q5_0|q4_K|q5_K|q6_K|mix)$/;
 srand($seed);
 
-my ($E, $H, $HKV, $HD, $FF) = $size eq 'big' ? (512, 8, 2, 64, 2048) : (64, 4, 2, 16, 128);
-my %TYPEID = (f32 => 0, f16 => 1, q8_0 => 8);
+my ($E, $H, $HKV, $HD, $FF) = $size eq 'big' ? (512, 8, 2, 64, 2048) : $size eq 'kq' ? (256, 4, 2, 64, 512) : (64, 4, 2, 16, 128);
+my %TYPEID = (f32 => 0, f16 => 1, q8_0 => 8, q4_0 => 2, q5_0 => 6, q4_K => 12, q5_K => 13, q6_K => 14);
+my @MIX = qw(q4_K q6_K q5_K q4_0 q5_0 q8_0 q4_K q6_K);     # cycled over the matrices of a --wtype mix model
+my $mixn = 0;
 
 sub u32 { pack('V', $_[0]) }
 sub u64 { pack('Q<', $_[0]) }
@@ -36,7 +42,7 @@ sub f2h {                      # float -> IEEE half bits (round to nearest, no s
     $h++ if ($m & 0x1fff) > 0x1000;
     return $s | $h;
 }
-sub gauss { return (rand() * 2 - 1) * 1.7 if $size eq 'big'; my $s = 0; $s += rand() for 1 .. 6; return ($s - 3.0) / 0.7071; }   # big models: uniform noise (faster)   # ~N(0,1)
+sub gauss { return (rand() * 2 - 1) * 1.7 if $size ne 'tiny'; my $s = 0; $s += rand() for 1 .. 6; return ($s - 3.0) / 0.7071; }   # big models: uniform noise (faster)   # ~N(0,1)
 
 sub encode {
     my ($vals, $deqout) = @_;   # flat list of floats; $deqout receives the values the file really stores
@@ -56,10 +62,37 @@ sub encode {
 }
 
 my (@tens, @tens_deq);
+# Random blocks for the K-quant and 4/5-bit types: random payload bits, scales chosen so weights
+# have standard deviation about $scale. (Not a real quantization of anything; the oracle just
+# dequantizes the same bytes.)
+sub rand_blocks {
+    my ($type, $nb, $scale) = @_;
+    my $buf = '';
+    my $rb = sub { join('', map { chr(int(rand(256))) } 1 .. $_[0]) };
+    for (1 .. $nb) {
+        if ($type eq 'q4_0') { $buf .= pack('v', f2h($scale / 4.6)) . $rb->(16); }
+        elsif ($type eq 'q5_0') { $buf .= pack('v', f2h($scale / 9.2)) . $rb->(20); }
+        elsif ($type eq 'q4_K') { my $d = $scale / 143; $buf .= pack('v2', f2h($d), f2h(7.5 * $d)) . $rb->(12 + 128); }
+        elsif ($type eq 'q5_K') { my $d = $scale / 280; $buf .= pack('v2', f2h($d), f2h(15.5 * $d)) . $rb->(12 + 32 + 128); }
+        elsif ($type eq 'q6_K') { my $d = $scale / 185; $buf .= $rb->(128 + 64) . pack('c16', map { int(rand(33)) - 16 } 1 .. 16) . pack('v', f2h($d)); }
+    }
+    return $buf;
+}
+
 sub mat { my ($name, $cols, $rows, $scale) = @_;
-    my @v = map { gauss() * $scale } 1 .. $cols * $rows;
-    my @dq;
-    push @tens, [$name, [$cols, $rows], $TYPEID{$wtype}, encode(\@v, \@dq)];
+    my $wt = $wtype eq 'mix' ? $MIX[$mixn++ % @MIX] : $wtype;
+    my ($bytes, @dq);
+    if ($wt =~ /^(q4_0|q5_0|q4_K|q5_K|q6_K)$/) {
+        my $ti = type_info($TYPEID{$wt});
+        die "$name: $cols columns is not a multiple of $ti->[0] (use --size kq)\n" if $cols % $ti->[0];
+        $bytes = rand_blocks($wt, $cols / $ti->[0] * $rows, $scale);
+        @dq = @{ dequant_blocks($TYPEID{$wt}, $bytes) };
+    } else {
+        my @v = map { gauss() * $scale } 1 .. $cols * $rows;
+        local $wtype = $wt;
+        $bytes = encode(\@v, \@dq);
+    }
+    push @tens, [$name, [$cols, $rows], $TYPEID{$wt}, $bytes];
     push @tens_deq, [$name, [$cols, $rows], 0, pack('f<*', @dq)];
 }
 sub vecw { my ($name, $n, $base, $noise) = @_;

@@ -1,6 +1,7 @@
 #include "../src/kern.h"
 #include "../src/mathx.h"
 #include "../src/probe.h"
+#include "../src/ggtype.h"
 #include "t.h"
 #include <math.h>
 #include <stdlib.h>
@@ -157,6 +158,85 @@ static void test_sincos(void)
     CHECK_NEAR(hfc_rope_theta_scale(10000.0f, 96), pow(10000.0, -2.0 / 96.0), 7e-8);
 }
 
+static void rand_half_at(unsigned char *p)
+{
+    uint16_t h = (uint16_t)(((8 + rnd() % 8) << 10) | (rnd() & 0x3ff));         /* finite, 2^-7 .. 2^0 */
+    p[0] = (unsigned char)(h & 0xff); p[1] = (unsigned char)(h >> 8);
+}
+
+typedef float (*dotfn)(const void *, const void *, size_t);
+
+static void test_quant_dot(const hfc_kernels *k, const char *label)
+{
+    struct { uint32_t type; int act_k; size_t blk, bytes; int halves[3]; dotfn fn; } cases[] = {
+        { 2,  0, 32,  18,  { 0, -1, -1 },   k->dot_q4_0 },
+        { 6,  0, 32,  22,  { 0, -1, -1 },   k->dot_q5_0 },
+        { 12, 1, 256, 144, { 0, 2, -1 },     k->dot_q4_K },
+        { 13, 1, 256, 176, { 0, 2, -1 },     k->dot_q5_K },
+        { 14, 1, 256, 210, { 208, -1, -1 },  k->dot_q6_K },
+    };
+    size_t ci;
+    for (ci = 0; ci < sizeof cases / sizeof cases[0]; ci++) {
+        int trial;
+        for (trial = 0; trial < 150; trial++) {
+            size_t nb = 1 + (size_t)(rnd() % 6), n, i;
+            unsigned char *w, *qa;
+            float *x, *wf, *af;
+            double ref = 0;
+            float got;
+            int h;
+            n = nb * cases[ci].blk;
+            w = (unsigned char *)malloc(nb * cases[ci].bytes);
+            qa = (unsigned char *)malloc(nb * 292 + 64);
+            x = (float *)malloc(n * sizeof(float)); wf = (float *)malloc(n * sizeof(float)); af = (float *)malloc(n * sizeof(float));
+            for (i = 0; i < nb * cases[ci].bytes; i++) w[i] = (unsigned char)rnd();
+            for (i = 0; i < nb; i++)
+                for (h = 0; h < 3; h++) if (cases[ci].halves[h] >= 0) rand_half_at(w + i * cases[ci].bytes + cases[ci].halves[h]);
+            for (i = 0; i < n; i++) x[i] = frand() * (1 + (float)(i / 32 % 7));
+            if (cases[ci].act_k) {
+                k->quantize_q8_K(x, qa, n);
+                for (i = 0; i < nb; i++) {
+                    float d; size_t j;
+                    memcpy(&d, qa + i * 292, 4);
+                    for (j = 0; j < 256; j++) af[i * 256 + j] = d * (float)(int8_t)qa[i * 292 + 4 + j];
+                }
+            } else {
+                k->quantize_q8_0(x, qa, n);
+                for (i = 0; i < nb; i++) {
+                    float d = h2f((uint16_t)(qa[i * 34] | (qa[i * 34 + 1] << 8))); size_t j;
+                    for (j = 0; j < 32; j++) af[i * 32 + j] = d * (float)(int8_t)qa[i * 34 + 2 + j];
+                }
+            }
+            if (hfc_dequant_row(cases[ci].type, w, wf, n) != HFC_OK) { t_fail_++; fprintf(stderr, "no dequant for type %u\n", cases[ci].type); return; }
+            for (i = 0; i < n; i++) ref += (double)wf[i] * (double)af[i];
+            got = cases[ci].fn(w, qa, nb);
+            if (!(fabs((double)got - ref) <= 2e-4 * (fabs(ref) + 1.0))) {
+                t_fail_++;
+                fprintf(stderr, "FAIL %s type %u trial %d: kernel %g reference %g\n", label, cases[ci].type, trial, (double)got, ref);
+                trial = 1000;
+            } else t_run_++;
+            free(w); free(qa); free(x); free(wf); free(af);
+        }
+    }
+    {   /* Q8_K quantizer: error within half a step, block sums exact, zero block ok */
+        float x[512]; unsigned char q[2 * 292]; size_t i, b; int j;
+        for (i = 0; i < 512; i++) x[i] = frand() * (i < 256 ? 1.0f : 30.0f);
+        k->quantize_q8_K(x, q, 512);
+        for (b = 0; b < 2; b++) {
+            float d; memcpy(&d, q + b * 292, 4);
+            for (j = 0; j < 256; j++) CHECK(fabsf(d * (float)(int8_t)q[b * 292 + 4 + j] - x[b * 256 + j]) <= fabsf(d) * 0.5001f + 1e-6f);
+            for (j = 0; j < 16; j++) {
+                int s = 0, e;
+                for (e = 0; e < 16; e++) s += (int8_t)q[b * 292 + 4 + 16 * j + e];
+                CHECK((int16_t)(q[b * 292 + 260 + 2 * j] | (q[b * 292 + 261 + 2 * j] << 8)) == s);
+            }
+        }
+        memset(x, 0, sizeof x);
+        k->quantize_q8_K(x, q, 256);
+        for (j = 0; j < 292; j++) CHECK(q[j] == 0);
+    }
+}
+
 static void test_norm_softmax(void)
 {
     float x[5] = { 1, 2, 3, 4, 5 }, w[5] = { 1, 1, 2, 2, 0.5f }, y[5], s[4] = { 1, 2, 3, 4 }, tot = 0;
@@ -186,6 +266,7 @@ int main(void)
     test_f16(g);
     test_q8(g, g);
     test_f32(g);
-    if (k != g) { test_f16(k); test_q8(k, g); test_f32(k); }
+    test_quant_dot(g, "generic");
+    if (k != g) { test_f16(k); test_q8(k, g); test_f32(k); test_quant_dot(k, k->isa); }
     return t_report("test_kern");
 }
