@@ -474,11 +474,24 @@ typedef struct hfc_resident {
     hfc_model *model;
     hfc_tok   *tok;
     char       tok_err[200];
+    /* prefix cache: the KV state of the previous request, valid for kv_ids[0..kv_n) */
+    hfc_ctx   *kvctx;
+    hfc_pool  *kv_pool;
+    uint32_t  *kv_ids;
+    size_t     kv_n, kv_ctx_max, kv_batch;
 } hfc_resident;
+
+static void kv_drop(hfc_resident *r)
+{
+    hfc_ctx_free(r->kvctx);
+    hfc_free(r->kv_ids);
+    r->kvctx = NULL; r->kv_ids = NULL; r->kv_pool = NULL; r->kv_n = 0;
+}
 
 static void resident_free(hfc_resident *r)
 {
     if (!r) return;
+    kv_drop(r);
     hfc_tok_free(r->tok);
     hfc_model_free(r->model);
     if (r->g_open) gguf_close(&r->g);
@@ -507,6 +520,7 @@ static hfc_status session_pool(hfc_session *s, hfc_pool **out)
         hfc_pool *p;
         hfc_status rc = hfc_pool_new(&p, n);
         if (rc != HFC_OK) return rc;
+        if (s->res) kv_drop(s->res);                  /* its context points into the old pool */
         hfc_pool_free(s->pool);
         s->pool = p;
         s->pool_n = n;
@@ -580,7 +594,8 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     hfc_resident *res = NULL;
     texts_t t;
     uint32_t *ids = NULL;
-    size_t n_prompt = 0, ngen_max, i, pos, ctx_max, nvocab;
+    size_t n_prompt = 0, ngen_max, i, pos, cached = 0, nvocab;
+    int touched = 0;
     hfc_ctx *ctx = NULL;
     hfc_pool *pool = NULL;
     float *logits = NULL;
@@ -591,7 +606,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     unsigned char pend[16];
     size_t npend = 0, generated = 0;
     const char *stop = "length";
-    char a[64], b[64], c[64], d[64];
+    char a[64], b[64], c[64], d[64], e[64];
     int top_n = eff->logprobs > 64 ? 64 : eff->logprobs;
     size_t batch = (size_t)(s->session->batch > 0 ? s->session->batch : 64);
 
@@ -624,10 +639,25 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     }
     ngen_max = (size_t)eff->max_tokens;
     if (ngen_max > (size_t)s->session->ctx_max - n_prompt) { ngen_max = (size_t)s->session->ctx_max - n_prompt; stop = "ctx"; }
-    ctx_max = n_prompt + ngen_max;
-    if (batch > n_prompt) batch = n_prompt;
     if ((rc = session_pool(s, &pool)) != HFC_OK) { snprintf(msg, cap, "cannot start worker threads: %s", hfc_strerror(rc)); goto out; }
-    if ((rc = hfc_ctx_new(&ctx, res->model, ctx_max, batch, pool)) != HFC_OK) { snprintf(msg, cap, "cannot allocate the inference context: %s", hfc_strerror(rc)); goto out; }
+    /* one context lives with the resident model; it keeps the KV state of the previous request */
+    if (!res->kvctx || res->kv_pool != pool || res->kv_ctx_max != (size_t)s->session->ctx_max || res->kv_batch != batch) {
+        kv_drop(res);
+        res->kv_ids = (uint32_t *)hfc_malloc((size_t)s->session->ctx_max * sizeof(uint32_t));
+        if (!res->kv_ids) { rc = HFC_ENOMEM; snprintf(msg, cap, "out of memory"); goto out; }
+        if ((rc = hfc_ctx_new(&res->kvctx, res->model, (size_t)s->session->ctx_max, batch, pool)) != HFC_OK) {
+            snprintf(msg, cap, "cannot allocate the inference context: %s", hfc_strerror(rc)); goto out;
+        }
+        res->kv_pool = pool; res->kv_ctx_max = (size_t)s->session->ctx_max; res->kv_batch = batch;
+    }
+    ctx = res->kvctx;
+    if (eff->prefix_cache) {
+        while (cached < res->kv_n && cached < n_prompt && res->kv_ids[cached] == ids[cached]) cached++;
+        if (cached >= n_prompt) cached = n_prompt - 1;        /* the last prompt token is always evaluated: it yields the logits */
+    }
+    hfc_ctx_truncate(ctx, cached);
+    res->kv_n = cached;
+    touched = 1;
     logits = (float *)hfc_malloc(nvocab * sizeof(float));
     if (!logits) { rc = HFC_ENOMEM; snprintf(msg, cap, "out of memory"); goto out; }
 
@@ -636,18 +666,21 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     hfc_out_event(&s->out, "prompt", "tokens", a, "threads", b, (const char *)NULL);
 
     t0 = pal_now();
-    for (pos = 0; pos < n_prompt; ) {
+    for (pos = cached; pos < n_prompt; ) {
         size_t nb = n_prompt - pos < batch ? n_prompt - pos : batch;
         rc = hfc_ctx_forward(ctx, ids + pos, nb, pos + nb == n_prompt ? logits : NULL);
         if (rc != HFC_OK) { snprintf(msg, cap, "prefill failed at token %lu: %s", (unsigned long)pos, hfc_strerror(rc)); goto out; }
         pos += nb;
     }
+    memcpy(res->kv_ids + cached, ids + cached, (n_prompt - cached) * sizeof(uint32_t));
+    res->kv_n = n_prompt;
     t_prefill = pal_now() - t0;
     snprintf(a, sizeof a, "%lu", (unsigned long)n_prompt);
     snprintf(b, sizeof b, "%.1f", t_prefill * 1000.0);
-    snprintf(c, sizeof c, "%.2f", t_prefill > 0 ? (double)n_prompt / t_prefill : 0.0);
+    snprintf(c, sizeof c, "%.2f", t_prefill > 0 ? (double)(n_prompt - cached) / t_prefill : 0.0);
     snprintf(d, sizeof d, "%lu", (unsigned long)hfc_ctx_kv_bytes(ctx));
-    hfc_out_event(&s->out, "prefill", "tokens", a, "ms", b, "tok_per_s", c, "kv_bytes", d, (const char *)NULL);
+    snprintf(e, sizeof e, "%lu", (unsigned long)cached);
+    hfc_out_event(&s->out, "prefill", "tokens", a, "cached", e, "ms", b, "tok_per_s", c, "kv_bytes", d, (const char *)NULL);
 
     sp.temp = (float)eff->temp; sp.top_k = eff->top_k; sp.top_p = (float)eff->top_p; sp.min_p = (float)eff->min_p;
     hfc_rng_seed(&rng, eff->seed);
@@ -692,6 +725,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
         if (i + 1 == ngen_max) break;
         rc = hfc_ctx_forward(ctx, &tok, 1, logits);
         if (rc != HFC_OK) { snprintf(msg, cap, "decode failed at token %lu: %s", (unsigned long)i, hfc_strerror(rc)); goto out; }
+        res->kv_ids[res->kv_n++] = tok;
     }
     if (npend) hfc_out_payload(&s->out, "text", pend, npend, (const char *)NULL);
     {
@@ -704,7 +738,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     rc = HFC_OK;
 out:
     hfc_free(logits);
-    hfc_ctx_free(ctx);
+    if (rc != HFC_OK && res && touched) kv_drop(res);            /* the cached state may be half-written */
     hfc_free(ids);
     texts_free(&t);
     return rc;

@@ -194,6 +194,21 @@ for my $n (1 .. 40) {
     ok(@b == 6 && $b[1] > 0 && $b[2] > 0 && $b[0] == 1 && $b[3] == 2, 'bench: one line per thread count with positive rates');
 }
 
+# prefix cache: the second request reuses the shared prefix and gives bit-identical results
+{
+    my $p1 = join(' ', 1 .. 20);
+    my $p2 = join(' ', 1 .. 20, 30, 31, 40);
+    ($o, $e, $x) = run("--stdin-mode args --op generate --model '$tiny' --temp 0 --max-tokens 5 --logprobs 3", "--prompt-ids \"$p1\"\n--prompt-ids \"$p2\"\n--prompt-ids \"$p2\" --no-prefix-cache\n");
+    my @pf = $o =~ /\@prefill tokens=(\d+) cached=(\d+)/g;
+    ok("@pf" eq "20 0 23 20 23 0", "prefix cache: cached counts $pf[1],$pf[3],$pf[5] (want 0,20,0)");
+    my @runs = split /\@begin /, $o;
+    my @tl = map { join("|", /^\@token [^\n]*/mg) } @runs[2, 3];
+    ok(@tl == 2 && $tl[0] ne '' && $tl[0] eq $tl[1], 'prefix cache: cached and uncached results are identical');
+    ($o, $e, $x) = run("--stdin-mode args --op generate --model '$tiny' --temp 0 --max-tokens 4", "--prompt-ids \"$p1\"\n--prompt-ids \"$p1\"\n");
+    @pf = $o =~ /\@prefill tokens=(\d+) cached=(\d+)/g;
+    ok("@pf" eq "20 0 20 19", 'prefix cache: an identical prompt still evaluates its last token');
+}
+
 # chat templates: segmented tokenization equals tokenizing the formatted string, and user text cannot forge markers
 ($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --chat chatml --system '  Be brief.\n' --prompt '\nHello  world'");
 my ($chat_ids) = $o =~ /ids="([^"]*)"/;
