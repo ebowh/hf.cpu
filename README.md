@@ -6,8 +6,18 @@ ik_llama.cpp, talks over stdin/stdout/stderr only, and is meant to be driven
 from a pipeline or from Emacs. See `docs/DESIGN-SPACE.md` for the research and
 design decisions and `docs/PROTOCOL.md` for the wire protocol.
 
-**Status: phase 0 (foundations).** There is no inference yet. What exists and
-is tested:
+**Status: phase 1a.** Dense transformers (Qwen2, Qwen3, Llama layouts) run
+end to end on one thread. What exists and is tested:
+
+* `--op generate`: tokenizer, forward pass with a paged f16 KV cache, greedy and
+  sampled decoding, per-token top-N logprobs, UTF-8-safe streamed text, resident
+  model between requests. Checked against an independent double-precision Perl
+  implementation on tiny random models of every layout and weight type, and
+  (on your machines) against llama.cpp via `tests/check-golden.pl`
+* Q8_0, F32, F16 weights with AVX2 kernels; every other type works through the
+  slower dequantizing path until its kernel is written
+
+Phase 0 foundations, also tested:
 
 * checked allocation with fault injection (no allocation is assumed to succeed)
 * platform layer for Linux and macOS (both confirmed running on the target machines), FreeBSD (written, untested)

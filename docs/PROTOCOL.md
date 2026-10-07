@@ -74,8 +74,8 @@ every `@done`, so a client can split the stream on it.
 | `echo` | reports the effective options and the resolved system and prompt text (protocol testing) |
 | `inspect` | `--model FILE.gguf`: header, metadata, per-type tensor statistics; `--list-tensors` for every tensor |
 | `doctor` | CPU features, caches, memory and commit limits, measured read bandwidth by thread count, FMA throughput (1 thread, all cores, all threads) and latency curve; `--probe-sustained S` adds a per-second all-core trace to expose throttling; `--probe-reps N` repeats the bandwidth sweep and reports median and range; caches the profile in `--cache-dir` (default `~/.cache/hfcpu`) |
+| `generate` | `--model FILE.gguf` plus a prompt (stdin record, `--prompt`, `--prompt-file`, or `--prompt-ids "1 2 3"` to skip the tokenizer). Events: `@prompt`, `@prefill` (tokens, ms, tok_per_s, kv_bytes), one `@token pos= id=` per generated token (with `logprob=` and `top="id:lp ..."` when `--logprobs N`), `@text` payloads (UTF-8 safe), and `@gen` (tokens, ms, tok_per_s, stop=eos/length/ctx). `--system` is rejected until chat templates exist: put the formatted text in the prompt. The model stays loaded between requests |
 | `tokenize` | `--model FILE.gguf` (needs tokenizer metadata): token ids of the prompt as `@tokens count=N ids="..."`; `--no-parse-special` treats `<|im_start|>` and friends as plain text |
-| `generate` | not implemented yet (phase 1); answers `ENOTSUP` |
 
 ## Signals and exit codes
 
