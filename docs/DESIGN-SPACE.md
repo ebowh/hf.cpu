@@ -468,7 +468,7 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 3. **Persistent prefix cache** and sidecar prepared models.
 4. **Hybrid blocks**: short conv (LFM), GDN (Qwen3.5), recurrent checkpoints.
 5. **Spec decoding** (n-gram first, then draft), constrained decoding, thinking budget, classify/score modes.
-6. **MoE and Ling** (KDA, MLA), then vision.
+6. **MoE and Ling** (KDA, MLA).
 7. **Vision** (ViT blocks, image decode, embedding cache) moves up next to step 4, because five of your models need it. LightOnOCR is a good first VLM (1B decoder, fan-out over pages).
 8. **Spec linter, `inspect` coverage report and validation harness** (Perl) for new architectures. Gemma (sandwich norms, SWA ring KV, PLE tables, KV sharing, 262k vocab) is a good test of the spec vocabulary.
 9. **Online tuning** from the run log.
