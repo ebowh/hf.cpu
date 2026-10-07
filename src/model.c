@@ -327,14 +327,15 @@ static void mm_run(void *vp, int tid, int nth)
         size_t rows = (size_t)w->rows, cols = (size_t)w->cols, nblk = cols / 32, qstride = nblk * HFC_Q8_0_BLOCK;
         size_t nkb = cols / 256, kstride = nkb * HFC_Q8_K_BLOCK;
         float (*kdot)(const void *, const void *, size_t) = NULL;
+        void (*kdot4)(const void *, const void *, size_t, size_t, float *) = NULL;
         int use_k = 0;
         switch (w->type) {
-        case 8:  kdot = k->dot_q8_0; break;
-        case 2:  kdot = k->dot_q4_0; break;
-        case 6:  kdot = k->dot_q5_0; break;
-        case 12: kdot = k->dot_q4_K; use_k = 1; break;
-        case 13: kdot = k->dot_q5_K; use_k = 1; break;
-        case 14: kdot = k->dot_q6_K; use_k = 1; break;
+        case 8:  kdot = k->dot_q8_0; kdot4 = k->dot4_q8_0; break;
+        case 2:  kdot = k->dot_q4_0; kdot4 = k->dot4_q4_0; break;
+        case 6:  kdot = k->dot_q5_0; kdot4 = k->dot4_q5_0; break;
+        case 12: kdot = k->dot_q4_K; kdot4 = k->dot4_q4_K; use_k = 1; break;
+        case 13: kdot = k->dot_q5_K; kdot4 = k->dot4_q5_K; use_k = 1; break;
+        case 14: kdot = k->dot_q6_K; kdot4 = k->dot4_q6_K; use_k = 1; break;
         default: break;
         }
         size_t lo, hi, r, t, n = tk->n;
@@ -342,10 +343,16 @@ static void mm_run(void *vp, int tid, int nth)
         for (r = lo; r < hi; r++) {
             const unsigned char *wr = w->data + r * (size_t)w->row_bytes;
             float b = bias ? bias[r] : 0.0f;
-            if (kdot && !use_k) {                                /* Q8_0, Q4_0, Q5_0: Q8_0 activations */
-                for (t = 0; t < n; t++) y[t * rows + r] = kdot(wr, tk->xq + t * qstride, nblk) + b;
-            } else if (kdot) {                                    /* K-quants: Q8_K activations */
-                for (t = 0; t < n; t++) y[t * rows + r] = kdot(wr, tk->xk + t * kstride, nkb) + b;
+            if (kdot) {                                           /* Q8_0/Q4_0/Q5_0 pair with Q8_0 activations, K-quants with Q8_K */
+                const unsigned char *xa = use_k ? tk->xk : tk->xq;
+                size_t as = use_k ? kstride : qstride, nbk = use_k ? nkb : nblk;
+                for (t = 0; t + 4 <= n; t += 4) {
+                    float o[4];
+                    kdot4(wr, xa + t * as, as, nbk, o);
+                    y[t * rows + r] = o[0] + b; y[(t + 1) * rows + r] = o[1] + b;
+                    y[(t + 2) * rows + r] = o[2] + b; y[(t + 3) * rows + r] = o[3] + b;
+                }
+                for (; t < n; t++) y[t * rows + r] = kdot(wr, xa + t * as, nbk) + b;
             } else {                                              /* any other type: dequantize the row once */
                 if (hfc_dequant_row(w->type, wr, rowbuf, cols) != HFC_OK) { c->err[tid] = HFC_ENOTSUP; return; }
                 for (t = 0; t < n; t++) y[t * rows + r] = k->dot_f32(rowbuf, tk->xf + t * cols, cols) + b;

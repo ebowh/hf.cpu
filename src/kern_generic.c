@@ -279,11 +279,17 @@ static float dot_q6_K_generic(const void *w, const void *a, size_t nb)
     return sumf;
 }
 
+#define DOT4_GENERIC(NAME) \
+static void dot4_##NAME##_generic(const void *w, const void *a, size_t as, size_t nb, float *out) \
+{ int t; for (t = 0; t < 4; t++) out[t] = dot_##NAME##_generic(w, (const unsigned char *)a + (size_t)t * as, nb); }
+DOT4_GENERIC(q8_0) DOT4_GENERIC(q4_0) DOT4_GENERIC(q5_0) DOT4_GENERIC(q4_K) DOT4_GENERIC(q5_K) DOT4_GENERIC(q6_K)
+
 static const hfc_kernels k_generic = {
     "generic", read_sum_generic, fma_burn_generic, 16.0,
     quantize_q8_0_generic, dot_q8_0_generic, dot_f32_generic, dot_f32_f16_generic,
     axpy_f32_f16_generic, f32_to_f16_generic,
-    quantize_q8_K_generic, dot_q4_0_generic, dot_q5_0_generic, dot_q4_K_generic, dot_q5_K_generic, dot_q6_K_generic
+    quantize_q8_K_generic, dot_q4_0_generic, dot_q5_0_generic, dot_q4_K_generic, dot_q5_K_generic, dot_q6_K_generic,
+    dot4_q8_0_generic, dot4_q4_0_generic, dot4_q5_0_generic, dot4_q4_K_generic, dot4_q5_K_generic, dot4_q6_K_generic
 };
 
 const hfc_kernels *hfc_kernels_generic(void) { return &k_generic; }

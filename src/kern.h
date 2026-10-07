@@ -40,6 +40,15 @@ typedef struct {
     float (*dot_q4_K)(const void *w, const void *a, size_t nblocks);    /* nblocks of 256 */
     float (*dot_q5_K)(const void *w, const void *a, size_t nblocks);
     float (*dot_q6_K)(const void *w, const void *a, size_t nblocks);
+
+    /* Four activation rows (at byte stride `as`) against one weight row; out[t] is bit-identical to
+     * the single-row dot of row t. Used by prefill so each weight block is decoded once per four tokens. */
+    void  (*dot4_q8_0)(const void *w, const void *a, size_t as, size_t nblocks, float *out);
+    void  (*dot4_q4_0)(const void *w, const void *a, size_t as, size_t nblocks, float *out);
+    void  (*dot4_q5_0)(const void *w, const void *a, size_t as, size_t nblocks, float *out);
+    void  (*dot4_q4_K)(const void *w, const void *a, size_t as, size_t nblocks, float *out);
+    void  (*dot4_q5_K)(const void *w, const void *a, size_t as, size_t nblocks, float *out);
+    void  (*dot4_q6_K)(const void *w, const void *a, size_t as, size_t nblocks, float *out);
 } hfc_kernels;
 
 #define HFC_Q8_0_BLOCK 34

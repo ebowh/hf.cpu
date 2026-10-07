@@ -253,6 +253,44 @@ static void test_norm_softmax(void)
     CHECK_NEAR(s[3] / s[2], exp(1.0), 1e-5);
 }
 
+/* the four-token kernels must reproduce the single-row kernels bit for bit */
+static void test_dot4(const hfc_kernels *k, const char *label)
+{
+    struct { int act_k; size_t blk, bytes; int halves[3]; dotfn fn; void (*fn4)(const void *, const void *, size_t, size_t, float *); } cases[] = {
+        { 0, 32,  34,  { 0, -1, -1 },   k->dot_q8_0, k->dot4_q8_0 },
+        { 0, 32,  18,  { 0, -1, -1 },   k->dot_q4_0, k->dot4_q4_0 },
+        { 0, 32,  22,  { 0, -1, -1 },   k->dot_q5_0, k->dot4_q5_0 },
+        { 1, 256, 144, { 0, 2, -1 },    k->dot_q4_K, k->dot4_q4_K },
+        { 1, 256, 176, { 0, 2, -1 },    k->dot_q5_K, k->dot4_q5_K },
+        { 1, 256, 210, { 208, -1, -1 }, k->dot_q6_K, k->dot4_q6_K },
+    };
+    size_t ci;
+    for (ci = 0; ci < sizeof cases / sizeof cases[0]; ci++) {
+        int trial;
+        for (trial = 0; trial < 60; trial++) {
+            size_t nb = 1 + (size_t)(rnd() % 7), n = nb * cases[ci].blk, i, astr = nb * (cases[ci].act_k ? 292 : 34);
+            unsigned char *w = (unsigned char *)malloc(nb * cases[ci].bytes), *qa = (unsigned char *)malloc(4 * astr);
+            float *x = (float *)malloc(n * sizeof(float)), out[4];
+            int t, h, same = 1;
+            for (i = 0; i < nb * cases[ci].bytes; i++) w[i] = (unsigned char)rnd();
+            for (i = 0; i < nb; i++)
+                for (h = 0; h < 3; h++) if (cases[ci].halves[h] >= 0) rand_half_at(w + i * cases[ci].bytes + cases[ci].halves[h]);
+            for (t = 0; t < 4; t++) {
+                for (i = 0; i < n; i++) x[i] = frand() * (1 + (float)(i / 32 % 7));
+                if (cases[ci].act_k) k->quantize_q8_K(x, qa + t * astr, n); else k->quantize_q8_0(x, qa + t * astr, n);
+            }
+            cases[ci].fn4(w, qa, astr, nb, out);
+            for (t = 0; t < 4; t++) {
+                float one = cases[ci].fn(w, qa + t * astr, nb);
+                if (memcmp(&one, &out[t], sizeof one) != 0) same = 0;
+            }
+            if (!same) { t_fail_++; fprintf(stderr, "FAIL %s dot4 case %zu trial %d: differs from single-row kernel\n", label, ci, trial); trial = 1000; }
+            else t_run_++;
+            free(w); free(qa); free(x);
+        }
+    }
+}
+
 int main(void)
 {
     hfc_cpu cpu;
@@ -266,7 +304,7 @@ int main(void)
     test_f16(g);
     test_q8(g, g);
     test_f32(g);
-    test_quant_dot(g, "generic");
-    if (k != g) { test_f16(k); test_q8(k, g); test_f32(k); test_quant_dot(k, k->isa); }
+    test_quant_dot(g, "generic"); test_dot4(g, "generic");
+    if (k != g) { test_f16(k); test_q8(k, g); test_f32(k); test_quant_dot(k, k->isa); test_dot4(k, k->isa); }
     return t_report("test_kern");
 }
