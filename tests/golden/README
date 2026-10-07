@@ -1,4 +1,4 @@
 Golden files are per machine and per llama.cpp build.
-Noise floor: for qwen2.5-0.5b-q4_k_m, llama.cpp with and without --no-repack differs from itself by
+Noise floor: for qwen2.5-0.5b-q4_k_m, llama.cpp run with `--no-repack -ub 256 -b 256` differs from itself by
 mean |dlogprob| 0.05-0.08 and max up to 0.48 (tools/cmp-golden.pl). hfcpu vs llama.cpp is mean ~0.02, max ~0.24,
 so check-golden.pl should be run with --tol 0.5 for K-quant files (0.15 is fine for q8_0).
