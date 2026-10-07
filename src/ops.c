@@ -299,7 +299,7 @@ static hfc_status op_doctor(hfc_session *s, const hfc_opts *eff, char *msg, size
         loaded = 1;
     }
     if (!loaded) {
-        rc = hfc_probe_run(&s->cpu, 1, &s->machine);
+        rc = hfc_probe_run(&s->cpu, 1, eff->probe_reps, &s->machine);
         if (rc != HFC_OK) { snprintf(msg, msgcap, "probe failed: %s", hfc_strerror(rc)); hfc_free(dir); return rc; }
         if (dir) {
             rc = hfc_probe_save(dir, &s->machine);

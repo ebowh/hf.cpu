@@ -30,7 +30,9 @@ typedef struct {
     long   when;                     /* unix time of the measurement */
     int    nbw;
     int    bw_threads[HFC_MAX_BW];
-    double bw_gbps[HFC_MAX_BW];      /* aggregate read bandwidth */
+    double bw_gbps[HFC_MAX_BW];      /* aggregate read bandwidth, median over reps */
+    double bw_lo[HFC_MAX_BW], bw_hi[HFC_MAX_BW];   /* spread over reps */
+    int    bw_reps;
     int    bw_best_threads;
     double bw_best_gbps;
     double fma_gflops_1t, fma_gflops_all, fma_gflops_logical;
@@ -47,8 +49,10 @@ typedef struct {
     double lat_ns[HFC_MAX_LAT];
 } hfc_machine;
 
-/* quick != 0: fewer thread counts and sizes (about 2 s). */
-hfc_status hfc_probe_run(const hfc_cpu *c, int quick, hfc_machine *m);
+/* quick != 0: fewer thread counts and sizes (about 2 s). reps > 1 repeats the
+ * bandwidth sweep round-robin and reports median and spread, because run-to-run
+ * variation on a busy machine is 10-40%. */
+hfc_status hfc_probe_run(const hfc_cpu *c, int quick, int reps, hfc_machine *m);
 hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total, hfc_machine *m);
 hfc_status hfc_probe_save(const char *dir, const hfc_machine *m);
 /* All physical cores running the FMA kernel for `seconds` seconds, one

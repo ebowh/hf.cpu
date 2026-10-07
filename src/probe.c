@@ -388,7 +388,13 @@ static double bench_latency(size_t bytes, long loads)
     return (t1 - t0) / (double)loads * 1e9;
 }
 
-hfc_status hfc_probe_run(const hfc_cpu *c, int quick, hfc_machine *m)
+static int cmp_dbl(const void *a, const void *b)
+{
+    double x = *(const double *)a, y = *(const double *)b;
+    return x < y ? -1 : x > y;
+}
+
+hfc_status hfc_probe_run(const hfc_cpu *c, int quick, int reps, hfc_machine *m)
 {
     const hfc_kernels *k = hfc_kernels_for(c);
     pal_meminfo mi;
@@ -419,12 +425,28 @@ hfc_status hfc_probe_run(const hfc_cpu *c, int quick, hfc_machine *m)
     } else {
         for (t = 1; t <= c->logical && nt < HFC_MAX_BW; t++) tlist[nt++] = t;
     }
-    for (i = 0; i < nt; i++) {
-        double g = bench_bw(k, buf, bytes, tlist[i]);
-        m->bw_threads[m->nbw] = tlist[i];
-        m->bw_gbps[m->nbw] = g;
-        if (g > m->bw_best_gbps * 1.03) { m->bw_best_gbps = g; m->bw_best_threads = tlist[i]; }
-        m->nbw++;
+    if (reps < 1) reps = 1;
+    if (reps > 32) reps = 32;
+    {
+        double samples[HFC_MAX_BW][32];
+        int r;
+        for (r = 0; r < reps; r++)                 /* round-robin so drift hits every count equally */
+            for (i = 0; i < nt; i++) samples[i][r] = bench_bw(k, buf, bytes, tlist[i]);
+        for (i = 0; i < nt; i++) {
+            double g;
+            qsort(samples[i], (size_t)reps, sizeof(double), cmp_dbl);
+            g = samples[i][reps / 2];
+            m->bw_threads[m->nbw] = tlist[i];
+            m->bw_gbps[m->nbw] = g;
+            m->bw_lo[m->nbw] = samples[i][0];
+            m->bw_hi[m->nbw] = samples[i][reps - 1];
+            /* fewest threads within 5% of the best median */
+            if (g > m->bw_best_gbps) m->bw_best_gbps = g;
+            m->nbw++;
+        }
+        m->bw_reps = reps;
+        for (i = 0; i < m->nbw; i++)
+            if (m->bw_gbps[i] >= 0.95 * m->bw_best_gbps) { m->bw_best_threads = m->bw_threads[i]; break; }
     }
     hfc_free(raw);
 
@@ -480,11 +502,12 @@ hfc_status hfc_probe_save(const char *dir, const hfc_machine *m)
 #define APP(...) do { int w_ = snprintf(buf + off, cap - off, __VA_ARGS__); \
                       if (w_ < 0 || (size_t)w_ >= cap - off) { hfc_free(buf); return HFC_ERANGE; } \
                       off += (size_t)w_; } while (0)
-    APP("format=3\nsig=%s\nisa=%s\nwhen=%ld\n", m->sig, m->isa, m->when);
+    APP("format=4\nsig=%s\nisa=%s\nwhen=%ld\n", m->sig, m->isa, m->when);
     APP("bw_best_threads=%d\nbw_best_gbps=%.3f\n", m->bw_best_threads, m->bw_best_gbps);
     APP("fma_gflops_1t=%.3f\nfma_gflops_all=%.3f\nfma_gflops_logical=%.3f\n", m->fma_gflops_1t, m->fma_gflops_all, m->fma_gflops_logical);
     for (i = 0; i < m->nfma; i++) APP("fma.%d=%.3f\n", m->fma_threads[i], m->fma_gflops_n[i]);
-    for (i = 0; i < m->nbw; i++) APP("bw.%d=%.3f\n", m->bw_threads[i], m->bw_gbps[i]);
+    APP("bw_reps=%d\n", m->bw_reps);
+    for (i = 0; i < m->nbw; i++) APP("bw.%d=%.3f\nbwlo.%d=%.3f\nbwhi.%d=%.3f\n", m->bw_threads[i], m->bw_gbps[i], m->bw_threads[i], m->bw_lo[i], m->bw_threads[i], m->bw_hi[i]);
     if (m->sustained_seconds) APP("sustained_seconds=%d\nfma_sustained_gflops=%.3f\nfma_sustained_ratio=%.4f\n", m->sustained_seconds, m->fma_sustained_gflops, m->fma_sustained_ratio);
     for (i = 0; i < m->nlat; i++) APP("lat.%lu=%.3f\n", (unsigned long)m->lat_bytes[i], m->lat_ns[i]);
 #undef APP
@@ -510,7 +533,7 @@ hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total,
         if (nl) *nl = '\0';
         if (!eq) continue;
         *eq++ = '\0';
-        if (strcmp(line, "format") == 0) saw_format = atoi(eq) == 3;     /* bump when the probe changes so stale profiles are re-measured */
+        if (strcmp(line, "format") == 0) saw_format = atoi(eq) == 4;     /* bump when the probe changes so stale profiles are re-measured */
         else if (strcmp(line, "sig") == 0) { strncpy(m->sig, eq, 16); m->sig[16] = '\0'; }
         else if (strcmp(line, "isa") == 0) { strncpy(m->isa, eq, sizeof m->isa - 1); }
         else if (strcmp(line, "when") == 0) m->when = atol(eq);
@@ -526,6 +549,9 @@ hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total,
             m->fma_threads[m->nfma] = atoi(line + 4);
             m->fma_gflops_n[m->nfma++] = atof(eq);
         }
+        else if (strcmp(line, "bw_reps") == 0) m->bw_reps = atoi(eq);
+        else if (strncmp(line, "bwlo.", 5) == 0) { int q; for (q = 0; q < m->nbw; q++) if (m->bw_threads[q] == atoi(line + 5)) m->bw_lo[q] = atof(eq); }
+        else if (strncmp(line, "bwhi.", 5) == 0) { int q; for (q = 0; q < m->nbw; q++) if (m->bw_threads[q] == atoi(line + 5)) m->bw_hi[q] = atof(eq); }
         else if (strncmp(line, "bw.", 3) == 0 && m->nbw < HFC_MAX_BW) {
             m->bw_threads[m->nbw] = atoi(line + 3);
             m->bw_gbps[m->nbw++] = atof(eq);
@@ -557,8 +583,9 @@ void hfc_probe_print(FILE *f, const hfc_cpu *c, const hfc_machine *m)
     }
     fprintf(f, "cache.l1d=%u\ncache.l2=%u\ncache.l3=%u\ncache.line=%u\n", c->l1d, c->l2, c->l3, c->line);
     fprintf(f, "machine.sig=%s\nmachine.isa=%s\nmachine.measured=%ld\n", m->sig, m->isa, m->when);
-    for (i = 0; i < m->nbw; i++) fprintf(f, "bw.threads.%d=%.2f GB/s\n", m->bw_threads[i], m->bw_gbps[i]);
-    fprintf(f, "bw.best=%.2f GB/s at %d threads\n", m->bw_best_gbps, m->bw_best_threads);
+    for (i = 0; i < m->nbw; i++)
+        fprintf(f, "bw.threads.%d=%.2f GB/s (range %.2f-%.2f over %d runs)\n", m->bw_threads[i], m->bw_gbps[i], m->bw_lo[i], m->bw_hi[i], m->bw_reps);
+    fprintf(f, "bw.best=%.2f GB/s; fewest threads within 5%% of it: %d\n", m->bw_best_gbps, m->bw_best_threads);
     for (i = 0; i < m->nfma; i++) fprintf(f, "fma.threads.%d=%.1f GFLOP/s\n", m->fma_threads[i], m->fma_gflops_n[i]);
     fprintf(f, "fma.gflops.1thread=%.1f\nfma.gflops.allcores=%.1f\nfma.gflops.allthreads=%.1f\n", m->fma_gflops_1t, m->fma_gflops_all, m->fma_gflops_logical);
     if (m->sustained_seconds)

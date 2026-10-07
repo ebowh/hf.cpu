@@ -61,6 +61,7 @@ static const opt_def defs[] = {
     { "timeout",        K_DBL,  OFF(timeout),        S_REQUEST, 0, 1e7, NULL, "per-request time limit in seconds, 0 = none" },
     { "list-tensors",   K_BOOL, OFF(list_tensors),   S_REQUEST, NOLIM, NULL, "inspect: list every tensor" },
     { "probe-sustained", K_INT, OFF(probe_sustained), S_REQUEST, 0, 600, NULL, "doctor: seconds of all-core load to measure throttling, 0 = skip" },
+    { "probe-reps",     K_INT,  OFF(probe_reps),     S_REQUEST, 1, 32, NULL, "doctor: repeat the bandwidth sweep N times, report median and range" },
 };
 #define NDEFS (sizeof defs / sizeof defs[0])
 
@@ -82,6 +83,7 @@ void hfc_opts_defaults(hfc_opts *o)
     o->max_record = (uint64_t)64 << 20;
     o->log_level = HFC_LOG_INFO;
     o->n = 1;
+    o->probe_reps = 1;
     o->temp = 0.8;
     o->top_k = 40;
     o->top_p = 0.95;

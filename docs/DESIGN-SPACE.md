@@ -62,6 +62,8 @@ Two MacBook runs differed a lot (details below), so treat single quick probes wi
 | FMA fp32, all hardware threads | 216 GFLOP/s (hyper-threading adds nothing) | 242 GFLOP/s (same) |
 | Latency | L1 1.8 ns, L2 8 ns, L3 10-33 ns (1-4 MB), 8 MB 62 ns, DRAM 92-98 ns | L1 2.6 ns, L2 7.5 ns, L3 ~11 ns up to 4 MB, 8 MB 25 ns, DRAM 94-128 ns |
 
+**Third MacBook run (new probe).** FMA scales perfectly across the two cores (108.5 then 215.3 GFLOP/s), so the 122 GFLOP/s reading really was a one-off, not a thread-placement problem the engine has to work around. Read bandwidth was 15.5 / 17.3 / 19.8 GB/s for 1 / 2 / 4 threads, so across three runs the best thread count has been 4, 2 and 4, with a spread of 15-24 GB/s. The probe now has `--probe-reps N`, which repeats the bandwidth sweep round-robin and reports the median and range per thread count; the thread count it recommends is the fewest threads within 5% of the best median. Use `--probe-reps 7` or more when you want a number you can trust.
+
 **Final EliteBook numbers and what they correct.** The sustained run on the EliteBook is dead flat at 242 GFLOP/s for 30 seconds: no thermal or power throttling beyond the all-core AVX2 clock drop (60 GFLOP/s per core is about 1.9 GHz, the base clock, against 104 GFLOP/s for a single core at about 3.3 GHz). Two consequences:
 
 - **The EliteBook is only about 1.13x the MacBook for compute** (242 vs 214 GFLOP/s sustained), and about 1.2x for bandwidth (25-29 vs 21-24 GB/s). Earlier estimates in this document that treat the EliteBook as roughly twice the MacBook for prefill (§1, §2.1, §4.9) should be read as about 1.1-1.2x. Its advantages are RAM (32 GB, all available), a 4-core scheduler that is not disturbed by other apps, and a stable Linux environment.
