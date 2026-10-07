@@ -1,0 +1,412 @@
+@begin id="" op=generate
+@prompt tokens=25 threads=4
+@prefill tokens=25 cached=0 ms=1096.6 tok_per_s=22.80 kv_bytes=786432
+@token pos=0 id=76377
+@text len=6
+Newton
+@token pos=1 id=594
+@text len=2
+'s
+@token pos=2 id=2326
+@text len=6
+ three
+@token pos=3 id=6872
+@text len=5
+ laws
+@token pos=4 id=315
+@text len=3
+ of
+@token pos=5 id=11379
+@text len=7
+ motion
+@token pos=6 id=7512
+@text len=9
+ describe
+@token pos=7 id=1246
+@text len=4
+ how
+@token pos=8 id=6171
+@text len=8
+ objects
+@token pos=9 id=3271
+@text len=5
+ move
+@token pos=10 id=1212
+@text len=6
+ under
+@token pos=11 id=279
+@text len=4
+ the
+@token pos=12 id=10173
+@text len=10
+ influence
+@token pos=13 id=315
+@text len=3
+ of
+@token pos=14 id=8437
+@text len=7
+ forces
+@token pos=15 id=13
+@text len=1
+.
+@token pos=16 id=576
+@text len=4
+ The
+@token pos=17 id=1156
+@text len=6
+ first
+@token pos=18 id=2329
+@text len=4
+ law
+@token pos=19 id=5302
+@text len=7
+ states
+@token pos=20 id=429
+@text len=5
+ that
+@token pos=21 id=458
+@text len=3
+ an
+@token pos=22 id=1633
+@text len=7
+ object
+@token pos=23 id=518
+@text len=3
+ at
+@token pos=24 id=2732
+@text len=5
+ rest
+@token pos=25 id=686
+@text len=5
+ will
+@token pos=26 id=7146
+@text len=7
+ remain
+@token pos=27 id=518
+@text len=3
+ at
+@token pos=28 id=2732
+@text len=5
+ rest
+@token pos=29 id=7241
+@text len=7
+ unless
+@token pos=30 id=30432
+@text len=6
+ acted
+@token pos=31 id=5193
+@text len=5
+ upon
+@token pos=32 id=553
+@text len=3
+ by
+@token pos=33 id=264
+@text len=2
+ a
+@token pos=34 id=4179
+@text len=4
+ net
+@token pos=35 id=5344
+@text len=6
+ force
+@token pos=36 id=11
+@text len=1
+,
+@token pos=37 id=323
+@text len=4
+ and
+@token pos=38 id=458
+@text len=3
+ an
+@token pos=39 id=1633
+@text len=7
+ object
+@token pos=40 id=304
+@text len=3
+ in
+@token pos=41 id=11379
+@text len=7
+ motion
+@token pos=42 id=686
+@text len=5
+ will
+@token pos=43 id=3060
+@text len=9
+ continue
+@token pos=44 id=304
+@text len=3
+ in
+@token pos=45 id=264
+@text len=2
+ a
+@token pos=46 id=7678
+@text len=9
+ straight
+@token pos=47 id=1555
+@text len=5
+ line
+@token pos=48 id=7241
+@text len=7
+ unless
+@token pos=49 id=30432
+@text len=6
+ acted
+@token pos=50 id=5193
+@text len=5
+ upon
+@token pos=51 id=553
+@text len=3
+ by
+@token pos=52 id=264
+@text len=2
+ a
+@token pos=53 id=4179
+@text len=4
+ net
+@token pos=54 id=5344
+@text len=6
+ force
+@token pos=55 id=304
+@text len=3
+ in
+@token pos=56 id=279
+@text len=4
+ the
+@token pos=57 id=14002
+@text len=9
+ opposite
+@token pos=58 id=5106
+@text len=10
+ direction
+@token pos=59 id=13
+@text len=1
+.
+@token pos=60 id=576
+@text len=4
+ The
+@token pos=61 id=2086
+@text len=7
+ second
+@token pos=62 id=2329
+@text len=4
+ law
+@token pos=63 id=5302
+@text len=7
+ states
+@token pos=64 id=429
+@text len=5
+ that
+@token pos=65 id=279
+@text len=4
+ the
+@token pos=66 id=30803
+@text len=13
+ acceleration
+@token pos=67 id=315
+@text len=3
+ of
+@token pos=68 id=458
+@text len=3
+ an
+@token pos=69 id=1633
+@text len=7
+ object
+@token pos=70 id=374
+@text len=3
+ is
+@token pos=71 id=5961
+@text len=9
+ directly
+@token pos=72 id=54172
+@text len=13
+ proportional
+@token pos=73 id=311
+@text len=3
+ to
+@token pos=74 id=279
+@text len=4
+ the
+@token pos=75 id=4179
+@text len=4
+ net
+@token pos=76 id=5344
+@text len=6
+ force
+@token pos=77 id=15358
+@text len=7
+ acting
+@token pos=78 id=389
+@text len=3
+ on
+@token pos=79 id=432
+@text len=3
+ it
+@token pos=80 id=323
+@text len=4
+ and
+@token pos=81 id=64583
+@text len=7
+ invers
+@token pos=82 id=974
+@text len=3
+ely
+@token pos=83 id=54172
+@text len=13
+ proportional
+@token pos=84 id=311
+@text len=3
+ to
+@token pos=85 id=1181
+@text len=4
+ its
+@token pos=86 id=3072
+@text len=5
+ mass
+@token pos=87 id=13
+@text len=1
+.
+@token pos=88 id=576
+@text len=4
+ The
+@token pos=89 id=4843
+@text len=6
+ third
+@token pos=90 id=2329
+@text len=4
+ law
+@token pos=91 id=5302
+@text len=7
+ states
+@token pos=92 id=429
+@text len=5
+ that
+@token pos=93 id=369
+@text len=4
+ for
+@token pos=94 id=1449
+@text len=6
+ every
+@token pos=95 id=1917
+@text len=7
+ action
+@token pos=96 id=11
+@text len=1
+,
+@token pos=97 id=1052
+@text len=6
+ there
+@token pos=98 id=374
+@text len=3
+ is
+@token pos=99 id=458
+@text len=3
+ an
+@token pos=100 id=6144
+@text len=6
+ equal
+@token pos=101 id=323
+@text len=4
+ and
+@token pos=102 id=14002
+@text len=9
+ opposite
+@token pos=103 id=12720
+@text len=9
+ reaction
+@token pos=104 id=13
+@text len=1
+.
+@gen tokens=105 ms=2584.4 tok_per_s=40.63 stop=eos
+@done status=ok ms=3722.2
+@begin id="" op=generate
+@prompt tokens=22 threads=4
+@prefill tokens=22 cached=13 ms=70.6 tok_per_s=127.56 kv_bytes=2359296
+@token pos=0 id=5830
+@text len=2
+Ab
+@token pos=1 id=16602
+@text len=5
+raham
+@token pos=2 id=24379
+@text len=8
+ Lincoln
+@token pos=3 id=572
+@text len=4
+ was
+@token pos=4 id=279
+@text len=4
+ the
+@token pos=5 id=220
+@text len=1
+ 
+@token pos=6 id=16
+@text len=1
+1
+@token pos=7 id=21
+@text len=1
+6
+@token pos=8 id=339
+@text len=2
+th
+@token pos=9 id=4795
+@text len=10
+ President
+@token pos=10 id=315
+@text len=3
+ of
+@token pos=11 id=279
+@text len=4
+ the
+@token pos=12 id=3639
+@text len=7
+ United
+@token pos=13 id=4180
+@text len=7
+ States
+@token pos=14 id=11
+@text len=1
+,
+@token pos=15 id=13480
+@text len=8
+ serving
+@token pos=16 id=504
+@text len=5
+ from
+@token pos=17 id=220
+@text len=1
+ 
+@token pos=18 id=16
+@text len=1
+1
+@token pos=19 id=23
+@text len=1
+8
+@token pos=20 id=21
+@text len=1
+6
+@token pos=21 id=16
+@text len=1
+1
+@token pos=22 id=311
+@text len=3
+ to
+@token pos=23 id=220
+@text len=1
+ 
+@token pos=24 id=16
+@text len=1
+1
+@token pos=25 id=23
+@text len=1
+8
+@token pos=26 id=21
+@text len=1
+6
+@token pos=27 id=20
+@text len=1
+5
+@token pos=28 id=13
+@text len=1
+.
+@gen tokens=29 ms=617.1 tok_per_s=46.99 stop=eos
+@done status=ok ms=687.7
