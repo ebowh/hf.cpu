@@ -40,6 +40,7 @@ static const opt_def defs[] = {
     { "ctx-max",        K_SIZE, OFF(ctx_max),        S_SESSION, NOLIM, NULL, "maximum context tokens" },
     { "max-record",     K_SIZE, OFF(max_record),     S_SESSION, NOLIM, NULL, "largest accepted prompt or request line" },
     { "probe-force",    K_BOOL, OFF(probe_force),    S_SESSION, NOLIM, NULL, "ignore the cached machine profile" },
+    { "batch",          K_INT,  OFF(batch),          S_SESSION, 1, 4096, NULL, "prefill tokens per step" },
     { "log-level",      K_ENUM, OFF(log_level),      S_SESSION, NOLIM, log_levels, "error | warn | info | debug" },
 
     { "op",             K_STR,  OFF(op),             S_REQUEST, NOLIM, NULL, "generate | inspect | doctor | echo" },
@@ -49,6 +50,7 @@ static const opt_def defs[] = {
     { "system-file",    K_STR,  OFF(system_file),    S_REQUEST, NOLIM, NULL, "system prompt from a file" },
     { "prompt",         K_STR,  OFF(prompt),         S_REQUEST, NOLIM, NULL, "prompt text (short prompts)" },
     { "prompt-file",    K_STR,  OFF(prompt_file),    S_REQUEST, NOLIM, NULL, "prompt from a file" },
+    { "prompt-ids",     K_STR,  OFF(prompt_ids),     S_REQUEST, NOLIM, NULL, "prompt as token ids, space or comma separated" },
     { "n",              K_INT,  OFF(n),              S_REQUEST, 1, 64, NULL, "parallel continuations of one prefix" },
     { "temp",           K_DBL,  OFF(temp),           S_REQUEST, 0, 5, NULL, "sampling temperature" },
     { "top-k",          K_INT,  OFF(top_k),          S_REQUEST, 0, 1000000, NULL, "top-k, 0 = off" },
@@ -85,6 +87,7 @@ void hfc_opts_defaults(hfc_opts *o)
     o->log_level = HFC_LOG_INFO;
     o->n = 1;
     o->probe_reps = 1;
+    o->batch = 64;
     o->parse_special = 1;
     o->temp = 0.8;
     o->top_k = 40;

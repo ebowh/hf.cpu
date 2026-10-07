@@ -11,10 +11,13 @@
 #include "gguf.h"
 #include "pal.h"
 #include "tok.h"
+#include "model.h"
+#include "sample.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 /* ---- helpers --------------------------------------------------------------- */
 
@@ -356,6 +359,224 @@ static hfc_status op_doctor(hfc_session *s, const hfc_opts *eff, char *msg, size
     return HFC_OK;
 }
 
+/* ---- resident model + generate ---------------------------------------------------------- */
+
+typedef struct hfc_resident {
+    char      *path;
+    uint64_t   size;
+    long       mtime;
+    gguf_file  g;
+    int        g_open;
+    hfc_model *model;
+    hfc_tok   *tok;
+    char       tok_err[200];
+} hfc_resident;
+
+static void resident_free(hfc_resident *r)
+{
+    if (!r) return;
+    hfc_tok_free(r->tok);
+    hfc_model_free(r->model);
+    if (r->g_open) gguf_close(&r->g);
+    hfc_free(r->path);
+    hfc_free(r);
+}
+
+void hfc_session_close(hfc_session *s)
+{
+    resident_free(s->res);
+    s->res = NULL;
+}
+
+static hfc_status resident_get(hfc_session *s, const char *path, hfc_resident **out, char *msg, size_t cap)
+{
+    struct stat st;
+    hfc_resident *r;
+    hfc_status rc;
+    hfc_cpu *cpu;
+    if (stat(path, &st) != 0) { snprintf(msg, cap, "cannot open '%s'", path); return HFC_EIO; }
+    r = s->res;
+    if (r && strcmp(r->path, path) == 0 && r->size == (uint64_t)st.st_size && r->mtime == (long)st.st_mtime) {
+        *out = r;
+        return HFC_OK;
+    }
+    resident_free(r);
+    s->res = NULL;
+    r = (hfc_resident *)hfc_calloc(1, sizeof *r);
+    if (!r) { snprintf(msg, cap, "out of memory"); return HFC_ENOMEM; }
+    r->path = hfc_strdup(path);
+    if (!r->path) { resident_free(r); snprintf(msg, cap, "out of memory"); return HFC_ENOMEM; }
+    r->size = (uint64_t)st.st_size;
+    r->mtime = (long)st.st_mtime;
+    if ((rc = gguf_open(&r->g, path, msg, cap)) != HFC_OK) { resident_free(r); return rc; }
+    r->g_open = 1;
+    if (!s->cpu_ready) { hfc_cpu_detect(&s->cpu); s->cpu_ready = 1; }
+    cpu = &s->cpu;
+    if ((rc = hfc_model_load(&r->model, &r->g, hfc_kernels_for(cpu), msg, cap)) != HFC_OK) { resident_free(r); return rc; }
+    if (hfc_tok_load(&r->tok, &r->g, r->tok_err, sizeof r->tok_err) != HFC_OK) r->tok = NULL;   /* not fatal: --prompt-ids still works */
+    s->res = r;
+    *out = r;
+    return HFC_OK;
+}
+
+static hfc_status parse_ids(const char *s, uint32_t **ids, size_t *n, uint32_t n_vocab, char *msg, size_t cap)
+{
+    size_t count = 0, i = 0;
+    const char *p;
+    uint32_t *v;
+    for (p = s; *p; ) {
+        while (*p == ' ' || *p == ',' || *p == '\t' || *p == '\n') p++;
+        if (!*p) break;
+        while (*p && *p != ' ' && *p != ',' && *p != '\t' && *p != '\n') p++;
+        count++;
+    }
+    v = (uint32_t *)hfc_malloc((count ? count : 1) * sizeof(uint32_t));
+    if (!v) { snprintf(msg, cap, "out of memory"); return HFC_ENOMEM; }
+    for (p = s; *p && i < count; ) {
+        char *end;
+        unsigned long long x;
+        while (*p == ' ' || *p == ',' || *p == '\t' || *p == '\n') p++;
+        if (!*p) break;
+        x = strtoull(p, &end, 10);
+        if (end == p || x >= n_vocab) { hfc_free(v); snprintf(msg, cap, "bad token id in --prompt-ids (vocabulary has %u tokens)", n_vocab); return HFC_EINVAL; }
+        v[i++] = (uint32_t)x;
+        p = end;
+    }
+    *ids = v;
+    *n = i;
+    return HFC_OK;
+}
+
+static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *body, size_t body_len,
+                              int has_body, char *msg, size_t cap)
+{
+    hfc_resident *res = NULL;
+    texts_t t;
+    uint32_t *ids = NULL;
+    size_t n_prompt = 0, ngen_max, i, pos, ctx_max, nvocab;
+    hfc_ctx *ctx = NULL;
+    float *logits = NULL;
+    hfc_sampler sp;
+    hfc_rng rng;
+    hfc_status rc;
+    double t0, t_prefill, t_dec0;
+    unsigned char pend[16];
+    size_t npend = 0, generated = 0;
+    const char *stop = "length";
+    char a[64], b[64], c[64], d[64];
+    int top_n = eff->logprobs > 64 ? 64 : eff->logprobs;
+    size_t batch = (size_t)(s->session->batch > 0 ? s->session->batch : 64);
+
+    memset(&t, 0, sizeof t);
+    if (!eff->model) { snprintf(msg, cap, "generate needs --model PATH"); return HFC_EINVAL; }
+    if (eff->system || eff->system_file) {
+        snprintf(msg, cap, "chat templates are not implemented yet: put the fully formatted text (system prompt included) in the prompt");
+        return HFC_EINVAL;
+    }
+    if ((rc = resident_get(s, eff->model, &res, msg, cap)) != HFC_OK) return rc;
+    nvocab = (size_t)res->model->hp.n_vocab;
+
+    if (eff->prompt_ids) {
+        if (has_body || eff->prompt || eff->prompt_file) { snprintf(msg, cap, "--prompt-ids cannot be combined with a text prompt"); return HFC_EINVAL; }
+        if ((rc = parse_ids(eff->prompt_ids, &ids, &n_prompt, (uint32_t)nvocab, msg, cap)) != HFC_OK) return rc;
+    } else {
+        if ((rc = resolve_texts(eff, body, body_len, has_body, &t, msg, cap)) != HFC_OK) return rc;
+        if (!res->tok) { snprintf(msg, cap, "this model has no usable tokenizer (%s); use --prompt-ids", res->tok_err); rc = HFC_ENOTSUP; goto out; }
+        rc = hfc_tok_encode(res->tok, t.prompt ? t.prompt : "", t.prompt_len,
+                            HFC_TOK_ADD_BOS | (eff->parse_special ? HFC_TOK_PARSE_SPECIAL : 0), &ids, &n_prompt);
+        if (rc != HFC_OK) { snprintf(msg, cap, "tokenization failed: %s", hfc_strerror(rc)); goto out; }
+    }
+    if (n_prompt == 0) { snprintf(msg, cap, "empty prompt"); rc = HFC_EINVAL; goto out; }
+    if (n_prompt >= (size_t)s->session->ctx_max) {
+        snprintf(msg, cap, "prompt has %lu tokens but --ctx-max is %llu", (unsigned long)n_prompt, (unsigned long long)s->session->ctx_max);
+        rc = HFC_ERANGE; goto out;
+    }
+    ngen_max = (size_t)eff->max_tokens;
+    if (ngen_max > (size_t)s->session->ctx_max - n_prompt) { ngen_max = (size_t)s->session->ctx_max - n_prompt; stop = "ctx"; }
+    ctx_max = n_prompt + ngen_max;
+    if (batch > n_prompt) batch = n_prompt;
+    if ((rc = hfc_ctx_new(&ctx, res->model, ctx_max, batch)) != HFC_OK) { snprintf(msg, cap, "cannot allocate the inference context: %s", hfc_strerror(rc)); goto out; }
+    logits = (float *)hfc_malloc(nvocab * sizeof(float));
+    if (!logits) { rc = HFC_ENOMEM; snprintf(msg, cap, "out of memory"); goto out; }
+
+    snprintf(a, sizeof a, "%lu", (unsigned long)n_prompt);
+    hfc_out_event(&s->out, "prompt", "tokens", a, (const char *)NULL);
+
+    t0 = pal_now();
+    for (pos = 0; pos < n_prompt; ) {
+        size_t nb = n_prompt - pos < batch ? n_prompt - pos : batch;
+        rc = hfc_ctx_forward(ctx, ids + pos, nb, pos + nb == n_prompt ? logits : NULL);
+        if (rc != HFC_OK) { snprintf(msg, cap, "prefill failed at token %lu: %s", (unsigned long)pos, hfc_strerror(rc)); goto out; }
+        pos += nb;
+    }
+    t_prefill = pal_now() - t0;
+    snprintf(a, sizeof a, "%lu", (unsigned long)n_prompt);
+    snprintf(b, sizeof b, "%.1f", t_prefill * 1000.0);
+    snprintf(c, sizeof c, "%.2f", t_prefill > 0 ? (double)n_prompt / t_prefill : 0.0);
+    snprintf(d, sizeof d, "%lu", (unsigned long)hfc_ctx_kv_bytes(ctx));
+    hfc_out_event(&s->out, "prefill", "tokens", a, "ms", b, "tok_per_s", c, "kv_bytes", d, (const char *)NULL);
+
+    sp.temp = (float)eff->temp; sp.top_k = eff->top_k; sp.top_p = (float)eff->top_p; sp.min_p = (float)eff->min_p;
+    hfc_rng_seed(&rng, eff->seed);
+    t_dec0 = pal_now();
+    for (i = 0; i < ngen_max; i++) {
+        uint32_t tok;
+        const unsigned char *piece;
+        size_t plen, take;
+        if ((rc = hfc_sample(logits, nvocab, &sp, &rng, &tok)) != HFC_OK) { snprintf(msg, cap, "sampling failed"); goto out; }
+        if (res->tok && hfc_tok_is_eog(res->tok, tok)) { stop = "eos"; break; }
+        if (top_n > 0) {
+            hfc_top top[64];
+            char list[64 * 24], *w = list, ids_[24], lp_[32], pos_[24];
+            int j;
+            hfc_top_logprobs(logits, nvocab, top_n, top);
+            *w = '\0';
+            for (j = 0; j < top_n; j++) w += sprintf(w, j ? " %u:%.6f" : "%u:%.6f", top[j].id, top[j].logprob);
+            snprintf(pos_, sizeof pos_, "%lu", (unsigned long)i);
+            snprintf(ids_, sizeof ids_, "%u", tok);
+            snprintf(lp_, sizeof lp_, "%.6f", hfc_logprob(logits, nvocab, tok));
+            hfc_out_event(&s->out, "token", "pos", pos_, "id", ids_, "logprob", lp_, "top", list, (const char *)NULL);
+        } else {
+            char ids_[24], pos_[24];
+            snprintf(pos_, sizeof pos_, "%lu", (unsigned long)i);
+            snprintf(ids_, sizeof ids_, "%u", tok);
+            hfc_out_event(&s->out, "token", "pos", pos_, "id", ids_, (const char *)NULL);
+        }
+        generated++;
+        if (res->tok && hfc_tok_piece(res->tok, tok, 0, &piece, &plen) == HFC_OK && plen > 0) {
+            unsigned char *buf = (unsigned char *)hfc_malloc(npend + plen);
+            if (buf) {
+                memcpy(buf, pend, npend);
+                memcpy(buf + npend, piece, plen);
+                take = hfc_utf8_complete_prefix(buf, npend + plen);
+                if (take) hfc_out_payload(&s->out, "text", buf, take, (const char *)NULL);
+                npend = npend + plen - take;
+                if (npend > sizeof pend) { hfc_out_payload(&s->out, "text", buf + take, npend, (const char *)NULL); npend = 0; }
+                else memcpy(pend, buf + take, npend);
+                hfc_free(buf);
+            }
+        }
+        if (i + 1 == ngen_max) break;
+        rc = hfc_ctx_forward(ctx, &tok, 1, logits);
+        if (rc != HFC_OK) { snprintf(msg, cap, "decode failed at token %lu: %s", (unsigned long)i, hfc_strerror(rc)); goto out; }
+    }
+    if (npend) hfc_out_payload(&s->out, "text", pend, npend, (const char *)NULL);
+    {
+        double dt = pal_now() - t_dec0;
+        snprintf(a, sizeof a, "%lu", (unsigned long)generated);
+        snprintf(b, sizeof b, "%.1f", dt * 1000.0);
+        snprintf(c, sizeof c, "%.2f", dt > 0 ? (double)generated / dt : 0.0);
+        hfc_out_event(&s->out, "gen", "tokens", a, "ms", b, "tok_per_s", c, "stop", stop, (const char *)NULL);
+    }
+    rc = HFC_OK;
+out:
+    hfc_free(logits);
+    hfc_ctx_free(ctx);
+    hfc_free(ids);
+    texts_free(&t);
+    return rc;
+}
+
 /* ---- dispatch ----------------------------------------------------------------- */
 
 void hfc_emit_failed_request(hfc_session *s, const char *id, hfc_status st, const char *msg)
@@ -380,10 +601,8 @@ hfc_status hfc_run_request(hfc_session *s, const hfc_opts *eff, const char *body
     else if (strcmp(op, "inspect") == 0) rc = op_inspect(s, eff, msg, sizeof msg);
     else if (strcmp(op, "doctor") == 0)  rc = op_doctor(s, eff, msg, sizeof msg);
     else if (strcmp(op, "tokenize") == 0) rc = op_tokenize(s, eff, body, body_len, has_body, msg, sizeof msg);
-    else if (strcmp(op, "generate") == 0) {
-        rc = HFC_ENOTSUP;
-        snprintf(msg, sizeof msg, "generation is not implemented yet (phase 1)");
-    } else {
+    else if (strcmp(op, "generate") == 0) rc = op_generate(s, eff, body, body_len, has_body, msg, sizeof msg);
+    else {
         rc = HFC_EINVAL;
         snprintf(msg, sizeof msg, "unknown --op '%s' (generate, inspect, doctor, tokenize, echo)", op);
     }

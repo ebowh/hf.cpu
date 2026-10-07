@@ -27,6 +27,7 @@ typedef struct {
     uint64_t ctx_init, ctx_step, ctx_max;
     uint64_t max_record;        /* largest accepted prompt/line in bytes */
     int      probe_force;
+    int      batch;             /* prefill tokens per forward step */
     int      log_level;         /* hfc_loglevel */
 
     /* --- options valid on the command line and in every request --- */
@@ -37,6 +38,7 @@ typedef struct {
     char    *system_file;
     char    *prompt;
     char    *prompt_file;
+    char    *prompt_ids;        /* prompt as space or comma separated token ids (skips the tokenizer) */
     int      n;                 /* parallel continuations */
     double   temp;
     int      top_k;

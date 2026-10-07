@@ -203,7 +203,7 @@ void hfc_cpu_signature(const hfc_cpu *c, uint64_t mem_total, char out[17])
 const hfc_kernels *hfc_kernels_for(const hfc_cpu *c)
 {
 #if defined(__x86_64__)
-    if (c->avx2 && c->fma) {
+    if (c->avx2 && c->fma && c->f16c) {
         const hfc_kernels *k = hfc_kernels_avx2();
         if (k) return k;
     }

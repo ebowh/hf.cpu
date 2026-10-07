@@ -663,3 +663,16 @@ hfc_status hfc_tok_decode(const hfc_tok *t, const uint32_t *ids, size_t n, int r
     *len = pos;
     return HFC_OK;
 }
+
+int hfc_tok_is_eog(const hfc_tok *t, uint32_t id)
+{
+    size_t l;
+    const unsigned char *s;
+    if (id >= t->n_vocab) return 0;
+    if ((int64_t)id == t->eos) return 1;
+    if (t->type[id] != 3 && t->type[id] != 4) return 0;
+    s = t->text + t->toff[id];
+    l = t->toff[id + 1] - t->toff[id];
+    return (l == 10 && memcmp(s, "<|im_end|>", 10) == 0) || (l == 13 && memcmp(s, "<|endoftext|>", 13) == 0) ||
+           (l == 10 && memcmp(s, "<|eot_id|>", 10) == 0);
+}

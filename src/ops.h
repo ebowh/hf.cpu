@@ -15,7 +15,10 @@ typedef struct {
     hfc_machine     machine;
     int             machine_ready;
     unsigned long   n_requests, n_errors;
+    struct hfc_resident *res;     /* model kept loaded between requests */
 } hfc_session;
+
+void hfc_session_close(hfc_session *s);
 
 /* Run one request with effective options `eff`. `body` is the prompt carried
  * on stdin in prompts mode (has_body = 1), else NULL. Emits @begin ... @done

@@ -44,4 +44,7 @@ hfc_status hfc_tok_decode(const hfc_tok *t, const uint32_t *ids, size_t n, int r
  * never splits a character. Invalid bytes count as complete. */
 size_t hfc_utf8_complete_prefix(const unsigned char *p, size_t n);
 
+/* 1 if generation should stop at this token (EOS or an end-of-turn marker). */
+int hfc_tok_is_eog(const hfc_tok *t, uint32_t id);
+
 #endif

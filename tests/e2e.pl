@@ -152,6 +152,32 @@ ok($o =~ /\@profile source=cache/, 'doctor: second run uses the cached profile')
 ($o, $e, $x) = run("--stdin-mode none --op doctor --cache-dir $tmp/cache --probe-force");
 ok($o =~ /\@profile source=measured/, 'doctor: --probe-force re-measures');
 
+# ---- generate: protocol, resident model, allocation failures ----------------------------------
+my $tiny = "$tmp/tiny.gguf";
+system("perl '$root/tools/mkmodel.pl' '$tiny' --arch qwen2 --wtype q8_0 --seed 4 >/dev/null") == 0 or die;
+($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '1 2 3 4 5' --temp 0 --max-tokens 6 --id g1");
+ok($x == 0 && $o =~ /\@prefill tokens=5/ && $o =~ /\@gen tokens=6 .*stop=length/ && $o =~ /\@done status=ok/, 'generate: prefill, decode and stats events');
+ok(count($o, qr/^\@token /m) == 6, 'generate: one  event per generated token');
+($o, $e, $x) = run("--stdin-mode args --model '$tiny' --temp 0 --max-tokens 3", "--op generate --prompt-ids '1 2 3' --id a\n--op generate --prompt-ids '1 2 3' --id b\n");
+my @gens = $o =~ /\@gen tokens=3 ms=\S+ tok_per_s=\S+ stop=length/g;
+ok(@gens == 2, 'generate: two requests in one process reuse the resident model');
+my @blocks = split /^\@begin /m, $o;
+my ($t1) = ($blocks[1] // '') =~ /\@token pos=0 id=(\d+)/; my ($t2) = ($blocks[2] // '') =~ /\@token pos=0 id=(\d+)/;
+ok(defined $t1 && defined $t2 && $t1 == $t2, 'generate: same prompt, same seed, same token');
+($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt hi");
+ok($x == 1 && $o =~ /no usable tokenizer/, 'generate: text prompt without tokenizer is a clean error');
+($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '1 9999'");
+ok($x == 1 && $o =~ /bad token id/, 'generate: token id out of range');
+($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '1 2' --system hello");
+ok($x == 1 && $o =~ /chat templates are not implemented/, 'generate: --system explains the missing template support');
+($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '1 2 3 4 5 6 7 8 9' --ctx-max 8");
+ok($x == 1 && $o =~ /--ctx-max/, 'generate: prompt longer than --ctx-max');
+for my $n (1 .. 40) {
+    my $r = system("HFC_FAIL_AFTER=$n '$bin' --stdin-mode none --op generate --model '$tiny' --prompt-ids '1 2 3 4 5' --temp 0 --max-tokens 3 > '$tmp/o3' 2> '$tmp/e3'");
+    my $out = slurp("$tmp/o3");
+    ok(($r & 127) == 0 && $out =~ /\@done status=(ok|error)/, "generate: allocation failure #$n handled (exit " . ($r >> 8) . ")");
+}
+
 # ---- robustness: closed stdout must not crash or hang --------------------------------------
 my $many = join('', map { "p$_$RS" } 1 .. 2000);
 spew("$tmp/many", $many);

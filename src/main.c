@@ -191,6 +191,7 @@ int main(int argc, char **argv)
     hfc_out_flush(&s.out);
     if (s.out.err) { hfc_log(HFC_LOG_ERROR, "msg=\"stdout closed\""); rc_exit = 1; }
     if (g_sigint) rc_exit = 130;
+    hfc_session_close(&s);
     hfc_opts_free(&o);
     if (hfc_live_allocs() != 0)
         hfc_log(HFC_LOG_DEBUG, "msg=\"allocations still live at exit\" count=%ld", hfc_live_allocs());

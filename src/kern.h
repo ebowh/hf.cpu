@@ -21,7 +21,19 @@ typedef struct {
      * iters * flops_per_iter floating point operations. */
     float    (*fma_burn)(long iters);
     double     flops_per_iter;
+
+    /* ---- model kernels ---- */
+    /* Q8_0 block = { uint16 fp16 scale; int8 q[32] } = 34 bytes, no padding. */
+    void  (*quantize_q8_0)(const float *x, void *y, size_t n);       /* n multiple of 32 */
+    float (*dot_q8_0)(const void *w, const void *a, size_t nblocks);   /* sum over blocks of dw*da*sum(wq*aq) */
+    float (*dot_f32)(const float *a, const float *b, size_t n);
+    float (*dot_f32_f16)(const float *a, const uint16_t *b, size_t n);
+    void  (*axpy_f32_f16)(float *y, float a, const uint16_t *x, size_t n);   /* y += a*x */
+    void  (*f32_to_f16)(const float *x, uint16_t *y, size_t n);
 } hfc_kernels;
+
+#define HFC_Q8_0_BLOCK 34
+#define HFC_Q8_0_QK    32
 
 const hfc_kernels *hfc_kernels_for(const struct hfc_cpu *cpu);
 const hfc_kernels *hfc_kernels_generic(void);
