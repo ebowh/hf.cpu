@@ -129,6 +129,19 @@ ok($x == 1 && $o =~ /code=EIO/, 'inspect: missing file');
 ($o, $e, $x) = run('--stdin-mode none --op inspect');
 ok($x == 1 && $o =~ /needs --model/, 'inspect: needs --model');
 
+# ---- tokenize -----------------------------------------------------------------------------
+my $vocab = "$root/tests/data/ggml-vocab-qwen2.gguf";
+($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --prompt 'Hello world'");
+ok($x == 0 && $o =~ /\@tokens count=2 ids="9707 1879"/, 'tokenize: Hello world');
+($o, $e, $x) = run("--op tokenize --model '$vocab'", "<|im_start|>user\nhi<|im_end|>${RS}12345 \xc3\xa9${RS}");
+ok($o =~ /ids="151644 872 198 6023 151645"/ && $o =~ /ids="16 17 18 19 20 3958"/, 'tokenize: special tokens and digits over stdin records');
+($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --no-parse-special --prompt '<|im_end|>'");
+ok($o =~ /count=([0-9]+)/ && $1 > 1 && $o !~ /151645/, 'tokenize: --no-parse-special treats them as text');
+($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$gg' --prompt hi");
+ok($x == 1 && $o =~ /code=EFORMAT/, 'tokenize: model without tokenizer metadata is an error');
+($o, $e, $x) = run('--stdin-mode none --op tokenize --prompt hi');
+ok($x == 1 && $o =~ /needs --model/, 'tokenize: needs --model');
+
 # ---- doctor ------------------------------------------------------------------------------
 ($o, $e, $x) = run("--stdin-mode none --op doctor --cache-dir $tmp/cache");
 ok($x == 0 && $o =~ /\@profile source=measured/ && $o =~ /key=bw.best/ && $o =~ /\@mem total=/, 'doctor: measures and reports');

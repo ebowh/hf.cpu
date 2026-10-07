@@ -234,7 +234,11 @@ static hfc_status parse(gguf_file *g, rd_t *r)
     /* data section starts at the next aligned offset */
     if (!hfc_add_u64(r->pos, g->align - 1, &tmp)) return rfail(r, HFC_ERANGE, "offset overflow");
     data_start = tmp & ~(g->align - 1);
-    if (data_start > r->len) return rfail(r, HFC_EFORMAT, "file ends before the tensor data section");
+    if (data_start > r->len) {
+        /* vocab-only files end right after the metadata: allowed when there are no tensors */
+        if (g->n_tensors != 0) return rfail(r, HFC_EFORMAT, "file ends before the tensor data section");
+        data_start = r->len;
+    }
     g->data_off = data_start;
     data_size = r->len - data_start;
 

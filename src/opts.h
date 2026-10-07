@@ -47,6 +47,7 @@ typedef struct {
     int      stop_on_repeat;
     double   timeout;           /* seconds, 0 = none */
     int      list_tensors;      /* inspect: also list every tensor */
+    int      parse_special;     /* tokenize: recognise special tokens such as <|im_start|> in the text */
     int      probe_sustained;   /* doctor: seconds of all-core load to expose throttling, 0 = skip */
     int      probe_reps;        /* doctor: repeat the bandwidth sweep this many times (median, range) */
 } hfc_opts;

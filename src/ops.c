@@ -10,6 +10,7 @@
 #include "ggtype.h"
 #include "gguf.h"
 #include "pal.h"
+#include "tok.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -270,6 +271,35 @@ static hfc_status op_inspect(hfc_session *s, const hfc_opts *eff, char *msg, siz
     return HFC_OK;
 }
 
+static hfc_status op_tokenize(hfc_session *s, const hfc_opts *eff, const char *body, size_t body_len,
+                            int has_body, char *msg, size_t msgcap)
+{
+    texts_t t;
+    gguf_file g;
+    hfc_tok *tok = NULL;
+    uint32_t *ids = NULL;
+    size_t n = 0, i, cap, pos = 0;
+    char *list = NULL, cnt[32];
+    hfc_status rc;
+
+    if (!eff->model) { snprintf(msg, msgcap, "tokenize needs --model PATH (a GGUF with a tokenizer)"); return HFC_EINVAL; }
+    if ((rc = resolve_texts(eff, body, body_len, has_body, &t, msg, msgcap)) != HFC_OK) return rc;
+    if ((rc = gguf_open(&g, eff->model, msg, msgcap)) != HFC_OK) { texts_free(&t); return rc; }
+    if ((rc = hfc_tok_load(&tok, &g, msg, msgcap)) != HFC_OK) goto out;
+    rc = hfc_tok_encode(tok, t.prompt ? t.prompt : "", t.prompt_len, eff->parse_special ? HFC_TOK_PARSE_SPECIAL : 0, &ids, &n);
+    if (rc != HFC_OK) { snprintf(msg, msgcap, "tokenization failed: %s", hfc_strerror(rc)); goto out; }
+    if (!hfc_mul_size(n, 11, &cap) || !hfc_add_size(cap, 1, &cap)) { rc = HFC_ERANGE; goto out; }
+    list = (char *)hfc_malloc(cap);
+    if (!list) { rc = HFC_ENOMEM; snprintf(msg, msgcap, "out of memory"); goto out; }
+    list[0] = '\0';
+    for (i = 0; i < n; i++) pos += (size_t)sprintf(list + pos, i ? " %lu" : "%lu", (unsigned long)ids[i]);
+    snprintf(cnt, sizeof cnt, "%lu", (unsigned long)n);
+    hfc_out_event(&s->out, "tokens", "count", cnt, "ids", list, (const char *)NULL);
+out:
+    hfc_free(list); hfc_free(ids); hfc_tok_free(tok); gguf_close(&g); texts_free(&t);
+    return rc;
+}
+
 static hfc_status op_doctor(hfc_session *s, const hfc_opts *eff, char *msg, size_t msgcap)
 {
     pal_meminfo mi;
@@ -349,12 +379,13 @@ hfc_status hfc_run_request(hfc_session *s, const hfc_opts *eff, const char *body
     if (strcmp(op, "echo") == 0)         rc = op_echo(s, eff, body, body_len, has_body, msg, sizeof msg);
     else if (strcmp(op, "inspect") == 0) rc = op_inspect(s, eff, msg, sizeof msg);
     else if (strcmp(op, "doctor") == 0)  rc = op_doctor(s, eff, msg, sizeof msg);
+    else if (strcmp(op, "tokenize") == 0) rc = op_tokenize(s, eff, body, body_len, has_body, msg, sizeof msg);
     else if (strcmp(op, "generate") == 0) {
         rc = HFC_ENOTSUP;
         snprintf(msg, sizeof msg, "generation is not implemented yet (phase 1)");
     } else {
         rc = HFC_EINVAL;
-        snprintf(msg, sizeof msg, "unknown --op '%s' (generate, inspect, doctor, echo)", op);
+        snprintf(msg, sizeof msg, "unknown --op '%s' (generate, inspect, doctor, tokenize, echo)", op);
     }
     snprintf(ms, sizeof ms, "%.1f", (pal_now() - t0) * 1000.0);
     if (rc == HFC_OK) {

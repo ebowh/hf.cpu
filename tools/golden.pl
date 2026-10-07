@@ -60,7 +60,9 @@ my $warn = 0;
 my $idx = 0;
 for my $p (@prompts) {
     my ($name, $text) = @$p;
-    my $tok = post('/tokenize', { content => $text, add_special => JSON::PP::false, parse_special => JSON::PP::true });
+    my $chars = $text;
+    utf8::decode($chars);                 # the literals above are UTF-8 bytes; send characters
+    my $tok = post('/tokenize', { content => $chars, add_special => JSON::PP::false, parse_special => JSON::PP::true });
     my @ptoks = @{ $tok->{tokens} // die "no tokens in /tokenize response\n" };
     my $res = post('/completion', {
         prompt => \@ptoks, n_predict => $npredict, temperature => 0, top_k => 1, seed => 1,
@@ -75,7 +77,9 @@ for my $p (@prompts) {
     print $fh "text_hex ", unpack('H*', $text), "\n";
     print $fh "prompt_tokens ", join(' ', @ptoks), "\n";
     print $fh "gen_tokens ", join(' ', @gen), "\n";
-    print $fh "gen_text_hex ", unpack('H*', $res->{content} // ''), "\n";
+    my $gen_bytes = $res->{content} // '';
+    utf8::encode($gen_bytes);             # hex of the UTF-8 bytes, not of Perl characters
+    print $fh "gen_text_hex ", unpack('H*', $gen_bytes), "\n";
     my $pos = 0;
     for my $e (@cp) {
         my $lp = $e->{logprob};

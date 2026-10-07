@@ -16,10 +16,14 @@ is tested:
 * one option vocabulary for command line, settings file and per-request lines
 * the stdin request loop (`prompts`, `args`, `none` modes) and event protocol
 * a hardened, fuzzed GGUF v2/v3 reader (`--op inspect`)
+* a byte-level BPE tokenizer with a hand-written Qwen2 pre-tokenizer (no regex
+  engine), checked against all 46 of llama.cpp's Qwen2 vocabulary test cases and
+  against token ids recorded from llama.cpp for real prompts (`--op tokenize`)
 * the ggml type table and scalar reference dequantizers for 18 types,
   verified bit-for-bit against upstream `ggml-quants.c`
 * Perl tools: `tools/gguf-inspect.pl` (independent reader), `tools/mkgguf.pl`
-  (synthetic GGUF generator)
+  (synthetic GGUF generator), `tools/golden.pl` (records reference tokens and
+  logprobs from a running llama-server), `tools/gen-unicode.pl`
 
 ## Build and test
 

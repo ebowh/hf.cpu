@@ -4,9 +4,9 @@ CFLAGS  ?= -O2
 WARN     = -std=c99 -Wall -Wextra -pedantic
 LDLIBS   = -pthread -lm
 
-LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o src/ggtype.o src/gguf.o src/proto.o src/ops.o
-HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h src/ggtype.h src/gguf.h src/proto.h src/ops.h
-TESTS  = tests/test_opts tests/test_gguf
+LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o src/ggtype.o src/gguf.o src/proto.o src/ops.o src/tok.o src/unitab.o
+HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h src/ggtype.h src/gguf.h src/proto.h src/ops.h src/tok.h src/unitab.h
+TESTS  = tests/test_opts tests/test_gguf tests/test_tok
 
 .SUFFIXES: .c .o
 .c.o:
@@ -32,6 +32,9 @@ tests/test_opts: tests/test_opts.c tests/t.h $(LIBOBJ)
 
 tests/test_gguf: tests/test_gguf.c tests/t.h tests/gguf_builder.h $(LIBOBJ)
 	$(CC) $(WARN) $(CFLAGS) -o $@ tests/test_gguf.c $(LIBOBJ) $(LDLIBS)
+
+tests/test_tok: tests/test_tok.c tests/t.h $(LIBOBJ)
+	$(CC) $(WARN) $(CFLAGS) -o $@ tests/test_tok.c $(LIBOBJ) $(LDLIBS)
 
 test: hfcpu $(TESTS)
 	@for t in $(TESTS); do ./$$t || exit 1; done

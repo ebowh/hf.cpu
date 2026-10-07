@@ -60,6 +60,7 @@ static const opt_def defs[] = {
     { "stop-on-repeat", K_BOOL, OFF(stop_on_repeat), S_REQUEST, NOLIM, NULL, "stop on repetition loops" },
     { "timeout",        K_DBL,  OFF(timeout),        S_REQUEST, 0, 1e7, NULL, "per-request time limit in seconds, 0 = none" },
     { "list-tensors",   K_BOOL, OFF(list_tensors),   S_REQUEST, NOLIM, NULL, "inspect: list every tensor" },
+    { "parse-special",  K_BOOL, OFF(parse_special),  S_REQUEST, NOLIM, NULL, "tokenize: recognise special tokens in the text (default on)" },
     { "probe-sustained", K_INT, OFF(probe_sustained), S_REQUEST, 0, 600, NULL, "doctor: seconds of all-core load to measure throttling, 0 = skip" },
     { "probe-reps",     K_INT,  OFF(probe_reps),     S_REQUEST, 1, 32, NULL, "doctor: repeat the bandwidth sweep N times, report median and range" },
 };
@@ -84,6 +85,7 @@ void hfc_opts_defaults(hfc_opts *o)
     o->log_level = HFC_LOG_INFO;
     o->n = 1;
     o->probe_reps = 1;
+    o->parse_special = 1;
     o->temp = 0.8;
     o->top_k = 40;
     o->top_p = 0.95;
