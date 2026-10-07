@@ -57,9 +57,9 @@ The block library must cover the union of these.
 | Qwen3.5 (0.8B, 2B, 4B, 9B) | Hybrid: Gated DeltaNet (linear attention) and full attention at 3:1. 0.8B: 18 GDN + 6 attn layers. 9B: 24 GDN + 8 attn. Natively multimodal. Context 262k | [V] |
 | LFM2.5 (350M, 1.2B, 2.6B...) | Gated short convolutions interleaved with GQA. A VL line (450M/1.6B/3B) and an 8B-A1B MoE variant also exist | [V] |
 | Ling-3.0-tiny | MoE 7.9B total, 1.3B active. 24 layers, 3x Kimi Delta Attention (KDA) then 1x Multi-head Latent Attention (MLA). 8-of-128 routed experts plus 1 shared. 256k ctx | [V] |
-| Ornith-1.5-9B | Dense 9B, MIT license, 32k context, coding/agentic tuned. Described as "building upon Qwen3.5 and Gemma4 architectures", so probably a Qwen3.5-style GDN hybrid. GGUFs exist. The HF page is blocked from my sandbox, so I could not read `config.json`. **Confirm the layer pattern from the file** | [V] third-party listing only |
-| Bonsai 2 (PrismML) | **Ternary** (-1/0/+1 weights, ~1.7 bits/weight) post-training quantization of Qwen3.8. The only member I could confirm is **Ternary-Bonsai-2-27B**: 27B params in ~5.9 GB (GGUF type `PTQ1_0`, ~5.93 GB) or ~7.2 GB (`PQ2_0`, a 2-bit packing), Apache 2.0, 262k ctx, reasoning, tool calling and image understanding, claimed 98.2% retention vs full precision (vendor claim). The collection page is blocked from my sandbox, so I do not know what other sizes exist or whether any are small enough to be a fast model for you. These are not mainline ggml types, so they need a fork's format spec (see §4.9). Architecture of Qwen3.8 itself is unconfirmed, probably a Qwen3.5-style GDN hybrid with a vision tower | [V] for 27B facts, rest [D] |
-| LightOnOCR-2-1B | Document OCR VLM, ~1B total. Pixtral-style native-resolution ViT (initialized from the Mistral-Small-3.1 vision encoder), 2-layer GELU MLP projector with 2x2 spatial merge (4x fewer visual tokens), Qwen3-based text decoder. Image in, markdown/LaTeX out | [V] |
+| Ornith-1.5-9B | **Confirmed from your `config.json`: it is a Qwen3.5-9B-class model** (`Qwen3_5ForConditionalGeneration`). 32 layers = 24 Gated-DeltaNet (linear) + 8 full attention (every 4th). Hidden 4096, MLP 12288 (SwiGLU), full attention 16 Q heads / **4 KV heads**, head_dim 256, **output gate** on attention, **partial RoPE 25%** (64 of 256 dims), interleaved **mRoPE** sections [11,11,10], theta 1e7. Linear layers: conv kernel 4, 16 key heads and 32 value heads, both dim 128, fp32 state. Vocab 248,320, **untied** lm_head, 1 **MTP** layer, vision tower (27 layers, hidden 1152, patch 16, 2x2 merge, temporal patch 2). Config says 262k positions, the model card says 32k. Same spec as Qwen3.5-9B, so one spec file covers both | [V] config |
+| Bonsai 2 (PrismML) | **Ternary** post-training quantization of Qwen3.8. Bonsai 2 is confirmed only as the **27B** (`PTQ1_0` ~1.75 bits/weight, ~5.9 GB; `PQ2_0` ~1.3 GB larger, "faster prompt processing", the default download). **Bonsai 2 still requires the PrismML llama.cpp fork** [V, from the Bonsai-demo README]; stock llama.cpp cannot load it. Earlier Bonsai (1-bit and ternary) are documented in sizes **1.7B, 4B, 8B and 27B** [V]. My reading of your note (please correct me): the earlier generation used 128-weight groups and is accepted by mainline llama.cpp, while Bonsai 2 uses a 64-weight layout that only the fork supports. The README does not state group sizes, block layouts or scale formats. Apache 2.0. Whether Bonsai 2 has small sizes is unknown, but the earlier 1.7B/4B/8B ternary models are the practical ones for your machines (§4.9) | [V] partly |
+| LightOnOCR-2-1B | **Confirmed from your `config.json`.** Text decoder is plain **Qwen3-0.6B-shaped**: 28 layers, hidden 1024, MLP 3072, 16 Q / 8 KV heads, head_dim 128, QK-norm, tied embeddings, vocab 151,936, theta 1e6, 16k positions. Vision is **Pixtral**: 24 layers, hidden 1024, MLP 4096 (gated SiLU), 16 heads x head_dim 64, patch 14, **image_size 1540** (so up to 110x110 = **12,100 patches per page**), 2D RoPE theta 1e4, projector with 2x2 spatial merge (so up to 3,025 image tokens). Image in, markdown/LaTeX out | [V] config |
 | Gemma 3 270M / 1B / 4B | Sandwich norms (pre and post), GeGLU, QK-norm, 5:1 local:global attention with sliding windows (270M: 15 of 18 layers local), dual RoPE bases (local vs global), tied embeddings. **262k vocab**: in the 270M model ~170M of ~270M params are embeddings. 4B adds a SigLIP vision tower | [V] 270M and vocab, rest [M] |
 | Gemma 4 E2B / E4B (and Gemma 3n E2B/E4B) | "Effective" parameter counts via **Per-Layer Embeddings (PLE)**: 2.3B/4.5B effective out of 5B/8B total. Sliding window 512, local:global 4:1 (E2B) / 5:1 (E4B), last layer always global, GQA, 128k ctx. **KV sharing**: later layers reuse earlier layers' KV (E2B: 35 layers but 15 KV-producing; E4B: 42 layers, 24 KV-producing). Multimodal | [V] |
 
@@ -77,6 +77,25 @@ The block library must cover the union of these.
 - **Vision (LFM2.5-VL, Qwen3.5, Gemma):** a ViT encoder plus projector, usually shipped as a separate `mmproj` GGUF in llama.cpp. It needs image decode and preprocessing in C, and ViT prefill is expensive. Cache image embeddings on disk, content-addressed by image hash (§6).
 
 First deliverable of any tool: `inspect <gguf>`. It prints architecture, hyperparameters, layer pattern, tensor types and which blocks are missing from our library.
+
+### 2.1 Worked numbers from the two configs you supplied [D, derived from config.json, verify by measurement]
+
+**Ornith-1.5-9B / Qwen3.5-9B (24 GDN + 8 attention layers):**
+- **Parameters**: embeddings and lm_head are ~1.0B each (248,320 x 4096), so **~2B of the 9B are the two vocab tables**. The MLPs are ~4.8B, linear-attention layers ~1.6B, full-attention layers ~0.5B.
+- **Decode bytes per token at Q4_K-ish**: ~4.0 GB of layer weights plus ~0.8 GB for the Q6 lm_head, so **~4.8 GB**. Bandwidth ceiling: **~4 t/s on the MacBook, ~5-6 t/s on the EliteBook**. The lm_head alone is ~15% of the traffic, so the sparse lm_head and fused top-k tricks (§4.5) pay off here too.
+- **Prefill**: ~16 GFLOP per token (embedding lookup is free, lm_head only on the last token). Ideal ~11 t/s on the MacBook and ~20 on the EliteBook, real maybe 60-70% of that.
+- **KV cache is tiny**: only 8 layers x 2 x 4 KV heads x 256 dims x 2 B = **32 KB/token** (a dense Qwen3-4B is 147 KB/token). 32k tokens is ~1 GB at f16, and even the full 262k is ~8.6 GB, or ~4.3 GB at q8.
+- **Recurrent state per checkpoint**: 24 layers x 32 value heads x 128 x 128 x 4 B (fp32) = **50 MB**, plus ~2.4 MB of conv state, so **~52 MB per checkpoint**. That is the KV of ~1,600 tokens, so checkpoint policy is a real cost trade (§6): a checkpoint every ~1-2k tokens is reasonable, not every turn of a short chat.
+- **GDN does not need the fancy chunked algorithm here.** The per-token recurrence costs ~75 MFLOP over all linear layers, against ~16 GFLOP of matmul per token. The recurrence is parallel across the 32 value heads (that is the threading axis) and the 2 MB per-layer state stays in L3. **Implement the simple sequential recurrence first**; the chunked/WY formulation is a GPU optimization that buys little on 2-4 CPU cores.
+- **MTP head**: the config has one multi-token-prediction layer, which can serve as a free draft head (§4.3). Its draft step still pays the 0.8 GB lm_head, so the net gain is modest, to be measured.
+- **One spec file serves Qwen3.5 (0.8B-9B), Ornith-1.5-9B, and likely Qwen3.8/Bonsai 2** (same `qwen3_5` family), which makes this the most valuable architecture to get right.
+
+**LightOnOCR-2-1B (Qwen3-0.6B-shaped decoder + Pixtral ViT):**
+- **Decoder**: ~0.44B non-embedding + 0.16B tied embedding. At Q8 that is ~0.6 GB per token, so **~25-30 t/s on the MacBook, ~35-40 on the EliteBook**. KV is 28 x 2 x 8 x 128 x 2 B = 114 KB/token (standard dense), so a page of ~3k image tokens + ~2k output is ~0.6 GB, fine.
+- **The ViT dominates the cost.** A full-size page is up to 12,100 patches. Linear layers: 2 x 0.4B x 12,100 = ~10 TFLOP. Attention (flash-style, 24 layers, quadratic): 4 x 12,100^2 x 1024 x 24 = ~14 TFLOP. **Total ~24 TFLOP per full-resolution page.** At ~100 GFLOPS sustained fp32 on the MacBook that is **~4 minutes per page**, and ~2 minutes on the EliteBook, before the ~3k-token LM prefill (~2.7 TFLOP, ~25 s) and 1-3k tokens of decode (~1-2 min).
+- **Levers**: render pages at lower resolution (1024 px longest side is ~5,300 patches, about **4-5x cheaper** because attention falls quadratically), tile pages, cache embeddings by image hash (retries and re-gates cost nothing), run pages as a fan-out batch for the decoder, and make the ViT attention flash-style so the 12k x 12k score matrix is never materialized. Accuracy versus resolution is for you to measure on your documents.
+- Vision is deferred past v1, and LightOnOCR is the natural first VLM when it returns.
+
 
 ---
 
@@ -195,6 +214,8 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 
 ### 4.9 Ternary models (Bonsai 2)
 - **What ternary buys:** bytes. 27B at ~1.7 bits/weight is ~5.9 GB, which fits both machines, and decode reads ~5.9 GB per token, so ~3-5 tokens/s is the bandwidth ceiling [D]. **What it does not buy:** prefill compute. A 27B dense (if it is dense) model still performs ~54 GFLOP-equivalents per token, so prefill is roughly 3x slower than the 9B models: on the order of 2-3 tokens/s on the MacBook and 5-7 on the EliteBook [D]. A 1000-token prompt is minutes. So Bonsai 2 27B is a **prompt-cache-mandatory, latency-tolerant pipeline stage**, a good fit for "think hard once" gates, not interactive chat.
+- **Small ternary models change the picture.** The earlier Bonsai generation (1.7B, 4B, 8B) at ~1.75 bits/weight is ~0.4 / 0.9 / 1.7 GB. For the 8B, bandwidth would allow ~12-15 t/s, but compute is ~16 GFLOP/token, which at ~150 GOPS is **~9 t/s, so decode becomes compute-bound**, not bandwidth-bound. Ternary is therefore where **ALU-efficient kernels pay off most**, and the T-MAC / LUT approach (fewer operations per weight, not just fewer bytes) is worth a real trial against the `vpmaddubsw` baseline once the baseline exists. Those small models are also potential speculative-draft candidates for the 27B if they share a tokenizer.
+
 - **Formats:** mainline ggml has `TQ1_0` (~1.69 bpw, base-3 packing of 5 trits per byte) and `TQ2_0` (~2.06 bpw). `PTQ1_0` (~1.7 bpw) and `PQ2_0` (~2 bpw) look like same-family variants in PrismML's fork, but I cannot see their spec. **Need the format definition** (block size, scale type and layout, which tensors stay higher precision such as embeddings, lm_head, norms) from the fork's source or the GGUF itself. Perl can dump the tensor-type table and block bytes from a downloaded file, so this is recoverable without the web page.
 - **AVX2 kernel idea:** the multiply-free trick is to keep weights as unsigned {0,1,2}, use `vpmaddubsw` (u8 x s8) exactly as for Q4, and subtract the precomputed activation block sum (`sum(a*(w-1)) = sum(a*w) - sum(a)`). Decoding 5-trits-per-byte with multiply-and-shift is cheap in SIMD. This puts ternary at roughly Q4's ALU cost per weight, so ternary is **not** faster for prefill. `vpsignb` is an alternative (sign-apply) but needs a signed weight byte. LUT/bit-serial methods (T-MAC, bitnet.cpp) are the research path, and worth a measured trial only after the baseline kernels exist.
 - **Activation quantization** is per-token int8 with block scales (BitNet-style models are trained for this, post-training ternarized ones usually tolerate a finer block scale). Whatever PrismML's fork does is the numerical reference.
@@ -315,7 +336,7 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 
 **Where I push back on "Perl only":** Python is the right tool for exactly one job, the **capture kit**, because the ground truth lives in PyTorch. It runs rarely, on a rented machine, and its outputs are plain files (JSON plus raw little-endian float arrays) that Perl and C consume. Perl stays the daily driver for everything else (inspect, lint, orchestrate, diff, cache management). Nothing in the engine, its build, or day-to-day workflow ever needs Python. I will write the capture scripts, and you only run them. If you would rather not touch Python at all, the llama.cpp oracle (§10) covers all models it supports, at lower fidelity for new architectures.
 
-**Capture kit (one run per model, on a rented box with enough RAM, ideally a GPU for speed):**
+**Capture kit (one run per model, on the EliteBook for models up to ~12B, on a rented box only if needed (§17)):**
 1. Module tree + `config.json` + tensor name/shape/dtype table (to build the spec's tensor map).
 2. `torch.export` / FX op graph from a tiny random-init instance.
 3. Per-module activation fixtures for a few fixed prompts on the real weights (fp32 or bf16): embeddings, per-layer inputs/outputs, attention and recurrent state, final logits and top-k.
@@ -387,28 +408,27 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 ## 12. Decisions so far and remaining questions
 
 **Decided (by you):**
-- Runtime and byte-heavy tools are C. Everyday offline tooling is Perl. Your Perl preference is a preference, not a ban: Python is acceptable for the rarely run capture kit on rented machines (§9).
+- Runtime and byte-heavy tools are C. Everyday offline tooling is Perl. Python is acceptable for the rarely run capture kit (§9).
 - **Batched fan-out** is in scope (§4.4).
 - Resident, load-once, many-requests process with two stdin modes: argv-lines and RS-separated records (§11).
-- Platforms: Linux on the EliteBook, macOS **12.7.6 (Monterey)** on the MacBook, FreeBSD should also work (§14).
-- Hardware: EliteBook i7-8665U (4C/8T, 8 MB L3), 2 x 16 GB DDR4 (dual channel), ~512 GB NVMe. MacBook 256 GB SSD. Cache budget is a setting (§15).
-- `llama-quantize` is fine for offline quantizing. Reuse existing GGUFs and rewrite them into our layout (§7). Rented machines are available for one-off jobs.
+- Platforms: Linux on the EliteBook (i7-8665U, 2 x 16 GB DDR4, ~512 GB NVMe), macOS **12.7.6** on the MacBook (256 GB SSD), FreeBSD should also work (§14). Cache budget is a setting (§15).
+- `llama-quantize` is fine. Reuse existing GGUFs and rewrite them into our layout (§7). Rental is acceptable but optional (§17).
 - **Vision can be deferred.** v1 is text-only.
-- Items you could not answer are decided by me, below.
+- **You will try many Gemma sizes** (and sizes of other models) to find what is tolerable. So the engine must make that cheap: one spec per architecture family, not per size, and the `doctor`/`bench` request that reports tokens/s per phase for any GGUF. Size-independence is a design requirement (§9).
 
 **Decided (by me, say if you disagree):**
-- macOS, Linux and FreeBSD behave **identically in results** (bit-identical logits on the same ISA) and differ only in the platform layer (§14).
-- Sidecar building is a C mode of the engine, orchestrated by Perl, and defaults to **lossless re-layout** only (§7).
-- **Vision is deferred in implementation but not in design.** The spec vocabulary, the protocol (`--image PATH`, repeatable) and the cache key format reserve room for it now, so adding it later is additive. The vision tower stays out of the sidecar for text-only runs. Order: text, cache, hybrids, then vision (§16).
-- **Quality-gate request types are first-class** (`classify`, `score`, logprob output, repetition-loop stop). They are cheap to build on the same prefill path and are exactly what your gated pipeline needs.
-- **Cancellation and control:** `SIGINT` always cancels the current request and keeps the process alive. In argv mode, a stdin line starting with `!` is a control line (`!cancel`, `!stats`, `!quit`). In record mode, an **optional `--control-fd N`** carries the same control lines, so record bodies never need reserved bytes. Emacs can ignore it and just send `SIGINT`.
-- **Gemma sizes**, in priority order: **Gemma 3 270M** (a tiny, fast classifier and a draft-model candidate, though its 262k vocab makes the output layer dominate), **Gemma 3 1B**, then **Gemma 4 E2B and E4B** (the interesting ones: per-layer embeddings, KV sharing, sliding windows). Gemma 3 4B is skipped initially, since E4B supersedes it. The two Gemma 3 models are text-only and need only the dense-with-sliding-window blocks, so they come before E2B/E4B, which need the PLE region and KV-sharing map.
-- **Config files you couldn't provide** (Ornith-1.5-9B, Qwen3.8, Bonsai 2 sizes): not blocking. `inspect` reads architecture and layer pattern straight from each GGUF's metadata, and the rented-machine capture kit will pull the HF `config.json` later. Until then those models are tracked as "architecture unconfirmed" and scheduled after Qwen3.5, whose block set they most likely reuse.
+- OS-identical results (bit-identical logits on the same ISA); only the platform layer differs (§14).
+- Sidecar building is a C mode of the engine, lossless re-layout by default (§7).
+- Vision is deferred in implementation but reserved in the design.
+- **Quality-gate request types are first-class.** `--logprobs N` (default off) streams the top-N logprobs per token. `classify` returns label logprobs and always computes them. `score` returns per-token logprobs and the mean/min/entropy summary. A repetition-loop stop (`--stop-on-repeat`) is on by default for `--op generate` with a conservative threshold.
+- **Cancellation:** `SIGINT` cancels the current request and the process stays alive. In argv mode a stdin line starting with `!` is a control line. In record mode an optional `--control-fd N` carries the same lines.
+- **Gemma order:** 270M, 1B, then 4 E2B/E4B. Add other sizes as the sidecar `bench` shows what is usable.
+- **Qwen3.5 family first** among the hybrids: your Ornith config shows it is a Qwen3.5-9B-class model, so one spec serves Qwen3.5, Ornith, and probably Qwen3.8 and Bonsai 2 (§2.1).
 
 **Still open (none blocks the start):**
-1. **PrismML format spec** for `PTQ1_0` / `PQ2_0`. A GGUF header dump of any Bonsai 2 file is enough, and I can write the Perl dump tool in the first phase. Bonsai 2 27B is deliberately late in the schedule.
-2. **MacBook CPU**: I assume an i7-5557U (the 2015 13-inch with Iris 6100), from "dual-core i7, 4 MB L3". The probe will report the truth at first run, so this only affects my estimates.
-3. **Rented machine class** for the capture kit (needed only when phase 7 starts).
+1. **Bonsai 2 format details.** The README names `PTQ1_0` and `PQ2_0` but not group size, block layout or scale format. I read your note as: the earlier Bonsai generation uses 128-weight groups and loads in stock llama.cpp, while Bonsai 2 needs the fork (64-weight layout?). Please correct me if that is wrong. Either way I will get the real layouts by dumping a GGUF with the Perl tool and reading the fork source (GitHub is reachable from my sandbox only for this repo's scope, so I cannot read the fork myself, but you can point me at the specific files).
+2. **Which Bonsai sizes you want to run.** The 1.7B/4B/8B ternary models are the practical ones (§4.9).
+3. **MacBook CPU**: assumed i7-5557U. The probe will report the truth.
 
 ---
 
@@ -486,3 +506,31 @@ Sources checked [V]:
 - [LightOnOCR paper](https://arxiv.org/html/2601.14251)
 - [Core i7-8665U specs](https://en.wikichip.org/wiki/intel/core_i7/i7-8665u)
 - [Gemma 4 deep dive](https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-gemma-4), [KV sharing and PLE notes](https://sebastianraschka.com/llm-architecture-gallery/kv-sharing/), [Gemma 3 270M](https://en.immers.cloud/ai/google/gemma-3-270m/)
+
+---
+
+## 17. One-off heavy jobs: do you need to rent anything?
+
+**Short answer: probably not for v1, and a few dollars if you do.** The capture kit and quantization jobs scale with model size, and nearly all your models are small.
+
+**What each job needs**
+
+| Job | Resource | Does the EliteBook (32 GB) do it? |
+|---|---|---|
+| Op-graph trace (`torch.export` on a tiny random-init config) | trivial | yes, seconds |
+| Activation/logit fixtures on real weights (HF, bf16) | 2 bytes per parameter | **yes up to ~12B**: Qwen3.5-9B / Ornith (18 GB), Qwen3-4B, MiniCPM5, Gemma 4 E4B (~8B raw, 16 GB), LFM2.5, LightOnOCR. Slow on CPU, but fixtures are a few short prompts |
+| Same for **Bonsai 2 27B** (54 GB bf16) | 64+ GB | no, but **skip it**: use PrismML's fork as the oracle for the ternary GGUF, since the HF-level truth for a post-training ternarized model is the fork's behavior anyway |
+| `llama-quantize` from bf16 | RAM about the model size | yes up to ~12B |
+| imatrix calibration | forward passes over ~100k tokens | yes for 9B (hours on CPU, run overnight), faster on a rented GPU |
+| KL-divergence/perplexity sweeps over many quants | repeated forward passes | possible but slow; this is where a GPU saves days |
+| Speculation acceptance studies | forward passes on sample text | yes, small models |
+
+**Where an hour of GPU is actually worth it:** imatrix and KL sweeps for the 9B-class models, and fixture capture for anything above ~12B. Both are one-time.
+
+**Options (prices from search results, which disagree with each other in places, so check live):**
+- **Hourly GPU marketplaces (Vast.ai, RunPod, Lambda, and similar):** an RTX 4090 (24 GB) is roughly **$0.3-0.5/hour**, an A100 80 GB roughly **$1.2-1.5/hour**, an H100 roughly **$2/hour**. A 24 GB card fits any bf16 model up to ~10B, enough for every imatrix and fixture job except the 27B. An evening of work is single-digit to low double-digit dollars. This is the best fit for "one-time cost, no commitment".
+- **Hetzner dedicated GPU servers:** GEX44 (RTX 4000 SFF Ada 20 GB, 64 GB RAM) about **EUR 184/month plus EUR 79 setup**; GEX130 (RTX 6000 Ada 48 GB, 128 GB RAM) about **EUR 838/month plus EUR 79 setup** [V, search results]. They are billed monthly, so a one-time job costs a month. Good if you want a standing box, poor for a few hours.
+- **Hetzner Cloud CPU instances** (hourly, up to ~48 vCPU / 192 GB RAM, from memory [M]): cheap enough for a 64 GB+ CPU-only bf16 run of the 27B (slow, but for a handful of short prompts it works), with no GPU. This is the "tough to rent 64 GB" answer if you do want HF-level fixtures for the 27B. Hetzner's dedicated **server auction** also has 64-128 GB RAM CPU boxes at modest monthly prices [M], again a month minimum.
+- **Skip entirely:** use existing GGUFs plus llama.cpp / ik_llama.cpp / the PrismML fork as oracles. That covers correctness for everything llama.cpp-supported. What you lose is HF-level fixtures for architectures llama.cpp lacks, and custom imatrix quants.
+
+**My recommendation:** do **no** rental until phase 4 (hybrids) or later, when the first quantization sweeps matter. Then rent a 24 GB GPU by the hour for a day. Revisit the 27B only if you decide Bonsai 2 27B is worth running at ~3 t/s.
