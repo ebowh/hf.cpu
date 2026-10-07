@@ -426,7 +426,7 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 - **Qwen3.5 family first** among the hybrids: your Ornith config shows it is a Qwen3.5-9B-class model, so one spec serves Qwen3.5, Ornith, and probably Qwen3.8 and Bonsai 2 (§2.1).
 
 **Still open (none blocks the start):**
-1. **Bonsai 2 format details.** The README names `PTQ1_0` and `PQ2_0` but not group size, block layout or scale format. I read your note as: the earlier Bonsai generation uses 128-weight groups and loads in stock llama.cpp, while Bonsai 2 needs the fork (64-weight layout?). Please correct me if that is wrong. Either way I will get the real layouts by dumping a GGUF with the Perl tool and reading the fork source (GitHub is reachable from my sandbox only for this repo's scope, so I cannot read the fork myself, but you can point me at the specific files).
+1. **Bonsai 2 format details.** The README names `PTQ1_0` and `PQ2_0` but not group size, block layout or scale format. I read your note as: the earlier Bonsai generation uses 128-weight groups and loads in stock llama.cpp, while Bonsai 2 needs the fork (64-weight layout?). Please correct me if that is wrong. Either way I will get the real layouts by dumping a GGUF with the Perl tool and reading the fork source (I could read the Bonsai-demo README through the web fetch tool, so I can probably read the fork's quant source too if you give me the branch or file names; I did not try, since it is outside this session's GitHub tool scope).
 2. **Which Bonsai sizes you want to run.** The 1.7B/4B/8B ternary models are the practical ones (§4.9).
 3. **MacBook CPU**: assumed i7-5557U. The probe will report the truth.
 
