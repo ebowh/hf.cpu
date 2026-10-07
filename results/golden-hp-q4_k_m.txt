@@ -1,20 +1,36 @@
-plain    ids   OK    agree 19/48 tokens, max |dlogprob| 0.0648, mean 0.0284, bias -0.0066 (diverged at a near-tie, gap 0.081)  prefill 45.6 t/s  decode 31.5 t/s
+plain    ids   OK    agree 19/48 tokens, max |dlogprob| 0.0648, mean 0.0284, bias -0.0066 (diverged at a near-tie, gap 0.081)  prefill 46.6 t/s  decode 31.0 t/s
            first difference at token 19: golden 1083, ours 7407
-plain    text  OK    agree 19/48 tokens, max |dlogprob| 0.0648, mean 0.0284, bias -0.0066 (diverged at a near-tie, gap 0.081)  prefill 56.6 t/s  decode 32.2 t/s
+             golden top: 1083:-1.417858 7407:-1.498524 279:-1.800653 304:-2.808416 30083:-2.929640
+             ours   top: 7407:-1.455907 1083:-1.544574 279:-1.810279 304:-2.801907 30083:-2.843177
+plain    text  OK    agree 19/48 tokens, max |dlogprob| 0.0648, mean 0.0284, bias -0.0066 (diverged at a near-tie, gap 0.081)  prefill 55.1 t/s  decode 31.8 t/s
            first difference at token 19: golden 1083, ours 7407
-code     ids   OK    agree 48/48 tokens, max |dlogprob| 0.2395, mean 0.0178, bias +0.0096  prefill 55.3 t/s  decode 31.6 t/s
-code     text  OK    agree 48/48 tokens, max |dlogprob| 0.2395, mean 0.0178, bias +0.0096  prefill 54.8 t/s  decode 30.2 t/s
-chatml   ids   FAIL  agree 26/48 tokens, max |dlogprob| 0.1187, mean 0.0225, bias -0.0017 (diverged with gap 0.374 > 0.300)  prefill 63.4 t/s  decode 25.8 t/s
+             golden top: 1083:-1.417858 7407:-1.498524 279:-1.800653 304:-2.808416 30083:-2.929640
+             ours   top: 7407:-1.455907 1083:-1.544574 279:-1.810279 304:-2.801907 30083:-2.843177
+code     ids   OK    agree 48/48 tokens, max |dlogprob| 0.2395, mean 0.0178, bias +0.0096  prefill 55.5 t/s  decode 31.9 t/s
+code     text  OK    agree 48/48 tokens, max |dlogprob| 0.2395, mean 0.0178, bias +0.0096  prefill 55.3 t/s  decode 30.9 t/s
+chatml   ids   FAIL  agree 26/48 tokens, max |dlogprob| 0.1187, mean 0.0225, bias -0.0017 (diverged with gap 0.374 > 0.300)  prefill 63.0 t/s  decode 29.5 t/s
            first difference at token 26: golden 320, ours 358
-chatml   text  FAIL  agree 26/48 tokens, max |dlogprob| 0.1187, mean 0.0225, bias -0.0017 (diverged with gap 0.374 > 0.300)  prefill 63.5 t/s  decode 28.2 t/s
+             golden top: 320:-1.235602 358:-1.609175 151645:-2.303270 2585:-2.784349 1096:-3.096575
+             ours   top: 358:-1.527647 320:-1.544862 151645:-2.576206 2585:-2.634438 1096:-2.851868
+chatml   text  FAIL  agree 26/48 tokens, max |dlogprob| 0.1187, mean 0.0225, bias -0.0017 (diverged with gap 0.374 > 0.300)  prefill 64.0 t/s  decode 30.9 t/s
            first difference at token 26: golden 320, ours 358
-unicode  ids   OK    agree  3/48 tokens, max |dlogprob| 0.1461, mean 0.1370, bias -0.0511 (diverged at a near-tie, gap 0.017)  prefill 62.2 t/s  decode 32.3 t/s
+             golden top: 320:-1.235602 358:-1.609175 151645:-2.303270 2585:-2.784349 1096:-3.096575
+             ours   top: 358:-1.527647 320:-1.544862 151645:-2.576206 2585:-2.634438 1096:-2.851868
+unicode  ids   OK    agree  3/48 tokens, max |dlogprob| 0.1461, mean 0.1370, bias -0.0511 (diverged at a near-tie, gap 0.017)  prefill 61.6 t/s  decode 31.9 t/s
            first difference at token 3: golden 2073, ours 100007
-unicode  text  OK    agree  3/48 tokens, max |dlogprob| 0.1461, mean 0.1370, bias -0.0511 (diverged at a near-tie, gap 0.017)  prefill 62.7 t/s  decode 32.3 t/s
+             golden top: 2073:-2.138986 100007:-2.155500 104602:-2.754300 43288:-2.855795 56568:-3.160784
+             ours   top: 100007:-2.097428 2073:-2.431899 104602:-2.758541 43288:-2.802529 56568:-3.114364
+unicode  text  OK    agree  3/48 tokens, max |dlogprob| 0.1461, mean 0.1370, bias -0.0511 (diverged at a near-tie, gap 0.017)  prefill 62.1 t/s  decode 31.1 t/s
            first difference at token 3: golden 2073, ours 100007
-long     ids   OK    agree  3/48 tokens, max |dlogprob| 0.0812, mean 0.0323, bias +0.0323 (diverged at a near-tie, gap 0.019)  prefill 61.5 t/s  decode 27.8 t/s
+             golden top: 2073:-2.138986 100007:-2.155500 104602:-2.754300 43288:-2.855795 56568:-3.160784
+             ours   top: 100007:-2.097428 2073:-2.431899 104602:-2.758541 43288:-2.802529 56568:-3.114364
+long     ids   OK    agree  3/48 tokens, max |dlogprob| 0.0812, mean 0.0323, bias +0.0323 (diverged at a near-tie, gap 0.019)  prefill 61.9 t/s  decode 27.8 t/s
            first difference at token 3: golden 646, ours 374
-long     text  OK    agree  3/48 tokens, max |dlogprob| 0.0812, mean 0.0323, bias +0.0323 (diverged at a near-tie, gap 0.019)  prefill 61.5 t/s  decode 27.7 t/s
+             golden top: 646:-1.431798 374:-1.450429 572:-2.799718 1410:-3.361021 702:-3.467617
+             ours   top: 374:-1.386978 646:-1.491794 572:-2.708963 702:-3.374321 1410:-3.424249
+long     text  OK    agree  3/48 tokens, max |dlogprob| 0.0812, mean 0.0323, bias +0.0323 (diverged at a near-tie, gap 0.019)  prefill 61.6 t/s  decode 26.7 t/s
            first difference at token 3: golden 646, ours 374
+             golden top: 646:-1.431798 374:-1.450429 572:-2.799718 1410:-3.361021 702:-3.467617
+             ours   top: 374:-1.386978 646:-1.491794 572:-2.708963 702:-3.374321 1410:-3.424249
 
 2 check(s) failed
