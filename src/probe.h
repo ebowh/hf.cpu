@@ -34,6 +34,9 @@ typedef struct {
     int    bw_best_threads;
     double bw_best_gbps;
     double fma_gflops_1t, fma_gflops_all, fma_gflops_logical;
+    int    nfma;
+    int    fma_threads[HFC_MAX_BW];
+    double fma_gflops_n[HFC_MAX_BW];   /* aggregate fp32 FMA throughput at each thread count */
     int    sustained_seconds;         /* 0 = not measured */
     double fma_sustained_gflops;      /* mean over the last quarter of the run */
     double fma_sustained_ratio;       /* sustained / first-second throughput */

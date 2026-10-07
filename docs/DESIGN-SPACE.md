@@ -53,14 +53,19 @@ Two MacBook runs differed a lot (details below), so treat single quick probes wi
 | CPU | i7-5557U (confirmed), 2C/4T, L1d 32 KB, L2 256 KB, L3 4 MB | i7-8665U (confirmed), 4C/8T, L1d 32 KB, L2 256 KB, L3 8 MB |
 | ISA | AVX2, FMA, F16C, BMI2. No AVX-512, no VNNI | same |
 | RAM | 16 GB total, **8.7-8.8 GB available** in both runs (macOS free + inactive) | 32 GB total, 32.7 GB available |
-| Read bandwidth, 1 thread | 13.6 then 17.4 GB/s | 19.9 GB/s |
-| Read bandwidth, 2 threads | 15.3 then **23.7 GB/s (best)** | not measured yet |
-| Read bandwidth, 4 threads | 20.8 then 21.7 GB/s | **29.0 GB/s (best)** |
-| Read bandwidth, 8 threads | n/a | **21.5 GB/s (26% worse than 4)** |
+| Read bandwidth, 1 thread | 13.6 then 17.4 GB/s | 19.9 then 22.3 GB/s |
+| Read bandwidth, 2 threads | 15.3 then **23.7 GB/s (best)** | 23.8 GB/s |
+| Read bandwidth, 4 threads | 20.8 then 21.7 GB/s | **29.0 then 25.6 GB/s (best)** |
+| Read bandwidth, 8 threads | n/a | **21.5 then 13.7 GB/s (26-46% worse than 4)** |
 | FMA fp32, 1 thread | 104-108 GFLOP/s (about 3.2 GHz) | 104 GFLOP/s |
-| FMA fp32, all physical cores | 122 (first run), then **214 GFLOP/s**; 30 s sustained mean 213, dips to 154-173 for a few seconds, no steady decline | 242 GFLOP/s (sustained run still to come) |
-| FMA fp32, all hardware threads | 216 GFLOP/s (hyper-threading adds nothing) | pending |
+| FMA fp32, all physical cores | 122 (first run), then **214 GFLOP/s**; 30 s sustained mean 213, dips to 154-173 for a few seconds, no steady decline | **242 GFLOP/s, flat for 30 s (100% of the first second)** |
+| FMA fp32, all hardware threads | 216 GFLOP/s (hyper-threading adds nothing) | 242 GFLOP/s (same) |
 | Latency | L1 1.8 ns, L2 8 ns, L3 10-33 ns (1-4 MB), 8 MB 62 ns, DRAM 92-98 ns | L1 2.6 ns, L2 7.5 ns, L3 ~11 ns up to 4 MB, 8 MB 25 ns, DRAM 94-128 ns |
+
+**Final EliteBook numbers and what they correct.** The sustained run on the EliteBook is dead flat at 242 GFLOP/s for 30 seconds: no thermal or power throttling beyond the all-core AVX2 clock drop (60 GFLOP/s per core is about 1.9 GHz, the base clock, against 104 GFLOP/s for a single core at about 3.3 GHz). Two consequences:
+
+- **The EliteBook is only about 1.13x the MacBook for compute** (242 vs 214 GFLOP/s sustained), and about 1.2x for bandwidth (25-29 vs 21-24 GB/s). Earlier estimates in this document that treat the EliteBook as roughly twice the MacBook for prefill (§1, §2.1, §4.9) should be read as about 1.1-1.2x. Its advantages are RAM (32 GB, all available), a 4-core scheduler that is not disturbed by other apps, and a stable Linux environment.
+- **Hyper-threading is harmful for streaming on the EliteBook and useless for FMA on both machines**: 8 threads gave 13.7-21.5 GB/s against 25-29 for 4, and no extra FMA throughput. Decode and prefill threads should equal physical cores. The probe now measures FMA throughput at 1, 2, 3 and all physical cores (`fma.threads.N`), so we can see whether fewer, faster-clocked cores are competitive when the machine should stay responsive.
 
 What this changes (corrected after the second MacBook run):
 

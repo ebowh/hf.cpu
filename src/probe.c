@@ -431,6 +431,17 @@ hfc_status hfc_probe_run(const hfc_cpu *c, int quick, hfc_machine *m)
     m->fma_gflops_1t = bench_fma(k, 1, quick ? 0.25 : 0.5);
     m->fma_gflops_all = c->logical > 1 ? bench_fma(k, c->physical, quick ? 0.25 : 0.5) : m->fma_gflops_1t;
     m->fma_gflops_logical = c->logical > c->physical ? bench_fma(k, c->logical, quick ? 0.25 : 0.5) : m->fma_gflops_all;
+    {
+        int ft[4], nf = 0, q;
+        ft[nf++] = 1;
+        if (c->physical > 2) ft[nf++] = 2;
+        if (c->physical > 3) ft[nf++] = 3;
+        if (c->physical > 1) ft[nf++] = c->physical;
+        for (q = 0; q < nf && m->nfma < HFC_MAX_BW; q++) {
+            m->fma_threads[m->nfma] = ft[q];
+            m->fma_gflops_n[m->nfma++] = bench_fma(k, ft[q], quick ? 0.25 : 0.5);
+        }
+    }
 
     {
         static const size_t full_sz[] = { 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288,
@@ -469,9 +480,10 @@ hfc_status hfc_probe_save(const char *dir, const hfc_machine *m)
 #define APP(...) do { int w_ = snprintf(buf + off, cap - off, __VA_ARGS__); \
                       if (w_ < 0 || (size_t)w_ >= cap - off) { hfc_free(buf); return HFC_ERANGE; } \
                       off += (size_t)w_; } while (0)
-    APP("format=2\nsig=%s\nisa=%s\nwhen=%ld\n", m->sig, m->isa, m->when);
+    APP("format=3\nsig=%s\nisa=%s\nwhen=%ld\n", m->sig, m->isa, m->when);
     APP("bw_best_threads=%d\nbw_best_gbps=%.3f\n", m->bw_best_threads, m->bw_best_gbps);
     APP("fma_gflops_1t=%.3f\nfma_gflops_all=%.3f\nfma_gflops_logical=%.3f\n", m->fma_gflops_1t, m->fma_gflops_all, m->fma_gflops_logical);
+    for (i = 0; i < m->nfma; i++) APP("fma.%d=%.3f\n", m->fma_threads[i], m->fma_gflops_n[i]);
     for (i = 0; i < m->nbw; i++) APP("bw.%d=%.3f\n", m->bw_threads[i], m->bw_gbps[i]);
     if (m->sustained_seconds) APP("sustained_seconds=%d\nfma_sustained_gflops=%.3f\nfma_sustained_ratio=%.4f\n", m->sustained_seconds, m->fma_sustained_gflops, m->fma_sustained_ratio);
     for (i = 0; i < m->nlat; i++) APP("lat.%lu=%.3f\n", (unsigned long)m->lat_bytes[i], m->lat_ns[i]);
@@ -498,7 +510,7 @@ hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total,
         if (nl) *nl = '\0';
         if (!eq) continue;
         *eq++ = '\0';
-        if (strcmp(line, "format") == 0) saw_format = atoi(eq) == 2;     /* bump when the probe changes so stale profiles are re-measured */
+        if (strcmp(line, "format") == 0) saw_format = atoi(eq) == 3;     /* bump when the probe changes so stale profiles are re-measured */
         else if (strcmp(line, "sig") == 0) { strncpy(m->sig, eq, 16); m->sig[16] = '\0'; }
         else if (strcmp(line, "isa") == 0) { strncpy(m->isa, eq, sizeof m->isa - 1); }
         else if (strcmp(line, "when") == 0) m->when = atol(eq);
@@ -510,6 +522,10 @@ hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total,
         else if (strcmp(line, "sustained_seconds") == 0) m->sustained_seconds = atoi(eq);
         else if (strcmp(line, "fma_sustained_gflops") == 0) m->fma_sustained_gflops = atof(eq);
         else if (strcmp(line, "fma_sustained_ratio") == 0) m->fma_sustained_ratio = atof(eq);
+        else if (strncmp(line, "fma.", 4) == 0 && m->nfma < HFC_MAX_BW) {
+            m->fma_threads[m->nfma] = atoi(line + 4);
+            m->fma_gflops_n[m->nfma++] = atof(eq);
+        }
         else if (strncmp(line, "bw.", 3) == 0 && m->nbw < HFC_MAX_BW) {
             m->bw_threads[m->nbw] = atoi(line + 3);
             m->bw_gbps[m->nbw++] = atof(eq);
@@ -543,6 +559,7 @@ void hfc_probe_print(FILE *f, const hfc_cpu *c, const hfc_machine *m)
     fprintf(f, "machine.sig=%s\nmachine.isa=%s\nmachine.measured=%ld\n", m->sig, m->isa, m->when);
     for (i = 0; i < m->nbw; i++) fprintf(f, "bw.threads.%d=%.2f GB/s\n", m->bw_threads[i], m->bw_gbps[i]);
     fprintf(f, "bw.best=%.2f GB/s at %d threads\n", m->bw_best_gbps, m->bw_best_threads);
+    for (i = 0; i < m->nfma; i++) fprintf(f, "fma.threads.%d=%.1f GFLOP/s\n", m->fma_threads[i], m->fma_gflops_n[i]);
     fprintf(f, "fma.gflops.1thread=%.1f\nfma.gflops.allcores=%.1f\nfma.gflops.allthreads=%.1f\n", m->fma_gflops_1t, m->fma_gflops_all, m->fma_gflops_logical);
     if (m->sustained_seconds)
         fprintf(f, "fma.gflops.sustained=%.1f over %ds (%.0f%% of first second)\n", m->fma_sustained_gflops, m->sustained_seconds, m->fma_sustained_ratio * 100.0);
