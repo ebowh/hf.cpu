@@ -1,0 +1,11 @@
+@profile stage=prefill embed=0.3 glue=4.8 qkv=15.8 attn=3.1 wo=12.4 gate_up=136.3 silu=11.9 down=44.8 head=6.4 quant=4.3 sample=0.0
+@profile stage=decode embed=21.8 glue=909.5 qkv=3173.0 attn=7831.5 wo=2441.4 gate_up=26095.5 silu=2151.9 down=9681.3 head=18367.8 quant=853.7 sample=1680.9
+@gen seq=0 tokens=697 ms=73501.1 tok_per_s=9.48 stop=eos
+@gen seq=1 tokens=724 ms=73501.1 tok_per_s=9.85 stop=eos
+@gen seq=2 tokens=744 ms=73501.1 tok_per_s=10.12 stop=eos
+@gen seq=3 tokens=398 ms=73501.1 tok_per_s=5.41 stop=eos
+@gen seq=4 tokens=259 ms=73501.1 tok_per_s=3.52 stop=eos
+@gen seq=5 tokens=1048 ms=73501.1 tok_per_s=14.26 stop=eos
+@gen seq=6 tokens=417 ms=73501.1 tok_per_s=5.67 stop=eos
+@gen seq=7 tokens=488 ms=73501.1 tok_per_s=6.64 stop=eos
+@genall sequences=8 tokens=4775 ms=73501.1 tok_per_s=64.97

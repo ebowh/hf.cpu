@@ -1,0 +1,3 @@
+@profile stage=prefill embed=0.2 glue=4.9 qkv=16.4 attn=3.2 wo=12.7 gate_up=139.3 silu=11.7 down=45.3 head=6.2 quant=4.4 sample=0.0
+@profile stage=decode embed=1.9 glue=113.1 qkv=555.3 attn=1203.6 wo=456.8 gate_up=4635.7 silu=256.7 down=2249.1 head=3739.6 quant=105.9 sample=214.0
+@gen tokens=697 ms=13537.0 tok_per_s=51.49 stop=eos
