@@ -22,6 +22,7 @@ void hfc_cpu_signature(const hfc_cpu *c, uint64_t mem_total, char out[17]);
 
 #define HFC_MAX_BW   32
 #define HFC_MAX_LAT  32
+#define HFC_MAX_TRACE 600
 
 typedef struct {
     char   sig[17];
@@ -32,7 +33,12 @@ typedef struct {
     double bw_gbps[HFC_MAX_BW];      /* aggregate read bandwidth */
     int    bw_best_threads;
     double bw_best_gbps;
-    double fma_gflops_1t, fma_gflops_all;
+    double fma_gflops_1t, fma_gflops_all, fma_gflops_logical;
+    int    sustained_seconds;         /* 0 = not measured */
+    double fma_sustained_gflops;      /* mean over the last quarter of the run */
+    double fma_sustained_ratio;       /* sustained / first-second throughput */
+    double sustained_trace[HFC_MAX_TRACE];
+    int    nsustained;
     int    nlat;
     size_t lat_bytes[HFC_MAX_LAT];
     double lat_ns[HFC_MAX_LAT];
@@ -42,6 +48,9 @@ typedef struct {
 hfc_status hfc_probe_run(const hfc_cpu *c, int quick, hfc_machine *m);
 hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total, hfc_machine *m);
 hfc_status hfc_probe_save(const char *dir, const hfc_machine *m);
+/* All physical cores running the FMA kernel for `seconds` seconds, one
+ * throughput sample per second: exposes power and thermal throttling. */
+hfc_status hfc_probe_sustained(const hfc_cpu *c, int seconds, hfc_machine *m);
 void hfc_probe_print(FILE *f, const hfc_cpu *c, const hfc_machine *m);
 
 #endif

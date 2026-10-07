@@ -306,6 +306,18 @@ static hfc_status op_doctor(hfc_session *s, const hfc_opts *eff, char *msg, size
             if (rc != HFC_OK) hfc_log(HFC_LOG_WARN, "msg=\"could not save machine profile\" dir=%s status=%s", dir, hfc_status_name(rc));
         }
     }
+    if (eff->probe_sustained > 0) {
+        int k;
+        rc = hfc_probe_sustained(&s->cpu, eff->probe_sustained, &s->machine);
+        if (rc != HFC_OK) { snprintf(msg, msgcap, "sustained probe failed: %s", hfc_strerror(rc)); hfc_free(dir); return rc; }
+        for (k = 0; k < s->machine.nsustained; k++) {
+            char t[16], gf[32];
+            snprintf(t, sizeof t, "%d", k + 1);
+            snprintf(gf, sizeof gf, "%.1f", s->machine.sustained_trace[k]);
+            hfc_out_event(&s->out, "sustained", "second", t, "gflops", gf, (const char *)NULL);
+        }
+        if (dir) (void)hfc_probe_save(dir, &s->machine);
+    }
     s->machine_ready = 1;
     hfc_out_event(&s->out, "profile", "source", loaded ? "cache" : "measured", "dir", dir ? dir : "(none)", (const char *)NULL);
     dump = capture(probe_fn, &s->cpu, &s->machine);

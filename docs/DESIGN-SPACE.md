@@ -44,6 +44,31 @@ Rough numbers only, to show the shape of the problem.
 - The lm_head is large. A vocab of 150k x hidden 2560 at Q6 is ~300 MB, over 10% of per-token traffic for a 4B model. Tricks in §4.5.
 - Laptops throttle. 15 W-class parts under sustained AVX2 fall well below burst clocks. The calibrator must measure sustained throughput (30-60 s runs), not just burst.
 
+### 1.1 Measured on your machines (`hfcpu --op doctor`, quick mode)
+
+| | MacBook (macOS 12.7.6) | EliteBook (Linux) |
+|---|---|---|
+| CPU | i7-5557U (confirmed), 2C/4T, L1d 32 KB, L2 256 KB, L3 4 MB | i7-8665U (confirmed), 4C/8T, L1d 32 KB, L2 256 KB, L3 8 MB |
+| ISA | AVX2, FMA, F16C, BMI2. No AVX-512, no VNNI | same |
+| RAM | 16 GB total, **8.8 GB available** (macOS free + inactive) | 32 GB total, 32.8 GB available |
+| Read bandwidth, 1 thread | 13.6 GB/s | 19.9 GB/s |
+| Read bandwidth, 2 threads | 15.3 GB/s | not measured (quick mode now adds it) |
+| Read bandwidth, 4 threads | **20.8 GB/s (best)** | **29.0 GB/s (best)** |
+| Read bandwidth, 8 threads | n/a | **21.5 GB/s (worse than 4)** |
+| FMA fp32, 1 thread | 104 GFLOP/s (about 3.25 GHz) | 104 GFLOP/s |
+| FMA fp32, all physical cores | 122 GFLOP/s | 242 GFLOP/s |
+| Latency | L1 1.8 ns, L2 ~10.6 ns, 1 MB 12.8 ns, **2 MB already 67 ns**, DRAM 94-99 ns | L1 2.6 ns, L2 7.5 ns, L3 ~11 ns up to 4 MB, 8 MB 25 ns, DRAM 94-128 ns |
+
+What this changes:
+
+- **The thread-count decision really is different per machine.** On the EliteBook, 8 threads are 26% *slower* than 4 for streaming reads, so decode should use the 4 physical cores (and probably 2-3 would already be close to the limit, since one thread alone reaches 69% of the best). On the MacBook, 4 threads (with hyper-threading) beat 2 by 36%, because a single stream only reaches 13.6 GB/s and the memory system needs more outstanding requests. The autotuner must pick from measurements, and the probe now includes the 2-thread point so the knee is visible.
+- **Bandwidth ceilings are lower than the spec sheets.** EliteBook 29 GB/s of 38.4 peak (76%), MacBook 20.8 of ~30 (70%). Decode ceilings follow from these: a 4.8 GB-per-token model (Ornith/Qwen3.5-9B at Q4) tops out near **6 tokens/s on the EliteBook and 4.3 on the MacBook**, consistent with the earlier estimates. Qwen2.5-7B at ~4.7 GB is about the same, the 3B (1.9 GB) about 15 and 11.
+- **All-core AVX2 throughput is power-limited.** The EliteBook's 4 cores give 2.3x one core, not 4x (about 1.9 GHz each, the base clock). The MacBook's 2 cores give only **1.17x one core**: either it drops to ~1.9 GHz under two-core AVX2 load, or macOS placed both threads on one physical core (there is no affinity control on macOS). The new `allthreads` figure, plus `--probe-sustained SECONDS` (a per-second throughput trace under all-core load), will separate these. **Please run `./hfcpu --stdin-mode none --op doctor --probe-force --probe-sustained 30` on both machines.** Compute budgets for prefill depend on it: at the measured 240 GFLOP/s fp32 the EliteBook's int8 prefill is plausibly 250-400 GOPS, the MacBook's about half of that or less.
+- **The MacBook's usable fast cache is smaller than its 4 MB L3.** Latency jumps from 12.8 ns at 1 MB to 67 ns at 2 MB, so GEMM blocking on this machine should target L2 (256 KB) plus at most ~1 MB beyond it. The 128 MB eDRAM does not show up as a distinct level (2-64 MB all sit at 67-99 ns); treat it as absent for tuning. This is exactly the kind of result the autotuner should discover rather than a table.
+- **Only 8.8 GB of the MacBook's 16 GB is available** at the moment of the probe, so budgets must come from the live reading, not total RAM. A 9B Q4 model (~5.3 GB) plus KV fits, a 14B does not, and the 27B ternary (5.9 GB) is tight with a browser open.
+- **Check the MacBook's cache location.** The profile path was `/Volumes/home/dr3ad/.cache/hfcpu`, i.e. the home directory is on a mounted volume. If that is a network or external drive, persistent KV caches must not live there; use `--cache-dir` on the internal SSD.
+
+
 ---
 
 ## 2. Your model list is architecturally diverse

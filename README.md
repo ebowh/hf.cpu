@@ -10,7 +10,7 @@ design decisions and `docs/PROTOCOL.md` for the wire protocol.
 is tested:
 
 * checked allocation with fault injection (no allocation is assumed to succeed)
-* platform layer for Linux (tested), macOS and FreeBSD (written, untested)
+* platform layer for Linux and macOS (both confirmed running on the target machines), FreeBSD (written, untested)
 * CPU feature, cache, memory and strict-overcommit probing and a measured
   machine profile (`--op doctor`)
 * one option vocabulary for command line, settings file and per-request lines

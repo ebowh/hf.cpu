@@ -320,6 +320,19 @@ static double bench_bw(const hfc_kernels *k, const unsigned char *buf, size_t by
     return best;
 }
 
+static double fma_run(const hfc_kernels *k, int nthreads, long iters)
+{
+    job_t jobs[HFC_MAX_BW + 64];
+    double dt;
+    int i;
+    if (nthreads > HFC_MAX_BW + 64) return 0;
+    memset(jobs, 0, sizeof jobs);
+    for (i = 0; i < nthreads; i++) { jobs[i].k = k; jobs[i].fma_iters = iters; jobs[i].mode = 1; }
+    dt = run_jobs(jobs, nthreads);
+    if (dt <= 0) return 0;
+    return k->flops_per_iter * (double)iters * nthreads / dt / 1e9;
+}
+
 static double bench_fma(const hfc_kernels *k, int nthreads, double seconds)
 {
     job_t jobs[HFC_MAX_BW + 64];
@@ -400,6 +413,7 @@ hfc_status hfc_probe_run(const hfc_cpu *c, int quick, hfc_machine *m)
 
     if (quick) {
         tlist[nt++] = 1;
+        if (c->physical > 2) tlist[nt++] = 2;     /* shows where bandwidth saturates */
         if (c->physical > 1) tlist[nt++] = c->physical;
         if (c->logical > c->physical) tlist[nt++] = c->logical;
     } else {
@@ -416,6 +430,7 @@ hfc_status hfc_probe_run(const hfc_cpu *c, int quick, hfc_machine *m)
 
     m->fma_gflops_1t = bench_fma(k, 1, quick ? 0.25 : 0.5);
     m->fma_gflops_all = c->logical > 1 ? bench_fma(k, c->physical, quick ? 0.25 : 0.5) : m->fma_gflops_1t;
+    m->fma_gflops_logical = c->logical > c->physical ? bench_fma(k, c->logical, quick ? 0.25 : 0.5) : m->fma_gflops_all;
 
     {
         static const size_t full_sz[] = { 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288,
@@ -456,8 +471,9 @@ hfc_status hfc_probe_save(const char *dir, const hfc_machine *m)
                       off += (size_t)w_; } while (0)
     APP("format=1\nsig=%s\nisa=%s\nwhen=%ld\n", m->sig, m->isa, m->when);
     APP("bw_best_threads=%d\nbw_best_gbps=%.3f\n", m->bw_best_threads, m->bw_best_gbps);
-    APP("fma_gflops_1t=%.3f\nfma_gflops_all=%.3f\n", m->fma_gflops_1t, m->fma_gflops_all);
+    APP("fma_gflops_1t=%.3f\nfma_gflops_all=%.3f\nfma_gflops_logical=%.3f\n", m->fma_gflops_1t, m->fma_gflops_all, m->fma_gflops_logical);
     for (i = 0; i < m->nbw; i++) APP("bw.%d=%.3f\n", m->bw_threads[i], m->bw_gbps[i]);
+    if (m->sustained_seconds) APP("sustained_seconds=%d\nfma_sustained_gflops=%.3f\nfma_sustained_ratio=%.4f\n", m->sustained_seconds, m->fma_sustained_gflops, m->fma_sustained_ratio);
     for (i = 0; i < m->nlat; i++) APP("lat.%lu=%.3f\n", (unsigned long)m->lat_bytes[i], m->lat_ns[i]);
 #undef APP
     rc = pal_write_file_atomic(path, buf, off);
@@ -490,6 +506,10 @@ hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total,
         else if (strcmp(line, "bw_best_gbps") == 0) m->bw_best_gbps = atof(eq);
         else if (strcmp(line, "fma_gflops_1t") == 0) m->fma_gflops_1t = atof(eq);
         else if (strcmp(line, "fma_gflops_all") == 0) m->fma_gflops_all = atof(eq);
+        else if (strcmp(line, "fma_gflops_logical") == 0) m->fma_gflops_logical = atof(eq);
+        else if (strcmp(line, "sustained_seconds") == 0) m->sustained_seconds = atoi(eq);
+        else if (strcmp(line, "fma_sustained_gflops") == 0) m->fma_sustained_gflops = atof(eq);
+        else if (strcmp(line, "fma_sustained_ratio") == 0) m->fma_sustained_ratio = atof(eq);
         else if (strncmp(line, "bw.", 3) == 0 && m->nbw < HFC_MAX_BW) {
             m->bw_threads[m->nbw] = atoi(line + 3);
             m->bw_gbps[m->nbw++] = atof(eq);
@@ -509,15 +529,62 @@ void hfc_probe_print(FILE *f, const hfc_cpu *c, const hfc_machine *m)
     fprintf(f, "cpu.vendor=%s\ncpu.brand=%s\n", c->vendor, c->brand);
     fprintf(f, "cpu.family=%d\ncpu.model=%d\ncpu.stepping=%d\n", c->family, c->model, c->stepping);
     fprintf(f, "cpu.logical=%d\ncpu.physical=%d\n", c->logical, c->physical);
-    fprintf(f, "cpu.features=%s%s%s%s%s%s%s%s%s%s%s\n",
-            c->sse42 ? "sse4.2 " : "", c->popcnt ? "popcnt " : "", c->avx ? "avx " : "",
-            c->avx2 ? "avx2 " : "", c->fma ? "fma " : "", c->f16c ? "f16c " : "",
-            c->bmi2 ? "bmi2 " : "", c->avx512f ? "avx512f " : "", c->avx512bw ? "avx512bw " : "",
-            c->avx512vnni ? "avx512vnni " : "", c->avxvnni ? "avx-vnni" : "");
+    {
+        static const char *nm[] = { "sse4.2", "popcnt", "avx", "avx2", "fma", "f16c", "bmi2", "avx512f", "avx512bw", "avx512vnni", "avx-vnni" };
+        unsigned fl[11];
+        int k, first = 1;
+        fl[0] = c->sse42; fl[1] = c->popcnt; fl[2] = c->avx; fl[3] = c->avx2; fl[4] = c->fma; fl[5] = c->f16c;
+        fl[6] = c->bmi2; fl[7] = c->avx512f; fl[8] = c->avx512bw; fl[9] = c->avx512vnni; fl[10] = c->avxvnni;
+        fprintf(f, "cpu.features=");
+        for (k = 0; k < 11; k++) if (fl[k]) { fprintf(f, "%s%s", first ? "" : " ", nm[k]); first = 0; }
+        fputc('\n', f);
+    }
     fprintf(f, "cache.l1d=%u\ncache.l2=%u\ncache.l3=%u\ncache.line=%u\n", c->l1d, c->l2, c->l3, c->line);
     fprintf(f, "machine.sig=%s\nmachine.isa=%s\nmachine.measured=%ld\n", m->sig, m->isa, m->when);
     for (i = 0; i < m->nbw; i++) fprintf(f, "bw.threads.%d=%.2f GB/s\n", m->bw_threads[i], m->bw_gbps[i]);
     fprintf(f, "bw.best=%.2f GB/s at %d threads\n", m->bw_best_gbps, m->bw_best_threads);
-    fprintf(f, "fma.gflops.1thread=%.1f\nfma.gflops.allcores=%.1f\n", m->fma_gflops_1t, m->fma_gflops_all);
+    fprintf(f, "fma.gflops.1thread=%.1f\nfma.gflops.allcores=%.1f\nfma.gflops.allthreads=%.1f\n", m->fma_gflops_1t, m->fma_gflops_all, m->fma_gflops_logical);
+    if (m->sustained_seconds)
+        fprintf(f, "fma.gflops.sustained=%.1f over %ds (%.0f%% of first second)\n", m->fma_sustained_gflops, m->sustained_seconds, m->fma_sustained_ratio * 100.0);
     for (i = 0; i < m->nlat; i++) fprintf(f, "lat.%lu=%.2f ns\n", (unsigned long)m->lat_bytes[i], m->lat_ns[i]);
+}
+
+hfc_status hfc_probe_sustained(const hfc_cpu *c, int seconds, hfc_machine *m)
+{
+    const hfc_kernels *k = hfc_kernels_for(c);
+    int nthreads = c->physical, s;
+    long iters = 1000000;
+    double g = 0, first, tail = 0;
+    int tail_n = 0, from;
+
+    if (seconds < 1) return HFC_OK;
+    if (seconds > HFC_MAX_TRACE) seconds = HFC_MAX_TRACE;
+    /* calibrate to about one second per sample */
+    for (s = 0; s < 8; s++) {
+        double t0 = pal_now(), dt;
+        g = fma_run(k, nthreads, iters);
+        dt = pal_now() - t0;
+        if (g <= 0) return HFC_EIO;
+        if (dt >= 0.5) break;
+        iters = (long)((double)iters * (1.0 / (dt > 1e-6 ? dt : 1e-6)));
+        if (iters > 2000000000L) iters = 2000000000L;
+    }
+    m->nsustained = 0;
+    for (s = 0; s < seconds; s++) {
+        double t0 = pal_now(), dt;
+        g = fma_run(k, nthreads, iters);
+        dt = pal_now() - t0;
+        if (g <= 0) return HFC_EIO;
+        /* rescale if a sample ran noticeably off one second (throttling lowers
+         * throughput, so the sample gets longer; keep the iteration count) */
+        m->sustained_trace[m->nsustained++] = g;
+        (void)dt;
+    }
+    first = m->sustained_trace[0];
+    from = m->nsustained - (m->nsustained + 3) / 4;
+    for (s = from; s < m->nsustained; s++) { tail += m->sustained_trace[s]; tail_n++; }
+    m->sustained_seconds = seconds;
+    m->fma_sustained_gflops = tail_n ? tail / tail_n : 0;
+    m->fma_sustained_ratio = first > 0 ? m->fma_sustained_gflops / first : 0;
+    return HFC_OK;
 }

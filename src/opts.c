@@ -60,6 +60,7 @@ static const opt_def defs[] = {
     { "stop-on-repeat", K_BOOL, OFF(stop_on_repeat), S_REQUEST, NOLIM, NULL, "stop on repetition loops" },
     { "timeout",        K_DBL,  OFF(timeout),        S_REQUEST, 0, 1e7, NULL, "per-request time limit in seconds, 0 = none" },
     { "list-tensors",   K_BOOL, OFF(list_tensors),   S_REQUEST, NOLIM, NULL, "inspect: list every tensor" },
+    { "probe-sustained", K_INT, OFF(probe_sustained), S_REQUEST, 0, 600, NULL, "doctor: seconds of all-core load to measure throttling, 0 = skip" },
 };
 #define NDEFS (sizeof defs / sizeof defs[0])
 

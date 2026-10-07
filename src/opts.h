@@ -47,6 +47,7 @@ typedef struct {
     int      stop_on_repeat;
     double   timeout;           /* seconds, 0 = none */
     int      list_tensors;      /* inspect: also list every tensor */
+    int      probe_sustained;   /* doctor: seconds of all-core load to expose throttling, 0 = skip */
 } hfc_opts;
 
 void       hfc_opts_defaults(hfc_opts *o);
