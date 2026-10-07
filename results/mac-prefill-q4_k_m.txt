@@ -1,0 +1,190 @@
+@begin id="" op=generate
+@prompt tokens=25 threads=2
+@prefill tokens=25 cached=0 ms=428.9 tok_per_s=58.28 kv_bytes=786432
+@token pos=0 id=76377
+@text len=6
+Newton
+@token pos=1 id=594
+@text len=2
+'s
+@token pos=2 id=2326
+@text len=6
+ three
+@token pos=3 id=6872
+@text len=5
+ laws
+@token pos=4 id=315
+@text len=3
+ of
+@token pos=5 id=11379
+@text len=7
+ motion
+@token pos=6 id=1584
+@text len=6
+ state
+@token pos=7 id=429
+@text len=5
+ that
+@token pos=8 id=458
+@text len=3
+ an
+@token pos=9 id=1633
+@text len=7
+ object
+@token pos=10 id=518
+@text len=3
+ at
+@token pos=11 id=2732
+@text len=5
+ rest
+@token pos=12 id=686
+@text len=5
+ will
+@token pos=13 id=7146
+@text len=7
+ remain
+@token pos=14 id=518
+@text len=3
+ at
+@token pos=15 id=2732
+@text len=5
+ rest
+@token pos=16 id=7241
+@text len=7
+ unless
+@token pos=17 id=30432
+@text len=6
+ acted
+@token pos=18 id=5193
+@text len=5
+ upon
+@token pos=19 id=553
+@text len=3
+ by
+@token pos=20 id=264
+@text len=2
+ a
+@token pos=21 id=4179
+@text len=4
+ net
+@token pos=22 id=5344
+@text len=6
+ force
+@token pos=23 id=11
+@text len=1
+,
+@token pos=24 id=323
+@text len=4
+ and
+@token pos=25 id=458
+@text len=3
+ an
+@token pos=26 id=1633
+@text len=7
+ object
+@token pos=27 id=304
+@text len=3
+ in
+@token pos=28 id=11379
+@text len=7
+ motion
+@token pos=29 id=686
+@text len=5
+ will
+@token pos=30 id=3060
+@text len=9
+ continue
+@token pos=31 id=304
+@text len=3
+ in
+@token pos=32 id=11379
+@text len=7
+ motion
+@token pos=33 id=518
+@text len=3
+ at
+@token pos=34 id=264
+@text len=2
+ a
+@token pos=35 id=6783
+@text len=9
+ constant
+@token pos=36 id=15435
+@text len=9
+ velocity
+@token pos=37 id=7241
+@text len=7
+ unless
+@token pos=38 id=30432
+@text len=6
+ acted
+@token pos=39 id=5193
+@text len=5
+ upon
+@token pos=40 id=553
+@text len=3
+ by
+@token pos=41 id=458
+@text len=3
+ an
+@token pos=42 id=9250
+@text len=9
+ external
+@token pos=43 id=5344
+@text len=6
+ force
+@token pos=44 id=13
+@text len=1
+.
+@gen tokens=45 ms=1553.4 tok_per_s=28.97 stop=eos
+@done status=ok ms=2040.2
+@begin id="" op=generate
+@prompt tokens=22 threads=2
+@prefill tokens=22 cached=13 ms=140.1 tok_per_s=64.25 kv_bytes=1572864
+@token pos=0 id=5830
+@text len=2
+Ab
+@token pos=1 id=16602
+@text len=5
+raham
+@token pos=2 id=24379
+@text len=8
+ Lincoln
+@token pos=3 id=572
+@text len=4
+ was
+@token pos=4 id=279
+@text len=4
+ the
+@token pos=5 id=220
+@text len=1
+ 
+@token pos=6 id=16
+@text len=1
+1
+@token pos=7 id=21
+@text len=1
+6
+@token pos=8 id=339
+@text len=2
+th
+@token pos=9 id=4795
+@text len=10
+ President
+@token pos=10 id=315
+@text len=3
+ of
+@token pos=11 id=279
+@text len=4
+ the
+@token pos=12 id=3639
+@text len=7
+ United
+@token pos=13 id=4180
+@text len=7
+ States
+@token pos=14 id=13
+@text len=1
+.
+@gen tokens=15 ms=508.9 tok_per_s=29.48 stop=eos
+@done status=ok ms=649.1
