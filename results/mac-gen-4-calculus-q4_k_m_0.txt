@@ -1,6 +1,6 @@
 @begin id="" op=generate
 @prompt tokens=39 threads=2
-@prefill tokens=39 cached=0 ms=645.9 tok_per_s=60.38 kv_bytes=786432
+@prefill tokens=39 cached=0 ms=607.3 tok_per_s=64.22 kv_bytes=786432
 @token seq=0 pos=0 id=95456
 @text len=9 seq=0
 Certainly
@@ -1463,9 +1463,6381 @@ mic
 @token seq=3 pos=119 id=82668
 @text len=9 seq=3
  calculus
-@gen seq=0 tokens=120 ms=9305.4 tok_per_s=12.90 stop=length
-@gen seq=1 tokens=120 ms=9305.4 tok_per_s=12.90 stop=length
-@gen seq=2 tokens=120 ms=9305.4 tok_per_s=12.90 stop=length
-@gen seq=3 tokens=120 ms=9305.4 tok_per_s=12.90 stop=length
-@genall sequences=4 tokens=480 ms=9305.4 tok_per_s=51.58
-@done status=ok ms=10011.7
+@token seq=0 pos=120 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=120 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=120 id=14374
+@text len=3 seq=2
+###
+@token seq=3 pos=120 id=25
+@text len=1 seq=3
+:
+@token seq=0 pos=121 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=121 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=121 id=220
+@text len=1 seq=2
+ 
+@token seq=3 pos=121 id=4636
+@text len=6 seq=3
+ After
+@token seq=0 pos=122 id=15655
+@text len=6 seq=0
+ curve
+@token seq=1 pos=122 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=122 id=17
+@text len=1 seq=2
+2
+@token seq=3 pos=122 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=123 id=518
+@text len=3 seq=0
+ at
+@token seq=1 pos=123 id=69123
+@text len=9 seq=1
+Different
+@token seq=2 pos=123 id=13
+@text len=1 seq=2
+.
+@token seq=3 pos=123 id=614
+@text len=5 seq=3
+ have
+@token seq=0 pos=124 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=124 id=7101
+@text len=6 seq=1
+iation
+@token seq=2 pos=124 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=124 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=125 id=3654
+@text len=8 seq=0
+ certain
+@token seq=1 pos=125 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=125 id=88492
+@text len=8 seq=2
+Practice
+@token seq=3 pos=125 id=6437
+@text len=6 seq=3
+ solid
+@token seq=0 pos=126 id=1459
+@text len=6 seq=0
+ point
+@token seq=1 pos=126 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=126 id=448
+@text len=5 seq=2
+ with
+@token seq=3 pos=126 id=16266
+@text len=11 seq=3
+ foundation
+@token seq=0 pos=127 id=624
+@text len=2 seq=0
+.
+
+@token seq=1 pos=127 id=1095
+@text len=5 seq=1
+ating
+@token seq=2 pos=127 id=33396
+@text len=10 seq=2
+ Different
+@token seq=3 pos=127 id=304
+@text len=3 seq=3
+ in
+@token seq=0 pos=128 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=128 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=128 id=7101
+@text len=6 seq=2
+iation
+@token seq=3 pos=128 id=37596
+@text len=12 seq=3
+ mathematics
+@token seq=0 pos=129 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=129 id=30232
+@text len=6 seq=1
+ slope
+@token seq=2 pos=129 id=64944
+@text len=11 seq=2
+ Techniques
+@token seq=3 pos=129 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=130 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=130 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=130 id=25
+@text len=1 seq=2
+:
+@token seq=3 pos=130 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=131 id=1072
+@text len=3 seq=0
+Int
+@token seq=1 pos=131 id=264
+@text len=2 seq=1
+ a
+@token seq=2 pos=131 id=1019
+@text len=3 seq=2
+**
+
+@token seq=3 pos=131 id=1265
+@text len=7 seq=3
+ should
+@token seq=0 pos=132 id=14412
+@text len=3 seq=0
+egr
+@token seq=1 pos=132 id=15655
+@text len=6 seq=1
+ curve
+@token seq=2 pos=132 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=132 id=3960
+@text len=6 seq=3
+ learn
+@token seq=0 pos=133 id=1127
+@text len=3 seq=0
+als
+@token seq=1 pos=133 id=518
+@text len=3 seq=1
+ at
+@token seq=2 pos=133 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=133 id=279
+@text len=4 seq=3
+ the
+@token seq=0 pos=134 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=134 id=894
+@text len=4 seq=1
+ any
+@token seq=2 pos=134 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=134 id=18940
+@text len=9 seq=3
+ concepts
+@token seq=0 pos=135 id=29001
+@text len=7 seq=0
+ Integr
+@token seq=1 pos=135 id=1459
+@text len=6 seq=1
+ point
+@token seq=2 pos=135 id=26008
+@text len=5 seq=2
+Rules
+@token seq=3 pos=135 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=136 id=1127
+@text len=3 seq=0
+als
+@token seq=1 pos=136 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=136 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=136 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=137 id=525
+@text len=4 seq=0
+ are
+@token seq=1 pos=137 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=137 id=33396
+@text len=10 seq=2
+ Different
+@token seq=3 pos=137 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=138 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=138 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=138 id=7101
+@text len=6 seq=2
+iation
+@token seq=3 pos=138 id=1096
+@text len=5 seq=3
+ This
+@token seq=0 pos=139 id=14002
+@text len=9 seq=0
+ opposite
+@token seq=1 pos=139 id=52464
+@text len=11 seq=1
+Integration
+@token seq=2 pos=139 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=139 id=5646
+@text len=9 seq=3
+ includes
+@token seq=0 pos=140 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=140 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=140 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=140 id=8660
+@text len=14 seq=3
+ understanding
+@token seq=0 pos=141 id=42545
+@text len=12 seq=0
+ derivatives
+@token seq=1 pos=141 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=141 id=323
+@text len=4 seq=2
+ and
+@token seq=3 pos=141 id=13388
+@text len=7 seq=3
+ limits
+@token seq=0 pos=142 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=142 id=1095
+@text len=5 seq=1
+ating
+@token seq=2 pos=142 id=3796
+@text len=6 seq=2
+ apply
+@token seq=3 pos=142 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=143 id=2379
+@text len=5 seq=0
+ They
+@token seq=1 pos=143 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=143 id=279
+@text len=4 seq=2
+ the
+@token seq=3 pos=143 id=49006
+@text len=11 seq=3
+ continuity
+@token seq=0 pos=144 id=525
+@text len=4 seq=0
+ are
+@token seq=1 pos=144 id=3082
+@text len=5 seq=1
+ area
+@token seq=2 pos=144 id=5601
+@text len=6 seq=2
+ rules
+@token seq=3 pos=144 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=145 id=1483
+@text len=5 seq=0
+ used
+@token seq=1 pos=145 id=1212
+@text len=6 seq=1
+ under
+@token seq=2 pos=145 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=145 id=42545
+@text len=12 seq=3
+ derivatives
+@token seq=0 pos=146 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=146 id=264
+@text len=2 seq=1
+ a
+@token seq=2 pos=146 id=58938
+@text len=16 seq=2
+ differentiation
+@token seq=3 pos=146 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=147 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=147 id=15655
+@text len=6 seq=1
+ curve
+@token seq=2 pos=147 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=147 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=148 id=5671
+@text len=6 seq=0
+ areas
+@token seq=1 pos=148 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=148 id=2670
+@text len=10 seq=2
+ including
+@token seq=3 pos=148 id=8761
+@text len=7 seq=3
+ integr
+@token seq=0 pos=149 id=1212
+@text len=6 seq=0
+ under
+@token seq=1 pos=149 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=149 id=5601
+@text len=6 seq=2
+ rules
+@token seq=3 pos=149 id=1127
+@text len=3 seq=3
+als
+@token seq=0 pos=150 id=35933
+@text len=7 seq=0
+ curves
+@token seq=1 pos=150 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=150 id=369
+@text len=4 seq=2
+ for
+@token seq=3 pos=150 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=151 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=151 id=94588
+@text len=6 seq=1
+Limits
+@token seq=2 pos=151 id=42545
+@text len=12 seq=2
+ derivatives
+@token seq=3 pos=151 id=1446
+@text len=4 seq=3
+ You
+@token seq=0 pos=152 id=26282
+@text len=8 seq=0
+ volumes
+@token seq=1 pos=152 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=152 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=152 id=1265
+@text len=7 seq=3
+ should
+@token seq=0 pos=153 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=153 id=45451
+@text len=14 seq=1
+ Understanding
+@token seq=2 pos=153 id=4185
+@text len=7 seq=2
+ common
+@token seq=3 pos=153 id=1083
+@text len=5 seq=3
+ also
+@token seq=0 pos=154 id=81386
+@text len=7 seq=0
+ solids
+@token seq=1 pos=154 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=154 id=5746
+@text len=10 seq=2
+ functions
+@token seq=3 pos=154 id=387
+@text len=3 seq=3
+ be
+@token seq=0 pos=155 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=155 id=7286
+@text len=8 seq=1
+ concept
+@token seq=2 pos=155 id=320
+@text len=2 seq=2
+ (
+@token seq=3 pos=155 id=11285
+@text len=9 seq=3
+ familiar
+@token seq=0 pos=156 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=156 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=156 id=68
+@text len=1 seq=2
+e
+@token seq=3 pos=156 id=448
+@text len=5 seq=3
+ with
+@token seq=0 pos=157 id=1008
+@text len=6 seq=0
+ other
+@token seq=1 pos=157 id=3930
+@text len=6 seq=1
+ limit
+@token seq=2 pos=157 id=1302
+@text len=2 seq=2
+.g
+@token seq=3 pos=157 id=279
+@text len=4 seq=3
+ the
+@token seq=0 pos=158 id=35972
+@text len=13 seq=0
+ mathematical
+@token seq=1 pos=158 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=158 id=2572
+@text len=2 seq=2
+.,
+@token seq=3 pos=158 id=15811
+@text len=12 seq=3
+ fundamental
+@token seq=0 pos=159 id=32676
+@text len=11 seq=0
+ quantities
+@token seq=1 pos=159 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=159 id=6783
+@text len=9 seq=2
+ constant
+@token seq=3 pos=159 id=57817
+@text len=8 seq=3
+ theorem
+@token seq=0 pos=160 id=382
+@text len=3 seq=0
+.
+
+
+@token seq=1 pos=160 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=160 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=160 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=161 id=17
+@text len=1 seq=0
+2
+@token seq=1 pos=161 id=25207
+@text len=9 seq=1
+Functions
+@token seq=2 pos=161 id=13482
+@text len=7 seq=2
+ linear
+@token seq=3 pos=161 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=162 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=162 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=162 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=162 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=163 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=163 id=45451
+@text len=14 seq=1
+ Understanding
+@token seq=2 pos=163 id=47311
+@text len=11 seq=2
+ polynomial
+@token seq=3 pos=163 id=892
+@text len=6 seq=3
+ which
+@token seq=0 pos=164 id=44576
+@text len=7 seq=0
+Concept
+@token seq=1 pos=164 id=5746
+@text len=10 seq=1
+ functions
+@token seq=2 pos=164 id=4292
+@text len=3 seq=2
+).
+
+@token seq=3 pos=164 id=35616
+@text len=8 seq=3
+ relates
+@token seq=0 pos=165 id=82
+@text len=1 seq=0
+s
+@token seq=1 pos=165 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=165 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=165 id=42545
+@text len=12 seq=3
+ derivatives
+@token seq=0 pos=166 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=166 id=1246
+@text len=4 seq=1
+ how
+@token seq=2 pos=166 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=166 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=167 id=31359
+@text len=7 seq=0
+ Calcul
+@token seq=1 pos=167 id=807
+@text len=5 seq=1
+ they
+@token seq=2 pos=167 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=167 id=8761
+@text len=7 seq=3
+ integr
+@token seq=0 pos=168 id=355
+@text len=2 seq=0
+us
+@token seq=1 pos=168 id=35692
+@text len=7 seq=1
+ behave
+@token seq=2 pos=168 id=18837
+@text len=5 seq=2
+Chain
+@token seq=3 pos=168 id=1127
+@text len=3 seq=3
+als
+@token seq=0 pos=169 id=334
+@text len=2 seq=0
+**
+@token seq=1 pos=169 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=169 id=18100
+@text len=5 seq=2
+ Rule
+@token seq=3 pos=169 id=382
+@text len=3 seq=3
+.
+
+
+@token seq=0 pos=170 id=510
+@text len=2 seq=0
+:
+
+@token seq=1 pos=170 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=170 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=170 id=18
+@text len=1 seq=3
+3
+@token seq=0 pos=171 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=171 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=171 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=171 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=172 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=172 id=94588
+@text len=6 seq=1
+Limits
+@token seq=2 pos=172 id=1246
+@text len=4 seq=2
+ how
+@token seq=3 pos=172 id=26984
+@text len=9 seq=3
+ Practice
+@token seq=0 pos=173 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=173 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=173 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=173 id=25
+@text len=1 seq=3
+:
+@token seq=0 pos=174 id=94588
+@text len=6 seq=0
+Limits
+@token seq=1 pos=174 id=12741
+@text len=4 seq=1
+ Der
+@token seq=2 pos=174 id=3796
+@text len=6 seq=2
+ apply
+@token seq=3 pos=174 id=31359
+@text len=7 seq=3
+ Calcul
+@token seq=0 pos=175 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=175 id=344
+@text len=2 seq=1
+iv
+@token seq=2 pos=175 id=279
+@text len=4 seq=2
+ the
+@token seq=3 pos=175 id=355
+@text len=2 seq=3
+us
+@token seq=0 pos=176 id=71855
+@text len=7 seq=0
+ Limits
+@token seq=1 pos=176 id=5859
+@text len=6 seq=1
+atives
+@token seq=2 pos=176 id=8781
+@text len=6 seq=2
+ chain
+@token seq=3 pos=176 id=374
+@text len=3 seq=3
+ is
+@token seq=0 pos=177 id=2138
+@text len=6 seq=0
+ allow
+@token seq=1 pos=177 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=177 id=5912
+@text len=5 seq=2
+ rule
+@token seq=3 pos=177 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=178 id=498
+@text len=4 seq=0
+ you
+@token seq=1 pos=178 id=576
+@text len=4 seq=1
+ The
+@token seq=2 pos=178 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=178 id=5000
+@text len=10 seq=3
+ difficult
+@token seq=0 pos=179 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=179 id=5025
+@text len=13 seq=1
+ relationship
+@token seq=2 pos=179 id=53163
+@text len=14 seq=2
+ differentiate
+@token seq=3 pos=179 id=3832
+@text len=8 seq=3
+ subject
+@token seq=0 pos=180 id=3535
+@text len=11 seq=0
+ understand
+@token seq=1 pos=180 id=1948
+@text len=8 seq=1
+ between
+@token seq=2 pos=180 id=27714
+@text len=10 seq=2
+ composite
+@token seq=3 pos=180 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=181 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=181 id=13388
+@text len=7 seq=1
+ limits
+@token seq=2 pos=181 id=5746
+@text len=10 seq=2
+ functions
+@token seq=3 pos=181 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=182 id=7709
+@text len=9 seq=0
+ behavior
+@token seq=1 pos=182 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=182 id=624
+@text len=2 seq=2
+.
+
+@token seq=3 pos=182 id=432
+@text len=3 seq=3
+ it
+@token seq=0 pos=183 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=183 id=42545
+@text len=12 seq=1
+ derivatives
+@token seq=2 pos=183 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=183 id=4990
+@text len=6 seq=3
+ takes
+@token seq=0 pos=184 id=5746
+@text len=10 seq=0
+ functions
+@token seq=1 pos=184 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=184 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=184 id=882
+@text len=5 seq=3
+ time
+@token seq=0 pos=185 id=438
+@text len=3 seq=0
+ as
+@token seq=1 pos=185 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=185 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=185 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=186 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=186 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=186 id=4816
+@text len=7 seq=2
+Product
+@token seq=3 pos=186 id=7341
+@text len=7 seq=3
+ master
+@token seq=0 pos=187 id=1946
+@text len=6 seq=0
+ input
+@token seq=1 pos=187 id=18
+@text len=1 seq=1
+3
+@token seq=2 pos=187 id=323
+@text len=4 seq=2
+ and
+@token seq=3 pos=187 id=432
+@text len=3 seq=3
+ it
+@token seq=0 pos=188 id=19827
+@text len=11 seq=0
+ approaches
+@token seq=1 pos=188 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=188 id=3406
+@text len=3 seq=2
+ Qu
+@token seq=3 pos=188 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=189 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=189 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=189 id=354
+@text len=2 seq=2
+ot
+@token seq=3 pos=189 id=26984
+@text len=9 seq=3
+ Practice
+@token seq=0 pos=190 id=3151
+@text len=9 seq=0
+ specific
+@token seq=1 pos=190 id=355
+@text len=2 seq=1
+us
+@token seq=2 pos=190 id=1167
+@text len=4 seq=2
+ient
+@token seq=3 pos=190 id=374
+@text len=3 seq=3
+ is
+@token seq=0 pos=191 id=897
+@text len=6 seq=0
+ value
+@token seq=1 pos=191 id=20909
+@text len=9 seq=1
+ Learning
+@token seq=2 pos=191 id=22847
+@text len=6 seq=2
+ Rules
+@token seq=3 pos=191 id=1376
+@text len=4 seq=3
+ key
+@token seq=0 pos=192 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=192 id=18801
+@text len=8 seq=1
+ Methods
+@token seq=2 pos=192 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=192 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=193 id=1752
+@text len=4 seq=0
+ For
+@token seq=1 pos=193 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=193 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=193 id=18392
+@text len=10 seq=3
+ improving
+@token seq=0 pos=194 id=3110
+@text len=8 seq=0
+ example
+@token seq=1 pos=194 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=194 id=1246
+@text len=4 seq=2
+ how
+@token seq=3 pos=194 id=697
+@text len=5 seq=3
+ your
+@token seq=0 pos=195 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=195 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=195 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=195 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=196 id=421
+@text len=3 seq=0
+ if
+@token seq=1 pos=196 id=71686
+@text len=11 seq=1
+Interactive
+@token seq=2 pos=196 id=3796
+@text len=6 seq=2
+ apply
+@token seq=3 pos=196 id=7361
+@text len=7 seq=3
+ skills
+@token seq=0 pos=197 id=498
+@text len=4 seq=0
+ you
+@token seq=1 pos=197 id=13852
+@text len=6 seq=1
+ Tools
+@token seq=2 pos=197 id=279
+@text len=4 seq=2
+ the
+@token seq=3 pos=197 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=198 id=1366
+@text len=5 seq=0
+ want
+@token seq=1 pos=198 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=198 id=1985
+@text len=8 seq=2
+ product
+@token seq=3 pos=198 id=9735
+@text len=4 seq=3
+ Try
+@token seq=0 pos=199 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=199 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=199 id=323
+@text len=4 seq=2
+ and
+@token seq=3 pos=199 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=200 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=200 id=4771
+@text len=6 seq=1
+ graph
+@token seq=2 pos=200 id=74762
+@text len=9 seq=2
+ quotient
+@token seq=3 pos=200 id=11625
+@text len=6 seq=3
+ solve
+@token seq=0 pos=201 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=201 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=201 id=5601
+@text len=6 seq=2
+ rules
+@token seq=3 pos=201 id=5322
+@text len=9 seq=3
+ problems
+@token seq=0 pos=202 id=3930
+@text len=6 seq=0
+ limit
+@token seq=1 pos=202 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=202 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=202 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=203 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=203 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=203 id=53163
+@text len=14 seq=2
+ differentiate
+@token seq=3 pos=203 id=6588
+@text len=9 seq=3
+ practice
+@token seq=0 pos=204 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=204 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=204 id=3871
+@text len=9 seq=2
+ products
+@token seq=3 pos=204 id=5322
+@text len=9 seq=3
+ problems
+@token seq=0 pos=205 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=205 id=3162
+@text len=9 seq=1
+ software
+@token seq=2 pos=205 id=323
+@text len=4 seq=2
+ and
+@token seq=3 pos=205 id=504
+@text len=5 seq=3
+ from
+@token seq=0 pos=206 id=37018
+@text len=4 seq=0
+frac
+@token seq=1 pos=206 id=1075
+@text len=5 seq=1
+ like
+@token seq=2 pos=206 id=26370
+@text len=5 seq=2
+ quot
+@token seq=3 pos=206 id=697
+@text len=5 seq=3
+ your
+@token seq=0 pos=207 id=90
+@text len=1 seq=0
+{
+@token seq=1 pos=207 id=3874
+@text len=4 seq=1
+ Des
+@token seq=2 pos=207 id=4075
+@text len=5 seq=2
+ients
+@token seq=3 pos=207 id=55085
+@text len=9 seq=3
+ textbook
+@token seq=0 pos=208 id=68
+@text len=1 seq=0
+e
+@token seq=1 pos=208 id=8631
+@text len=3 seq=1
+mos
+@token seq=2 pos=208 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=3 pos=208 id=476
+@text len=3 seq=3
+ or
+@token seq=0 pos=209 id=61
+@text len=1 seq=0
+^
+@token seq=1 pos=209 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=209 id=14374
+@text len=3 seq=2
+###
+@token seq=3 pos=209 id=2860
+@text len=7 seq=3
+ online
+@token seq=0 pos=210 id=87
+@text len=1 seq=0
+x
+@token seq=1 pos=210 id=476
+@text len=3 seq=1
+ or
+@token seq=2 pos=210 id=220
+@text len=1 seq=2
+ 
+@token seq=3 pos=210 id=4963
+@text len=10 seq=3
+ resources
+@token seq=0 pos=211 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=211 id=2860
+@text len=7 seq=1
+ online
+@token seq=2 pos=211 id=18
+@text len=1 seq=2
+3
+@token seq=3 pos=211 id=382
+@text len=3 seq=3
+.
+
+
+@token seq=0 pos=212 id=220
+@text len=1 seq=0
+ 
+@token seq=1 pos=212 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=212 id=13
+@text len=1 seq=2
+.
+@token seq=3 pos=212 id=19
+@text len=1 seq=3
+4
+@token seq=0 pos=213 id=16
+@text len=1 seq=0
+1
+@token seq=1 pos=213 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=213 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=213 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=214 id=15170
+@text len=2 seq=0
+}{
+@token seq=1 pos=214 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=214 id=48712
+@text len=5 seq=2
+Study
+@token seq=3 pos=214 id=70894
+@text len=11 seq=3
+ Understand
+@token seq=0 pos=215 id=87
+@text len=1 seq=0
+x
+@token seq=1 pos=215 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=215 id=33396
+@text len=10 seq=2
+ Different
+@token seq=3 pos=215 id=279
+@text len=4 seq=3
+ the
+@token seq=0 pos=216 id=92
+@text len=1 seq=0
+}
+@token seq=1 pos=216 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=216 id=7101
+@text len=6 seq=2
+iation
+@token seq=3 pos=216 id=18940
+@text len=9 seq=3
+ concepts
+@token seq=0 pos=217 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=217 id=31198
+@text len=7 seq=1
+Problem
+@token seq=2 pos=217 id=64944
+@text len=11 seq=2
+ Techniques
+@token seq=3 pos=217 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=218 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=218 id=11473
+@text len=4 seq=1
+ Sol
+@token seq=2 pos=218 id=25
+@text len=1 seq=2
+:
+@token seq=3 pos=218 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=219 id=438
+@text len=3 seq=0
+ as
+@token seq=1 pos=219 id=4405
+@text len=4 seq=1
+ving
+@token seq=2 pos=219 id=1019
+@text len=3 seq=2
+**
+
+@token seq=3 pos=219 id=25
+@text len=1 seq=3
+:
+@token seq=0 pos=220 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=220 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=220 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=220 id=9646
+@text len=5 seq=3
+ Once
+@token seq=0 pos=221 id=856
+@text len=2 seq=0
+ x
+@token seq=1 pos=221 id=26984
+@text len=9 seq=1
+ Practice
+@token seq=2 pos=221 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=221 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=222 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=222 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=222 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=222 id=614
+@text len=5 seq=3
+ have
+@token seq=0 pos=223 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=223 id=1075
+@text len=5 seq=1
+ like
+@token seq=2 pos=223 id=37314
+@text len=7 seq=2
+Partial
+@token seq=3 pos=223 id=70225
+@text len=9 seq=3
+ mastered
+@token seq=0 pos=224 id=19827
+@text len=11 seq=0
+ approaches
+@token seq=1 pos=224 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=224 id=12741
+@text len=4 seq=2
+ Der
+@token seq=3 pos=224 id=279
+@text len=4 seq=3
+ the
+@token seq=0 pos=225 id=220
+@text len=1 seq=0
+ 
+@token seq=1 pos=225 id=330
+@text len=2 seq=1
+ "
+@token seq=2 pos=225 id=344
+@text len=2 seq=2
+iv
+@token seq=3 pos=225 id=6770
+@text len=6 seq=3
+ basic
+@token seq=0 pos=226 id=15
+@text len=1 seq=0
+0
+@token seq=1 pos=226 id=7378
+@text len=6 seq=1
+Double
+@token seq=2 pos=226 id=5859
+@text len=6 seq=2
+atives
+@token seq=3 pos=226 id=18940
+@text len=9 seq=3
+ concepts
+@token seq=0 pos=227 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=227 id=12518
+@text len=6 seq=1
+ Prime
+@token seq=2 pos=227 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=227 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=228 id=498
+@text len=4 seq=0
+ you
+@token seq=1 pos=228 id=18100
+@text len=5 seq=1
+ Rule
+@token seq=2 pos=228 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=228 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=229 id=646
+@text len=4 seq=0
+ can
+@token seq=1 pos=229 id=1
+@text len=1 seq=1
+"
+@token seq=2 pos=229 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=229 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=230 id=990
+@text len=4 seq=0
+ use
+@token seq=1 pos=230 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=230 id=53163
+@text len=14 seq=2
+ differentiate
+@token seq=3 pos=230 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=231 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=231 id=330
+@text len=2 seq=1
+ "
+@token seq=2 pos=231 id=5746
+@text len=10 seq=2
+ functions
+@token seq=3 pos=231 id=1265
+@text len=7 seq=3
+ should
+@token seq=0 pos=232 id=7271
+@text len=11 seq=0
+ definition
+@token seq=1 pos=232 id=18837
+@text len=5 seq=1
+Chain
+@token seq=2 pos=232 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=232 id=3535
+@text len=11 seq=3
+ understand
+@token seq=0 pos=233 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=233 id=18100
+@text len=5 seq=1
+ Rule
+@token seq=2 pos=233 id=3807
+@text len=8 seq=2
+ several
+@token seq=3 pos=233 id=279
+@text len=4 seq=3
+ the
+@token seq=0 pos=234 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=234 id=22956
+@text len=3 seq=1
+".
+
+@token seq=2 pos=234 id=7332
+@text len=10 seq=2
+ variables
+@token seq=3 pos=234 id=18940
+@text len=9 seq=3
+ concepts
+@token seq=0 pos=235 id=31805
+@text len=11 seq=0
+ derivative
+@token seq=1 pos=235 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=235 id=624
+@text len=2 seq=2
+.
+
+@token seq=3 pos=235 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=236 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=236 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=236 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=236 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=237 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=237 id=9594
+@text len=6 seq=1
+Visual
+@token seq=2 pos=237 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=237 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=238 id=419
+@text len=5 seq=0
+ this
+@token seq=1 pos=238 id=4849
+@text len=5 seq=1
+izing
+@token seq=2 pos=238 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=238 id=1096
+@text len=5 seq=3
+ This
+@token seq=0 pos=239 id=3930
+@text len=6 seq=0
+ limit
+@token seq=1 pos=239 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=239 id=43
+@text len=1 seq=2
+L
+@token seq=3 pos=239 id=5646
+@text len=9 seq=3
+ includes
+@token seq=0 pos=240 id=624
+@text len=2 seq=0
+.
+
+@token seq=1 pos=240 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=240 id=66970
+@text len=2 seq=2
+'H
+@token seq=3 pos=240 id=8660
+@text len=14 seq=3
+ understanding
+@token seq=0 pos=241 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=241 id=46187
+@text len=9 seq=1
+ diagrams
+@token seq=2 pos=241 id=453
+@text len=2 seq=2
+op
+@token seq=3 pos=241 id=279
+@text len=4 seq=3
+ the
+@token seq=0 pos=242 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=242 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=242 id=2174
+@text len=4 seq=2
+ital
+@token seq=3 pos=242 id=2155
+@text len=10 seq=3
+ different
+@token seq=0 pos=243 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=243 id=9124
+@text len=7 seq=1
+ visual
+@token seq=2 pos=243 id=594
+@text len=2 seq=2
+'s
+@token seq=3 pos=243 id=4494
+@text len=6 seq=3
+ types
+@token seq=0 pos=244 id=22171
+@text len=3 seq=0
+Der
+@token seq=1 pos=244 id=7375
+@text len=6 seq=1
+ tools
+@token seq=2 pos=244 id=18100
+@text len=5 seq=2
+ Rule
+@token seq=3 pos=244 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=245 id=344
+@text len=2 seq=0
+iv
+@token seq=1 pos=245 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=245 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=245 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=246 id=5859
+@text len=6 seq=0
+atives
+@token seq=1 pos=246 id=3535
+@text len=11 seq=1
+ understand
+@token seq=2 pos=246 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=246 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=247 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=247 id=18940
+@text len=9 seq=1
+ concepts
+@token seq=2 pos=247 id=911
+@text len=6 seq=2
+ about
+@token seq=3 pos=247 id=1741
+@text len=5 seq=3
+ such
+@token seq=0 pos=248 id=12741
+@text len=4 seq=0
+ Der
+@token seq=1 pos=248 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=248 id=444
+@text len=2 seq=2
+ L
+@token seq=3 pos=248 id=438
+@text len=3 seq=3
+ as
+@token seq=0 pos=249 id=344
+@text len=2 seq=0
+iv
+@token seq=1 pos=249 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=249 id=66970
+@text len=2 seq=2
+'H
+@token seq=3 pos=249 id=40164
+@text len=13 seq=3
+ differential
+@token seq=0 pos=250 id=5859
+@text len=6 seq=0
+atives
+@token seq=1 pos=250 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=250 id=453
+@text len=2 seq=2
+op
+@token seq=3 pos=250 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=251 id=2138
+@text len=6 seq=0
+ allow
+@token seq=1 pos=251 id=19
+@text len=1 seq=1
+4
+@token seq=2 pos=251 id=2174
+@text len=4 seq=2
+ital
+@token seq=3 pos=251 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=252 id=498
+@text len=4 seq=0
+ you
+@token seq=1 pos=252 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=252 id=594
+@text len=2 seq=2
+'s
+@token seq=3 pos=252 id=25098
+@text len=9 seq=3
+ integral
+@token seq=0 pos=253 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=253 id=5309
+@text len=4 seq=1
+ Key
+@token seq=2 pos=253 id=5912
+@text len=5 seq=2
+ rule
+@token seq=3 pos=253 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=254 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=254 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=254 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=254 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=255 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=255 id=355
+@text len=2 seq=1
+us
+@token seq=2 pos=255 id=892
+@text len=6 seq=2
+ which
+@token seq=3 pos=255 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=256 id=4379
+@text len=5 seq=0
+ rate
+@token seq=1 pos=256 id=40894
+@text len=7 seq=1
+ Topics
+@token seq=2 pos=256 id=374
+@text len=3 seq=2
+ is
+@token seq=3 pos=256 id=8660
+@text len=14 seq=3
+ understanding
+@token seq=0 pos=257 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=257 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=257 id=5390
+@text len=7 seq=2
+ useful
+@token seq=3 pos=257 id=279
+@text len=4 seq=3
+ the
+@token seq=0 pos=258 id=2297
+@text len=7 seq=0
+ change
+@token seq=1 pos=258 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=258 id=979
+@text len=5 seq=2
+ when
+@token seq=3 pos=258 id=18940
+@text len=9 seq=3
+ concepts
+@token seq=0 pos=259 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=259 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=259 id=279
+@text len=4 seq=2
+ the
+@token seq=3 pos=259 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=260 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=260 id=22171
+@text len=3 seq=1
+Der
+@token seq=2 pos=260 id=31805
+@text len=11 seq=2
+ derivative
+@token seq=3 pos=260 id=13388
+@text len=7 seq=3
+ limits
+@token seq=0 pos=261 id=729
+@text len=9 seq=0
+ function
+@token seq=1 pos=261 id=344
+@text len=2 seq=1
+iv
+@token seq=2 pos=261 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=261 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=262 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=262 id=5859
+@text len=6 seq=1
+atives
+@token seq=2 pos=262 id=264
+@text len=2 seq=2
+ a
+@token seq=3 pos=262 id=49006
+@text len=11 seq=3
+ continuity
+@token seq=0 pos=263 id=1752
+@text len=4 seq=0
+ For
+@token seq=1 pos=263 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=263 id=3930
+@text len=6 seq=2
+ limit
+@token seq=3 pos=263 id=382
+@text len=3 seq=3
+.
+
+
+@token seq=0 pos=264 id=3110
+@text len=8 seq=0
+ example
+@token seq=1 pos=264 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=264 id=374
+@text len=3 seq=2
+ is
+@token seq=3 pos=264 id=20
+@text len=1 seq=3
+5
+@token seq=0 pos=265 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=265 id=1095
+@text len=5 seq=1
+ating
+@token seq=2 pos=265 id=537
+@text len=4 seq=2
+ not
+@token seq=3 pos=265 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=266 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=266 id=7813
+@text len=6 seq=1
+ rates
+@token seq=2 pos=266 id=4512
+@text len=8 seq=2
+ defined
+@token seq=3 pos=266 id=5443
+@text len=4 seq=3
+ Use
+@token seq=0 pos=267 id=31805
+@text len=11 seq=0
+ derivative
+@token seq=1 pos=267 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=267 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=3 pos=267 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=268 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=268 id=2297
+@text len=7 seq=1
+ change
+@token seq=2 pos=268 id=14374
+@text len=3 seq=2
+###
+@token seq=3 pos=268 id=304
+@text len=3 seq=3
+ in
+@token seq=0 pos=269 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=269 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=269 id=220
+@text len=1 seq=2
+ 
+@token seq=3 pos=269 id=1931
+@text len=5 seq=3
+ real
+@token seq=0 pos=270 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=270 id=59008
+@text len=7 seq=1
+ slopes
+@token seq=2 pos=270 id=19
+@text len=1 seq=2
+4
+@token seq=3 pos=270 id=25843
+@text len=5 seq=3
+-life
+@token seq=0 pos=271 id=15940
+@text len=3 seq=0
+sin
+@token seq=1 pos=271 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=271 id=13
+@text len=1 seq=2
+.
+@token seq=3 pos=271 id=14740
+@text len=11 seq=3
+ situations
+@token seq=0 pos=272 id=2075
+@text len=2 seq=0
+(x
+@token seq=1 pos=272 id=5746
+@text len=10 seq=1
+ functions
+@token seq=2 pos=272 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=272 id=25
+@text len=1 seq=3
+:
+@token seq=0 pos=273 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=273 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=273 id=48712
+@text len=5 seq=2
+Study
+@token seq=3 pos=273 id=9646
+@text len=5 seq=3
+ Once
+@token seq=0 pos=274 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=274 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=274 id=40069
+@text len=12 seq=2
+ Integration
+@token seq=3 pos=274 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=275 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=275 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=275 id=64944
+@text len=11 seq=2
+ Techniques
+@token seq=3 pos=275 id=614
+@text len=5 seq=3
+ have
+@token seq=0 pos=276 id=374
+@text len=3 seq=0
+ is
+@token seq=1 pos=276 id=1072
+@text len=3 seq=1
+Int
+@token seq=2 pos=276 id=25
+@text len=1 seq=2
+:
+@token seq=3 pos=276 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=277 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=277 id=14412
+@text len=3 seq=1
+egr
+@token seq=2 pos=277 id=1019
+@text len=3 seq=2
+**
+
+@token seq=3 pos=277 id=1661
+@text len=5 seq=3
+ good
+@token seq=0 pos=278 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=278 id=1127
+@text len=3 seq=1
+als
+@token seq=2 pos=278 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=278 id=8660
+@text len=14 seq=3
+ understanding
+@token seq=0 pos=279 id=9407
+@text len=3 seq=0
+cos
+@token seq=1 pos=279 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=279 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=279 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=280 id=2075
+@text len=2 seq=0
+(x
+@token seq=1 pos=280 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=280 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=280 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=281 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=281 id=1095
+@text len=5 seq=1
+ating
+@token seq=2 pos=281 id=52464
+@text len=11 seq=2
+Integration
+@token seq=3 pos=281 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=282 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=282 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=282 id=553
+@text len=3 seq=2
+ by
+@token seq=3 pos=282 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=283 id=568
+@text len=2 seq=0
+).
+@token seq=1 pos=283 id=3082
+@text len=5 seq=1
+ area
+@token seq=2 pos=283 id=26303
+@text len=6 seq=2
+ Parts
+@token seq=3 pos=283 id=1265
+@text len=7 seq=3
+ should
+@token seq=0 pos=284 id=1096
+@text len=5 seq=0
+ This
+@token seq=1 pos=284 id=1212
+@text len=6 seq=1
+ under
+@token seq=2 pos=284 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=284 id=990
+@text len=4 seq=3
+ use
+@token seq=0 pos=285 id=374
+@text len=3 seq=0
+ is
+@token seq=1 pos=285 id=264
+@text len=2 seq=1
+ a
+@token seq=2 pos=285 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=285 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=286 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=286 id=15655
+@text len=6 seq=1
+ curve
+@token seq=2 pos=286 id=279
+@text len=4 seq=2
+ the
+@token seq=3 pos=286 id=304
+@text len=3 seq=3
+ in
+@token seq=0 pos=287 id=15811
+@text len=12 seq=0
+ fundamental
+@token seq=1 pos=287 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=287 id=1714
+@text len=7 seq=2
+ method
+@token seq=3 pos=287 id=1931
+@text len=5 seq=3
+ real
+@token seq=0 pos=288 id=7286
+@text len=8 seq=0
+ concept
+@token seq=1 pos=288 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=288 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=288 id=25843
+@text len=5 seq=3
+-life
+@token seq=0 pos=289 id=304
+@text len=3 seq=0
+ in
+@token seq=1 pos=289 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=289 id=17590
+@text len=12 seq=2
+ integration
+@token seq=3 pos=289 id=14740
+@text len=11 seq=3
+ situations
+@token seq=0 pos=290 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=290 id=94588
+@text len=6 seq=1
+Limits
+@token seq=2 pos=290 id=553
+@text len=3 seq=2
+ by
+@token seq=3 pos=290 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=291 id=624
+@text len=2 seq=0
+.
+
+@token seq=1 pos=291 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=291 id=5479
+@text len=6 seq=2
+ parts
+@token seq=3 pos=291 id=1096
+@text len=5 seq=3
+ This
+@token seq=0 pos=292 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=292 id=45451
+@text len=14 seq=1
+ Understanding
+@token seq=2 pos=292 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=292 id=5646
+@text len=9 seq=3
+ includes
+@token seq=0 pos=293 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=293 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=293 id=892
+@text len=6 seq=2
+ which
+@token seq=3 pos=293 id=18950
+@text len=9 seq=3
+ applying
+@token seq=0 pos=294 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=294 id=7286
+@text len=8 seq=1
+ concept
+@token seq=2 pos=294 id=374
+@text len=3 seq=2
+ is
+@token seq=3 pos=294 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=295 id=1072
+@text len=3 seq=0
+Int
+@token seq=1 pos=295 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=295 id=5390
+@text len=7 seq=2
+ useful
+@token seq=3 pos=295 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=296 id=14412
+@text len=3 seq=0
+egr
+@token seq=1 pos=296 id=3930
+@text len=6 seq=1
+ limit
+@token seq=2 pos=296 id=369
+@text len=4 seq=2
+ for
+@token seq=3 pos=296 id=5322
+@text len=9 seq=3
+ problems
+@token seq=0 pos=297 id=1127
+@text len=3 seq=0
+als
+@token seq=1 pos=297 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=297 id=53852
+@text len=12 seq=2
+ integrating
+@token seq=3 pos=297 id=304
+@text len=3 seq=3
+ in
+@token seq=0 pos=298 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=298 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=298 id=3871
+@text len=9 seq=2
+ products
+@token seq=3 pos=298 id=5043
+@text len=7 seq=3
+ fields
+@token seq=0 pos=299 id=29001
+@text len=7 seq=0
+ Integr
+@token seq=1 pos=299 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=299 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=299 id=1075
+@text len=5 seq=3
+ like
+@token seq=0 pos=300 id=1127
+@text len=3 seq=0
+als
+@token seq=1 pos=300 id=25207
+@text len=9 seq=1
+Functions
+@token seq=2 pos=300 id=5746
+@text len=10 seq=2
+ functions
+@token seq=3 pos=300 id=21321
+@text len=8 seq=3
+ physics
+@token seq=0 pos=301 id=2138
+@text len=6 seq=0
+ allow
+@token seq=1 pos=301 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=301 id=624
+@text len=2 seq=2
+.
+
+@token seq=3 pos=301 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=302 id=498
+@text len=4 seq=0
+ you
+@token seq=1 pos=302 id=45451
+@text len=14 seq=1
+ Understanding
+@token seq=2 pos=302 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=302 id=14667
+@text len=12 seq=3
+ engineering
+@token seq=0 pos=303 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=303 id=5746
+@text len=10 seq=1
+ functions
+@token seq=2 pos=303 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=303 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=304 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=304 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=304 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=304 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=305 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=305 id=1246
+@text len=4 seq=1
+ how
+@token seq=2 pos=305 id=52464
+@text len=11 seq=2
+Integration
+@token seq=3 pos=305 id=27889
+@text len=10 seq=3
+ economics
+@token seq=0 pos=306 id=3082
+@text len=5 seq=0
+ area
+@token seq=1 pos=306 id=807
+@text len=5 seq=1
+ they
+@token seq=2 pos=306 id=553
+@text len=3 seq=2
+ by
+@token seq=3 pos=306 id=382
+@text len=3 seq=3
+.
+
+
+@token seq=0 pos=307 id=1212
+@text len=6 seq=0
+ under
+@token seq=1 pos=307 id=35692
+@text len=7 seq=1
+ behave
+@token seq=2 pos=307 id=3719
+@text len=4 seq=2
+ Sub
+@token seq=3 pos=307 id=21
+@text len=1 seq=3
+6
+@token seq=0 pos=308 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=308 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=308 id=10446
+@text len=9 seq=2
+stitution
+@token seq=3 pos=308 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=309 id=15655
+@text len=6 seq=0
+ curve
+@token seq=1 pos=309 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=309 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=309 id=29739
+@text len=5 seq=3
+ Seek
+@token seq=0 pos=310 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=310 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=310 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=310 id=1492
+@text len=5 seq=3
+ help
+@token seq=0 pos=311 id=1752
+@text len=4 seq=0
+ For
+@token seq=1 pos=311 id=94588
+@text len=6 seq=1
+Limits
+@token seq=2 pos=311 id=1246
+@text len=4 seq=2
+ how
+@token seq=3 pos=311 id=25
+@text len=1 seq=3
+:
+@token seq=0 pos=312 id=3110
+@text len=8 seq=0
+ example
+@token seq=1 pos=312 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=312 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=312 id=31359
+@text len=7 seq=3
+ Calcul
+@token seq=0 pos=313 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=313 id=12741
+@text len=4 seq=1
+ Der
+@token seq=2 pos=313 id=990
+@text len=4 seq=2
+ use
+@token seq=3 pos=313 id=355
+@text len=2 seq=3
+us
+@token seq=0 pos=314 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=314 id=344
+@text len=2 seq=1
+iv
+@token seq=2 pos=314 id=48968
+@text len=13 seq=2
+ substitution
+@token seq=3 pos=314 id=646
+@text len=4 seq=3
+ can
+@token seq=0 pos=315 id=25098
+@text len=9 seq=0
+ integral
+@token seq=1 pos=315 id=5859
+@text len=6 seq=1
+atives
+@token seq=2 pos=315 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=315 id=387
+@text len=3 seq=3
+ be
+@token seq=0 pos=316 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=316 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=316 id=1477
+@text len=5 seq=2
+ find
+@token seq=3 pos=316 id=5000
+@text len=10 seq=3
+ difficult
+@token seq=0 pos=317 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=317 id=576
+@text len=4 seq=1
+ The
+@token seq=2 pos=317 id=8761
+@text len=7 seq=2
+ integr
+@token seq=3 pos=317 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=318 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=318 id=5025
+@text len=13 seq=1
+ relationship
+@token seq=2 pos=318 id=1127
+@text len=3 seq=2
+als
+@token seq=3 pos=318 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=319 id=37018
+@text len=4 seq=0
+frac
+@token seq=1 pos=319 id=1948
+@text len=8 seq=1
+ between
+@token seq=2 pos=319 id=624
+@text len=2 seq=2
+.
+
+@token seq=3 pos=319 id=432
+@text len=3 seq=3
+ it
+@token seq=0 pos=320 id=90
+@text len=1 seq=0
+{
+@token seq=1 pos=320 id=13388
+@text len=7 seq=1
+ limits
+@token seq=2 pos=320 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=320 id=1231
+@text len=4 seq=3
+ may
+@token seq=0 pos=321 id=16
+@text len=1 seq=0
+1
+@token seq=1 pos=321 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=321 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=321 id=1896
+@text len=5 seq=3
+ take
+@token seq=0 pos=322 id=15170
+@text len=2 seq=0
+}{
+@token seq=1 pos=322 id=42545
+@text len=12 seq=1
+ derivatives
+@token seq=2 pos=322 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=322 id=882
+@text len=5 seq=3
+ time
+@token seq=0 pos=323 id=87
+@text len=1 seq=0
+x
+@token seq=1 pos=323 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=323 id=52464
+@text len=11 seq=2
+Integration
+@token seq=3 pos=323 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=324 id=92
+@text len=1 seq=0
+}
+@token seq=1 pos=324 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=324 id=553
+@text len=3 seq=2
+ by
+@token seq=3 pos=324 id=3535
+@text len=11 seq=3
+ understand
+@token seq=0 pos=325 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=325 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=325 id=26303
+@text len=6 seq=2
+ Parts
+@token seq=3 pos=325 id=432
+@text len=3 seq=3
+ it
+@token seq=0 pos=326 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=326 id=20
+@text len=1 seq=1
+5
+@token seq=2 pos=326 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=326 id=7225
+@text len=6 seq=3
+ fully
+@token seq=0 pos=327 id=374
+@text len=3 seq=0
+ is
+@token seq=1 pos=327 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=327 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=327 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=328 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=328 id=20909
+@text len=9 seq=1
+ Learning
+@token seq=2 pos=328 id=279
+@text len=4 seq=2
+ the
+@token seq=3 pos=328 id=1084
+@text len=3 seq=3
+ It
+@token seq=0 pos=329 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=329 id=55519
+@text len=11 seq=1
+ Strategies
+@token seq=2 pos=329 id=1714
+@text len=7 seq=2
+ method
+@token seq=3 pos=329 id=374
+@text len=3 seq=3
+ is
+@token seq=0 pos=330 id=2261
+@text len=2 seq=0
+ln
+@token seq=1 pos=330 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=330 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=330 id=2989
+@text len=10 seq=3
+ important
+@token seq=0 pos=331 id=2075
+@text len=2 seq=0
+(x
+@token seq=1 pos=331 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=331 id=17590
+@text len=12 seq=2
+ integration
+@token seq=3 pos=331 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=332 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=332 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=332 id=553
+@text len=3 seq=2
+ by
+@token seq=3 pos=332 id=5931
+@text len=5 seq=3
+ seek
+@token seq=0 pos=333 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=333 id=5728
+@text len=6 seq=1
+Active
+@token seq=2 pos=333 id=5479
+@text len=6 seq=2
+ parts
+@token seq=3 pos=333 id=1492
+@text len=5 seq=3
+ help
+@token seq=0 pos=334 id=568
+@text len=2 seq=0
+).
+@token seq=1 pos=334 id=20909
+@text len=9 seq=1
+ Learning
+@token seq=2 pos=334 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=334 id=421
+@text len=3 seq=3
+ if
+@token seq=0 pos=335 id=1096
+@text len=5 seq=0
+ This
+@token seq=1 pos=335 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=335 id=892
+@text len=6 seq=2
+ which
+@token seq=3 pos=335 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=336 id=374
+@text len=3 seq=0
+ is
+@token seq=1 pos=336 id=3285
+@text len=4 seq=1
+ Eng
+@token seq=2 pos=336 id=374
+@text len=3 seq=2
+ is
+@token seq=3 pos=336 id=525
+@text len=4 seq=3
+ are
+@token seq=0 pos=337 id=2441
+@text len=8 seq=0
+ another
+@token seq=1 pos=337 id=424
+@text len=3 seq=1
+age
+@token seq=2 pos=337 id=5390
+@text len=7 seq=2
+ useful
+@token seq=3 pos=337 id=3432
+@text len=7 seq=3
+ having
+@token seq=0 pos=338 id=15811
+@text len=12 seq=0
+ fundamental
+@token seq=1 pos=338 id=448
+@text len=5 seq=1
+ with
+@token seq=2 pos=338 id=369
+@text len=4 seq=2
+ for
+@token seq=3 pos=338 id=12264
+@text len=8 seq=3
+ trouble
+@token seq=0 pos=339 id=7286
+@text len=8 seq=0
+ concept
+@token seq=1 pos=339 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=339 id=53852
+@text len=12 seq=2
+ integrating
+@token seq=3 pos=339 id=448
+@text len=5 seq=3
+ with
+@token seq=0 pos=340 id=304
+@text len=3 seq=0
+ in
+@token seq=1 pos=340 id=3684
+@text len=9 seq=1
+ material
+@token seq=2 pos=340 id=3871
+@text len=9 seq=2
+ products
+@token seq=3 pos=340 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=341 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=341 id=553
+@text len=3 seq=1
+ by
+@token seq=2 pos=341 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=341 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=342 id=382
+@text len=3 seq=0
+.
+
+
+@token seq=1 pos=342 id=10161
+@text len=7 seq=1
+ asking
+@token seq=2 pos=342 id=5746
+@text len=10 seq=2
+ functions
+@token seq=3 pos=342 id=1446
+@text len=4 seq=3
+ You
+@token seq=0 pos=343 id=18
+@text len=1 seq=0
+3
+@token seq=1 pos=343 id=4755
+@text len=10 seq=1
+ questions
+@token seq=2 pos=343 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=3 pos=343 id=646
+@text len=4 seq=3
+ can
+@token seq=0 pos=344 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=344 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=344 id=14374
+@text len=3 seq=2
+###
+@token seq=3 pos=344 id=2548
+@text len=4 seq=3
+ ask
+@token seq=0 pos=345 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=345 id=21828
+@text len=8 seq=1
+ solving
+@token seq=2 pos=345 id=220
+@text len=1 seq=2
+ 
+@token seq=3 pos=345 id=697
+@text len=5 seq=3
+ your
+@token seq=0 pos=346 id=40381
+@text len=8 seq=0
+Examples
+@token seq=1 pos=346 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=346 id=20
+@text len=1 seq=2
+5
+@token seq=3 pos=346 id=11079
+@text len=8 seq=3
+ teacher
+@token seq=0 pos=347 id=334
+@text len=2 seq=0
+**
+@token seq=1 pos=347 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=347 id=13
+@text len=1 seq=2
+.
+@token seq=3 pos=347 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=348 id=510
+@text len=2 seq=0
+:
+
+@token seq=1 pos=348 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=348 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=348 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=349 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=349 id=23966
+@text len=10 seq=1
+ exploring
+@token seq=2 pos=349 id=48712
+@text len=5 seq=2
+Study
+@token seq=3 pos=349 id=25302
+@text len=6 seq=3
+ tutor
+@token seq=0 pos=350 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=350 id=10295
+@text len=9 seq=1
+ examples
+@token seq=2 pos=350 id=31525
+@text len=13 seq=2
+ Applications
+@token seq=3 pos=350 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=351 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=351 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=351 id=315
+@text len=3 seq=2
+ of
+@token seq=3 pos=351 id=476
+@text len=3 seq=3
+ or
+@token seq=0 pos=352 id=51422
+@text len=7 seq=0
+Finding
+@token seq=1 pos=352 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=352 id=31359
+@text len=7 seq=2
+ Calcul
+@token seq=3 pos=352 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=353 id=71855
+@text len=7 seq=0
+ Limits
+@token seq=1 pos=353 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=353 id=355
+@text len=2 seq=2
+us
+@token seq=3 pos=353 id=4238
+@text len=7 seq=3
+ friend
+@token seq=0 pos=354 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=354 id=2808
+@text len=5 seq=1
+Group
+@token seq=2 pos=354 id=25
+@text len=1 seq=2
+:
+@token seq=3 pos=354 id=369
+@text len=4 seq=3
+ for
+@token seq=0 pos=355 id=21144
+@text len=9 seq=0
+ Consider
+@token seq=1 pos=355 id=5547
+@text len=5 seq=1
+ Work
+@token seq=2 pos=355 id=1019
+@text len=3 seq=2
+**
+
+@token seq=3 pos=355 id=1492
+@text len=5 seq=3
+ help
+@token seq=0 pos=356 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=356 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=356 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=356 id=382
+@text len=3 seq=3
+.
+
+
+@token seq=0 pos=357 id=3930
+@text len=6 seq=0
+ limit
+@token seq=1 pos=357 id=48581
+@text len=9 seq=1
+ Collabor
+@token seq=2 pos=357 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=357 id=28590
+@text len=8 seq=3
+Remember
+@token seq=0 pos=358 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=358 id=349
+@text len=3 seq=1
+ate
+@token seq=2 pos=358 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=358 id=429
+@text len=5 seq=3
+ that
+@token seq=0 pos=359 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=359 id=448
+@text len=5 seq=1
+ with
+@token seq=2 pos=359 id=50359
+@text len=12 seq=2
+Applications
+@token seq=3 pos=359 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=360 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=360 id=25029
+@text len=6 seq=1
+ peers
+@token seq=2 pos=360 id=304
+@text len=3 seq=2
+ in
+@token seq=3 pos=360 id=374
+@text len=3 seq=3
+ is
+@token seq=0 pos=361 id=37018
+@text len=4 seq=0
+frac
+@token seq=1 pos=361 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=361 id=27315
+@text len=8 seq=2
+ Physics
+@token seq=3 pos=361 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=362 id=90
+@text len=1 seq=0
+{
+@token seq=1 pos=362 id=11625
+@text len=6 seq=1
+ solve
+@token seq=2 pos=362 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=362 id=6351
+@text len=8 seq=3
+ complex
+@token seq=0 pos=363 id=68
+@text len=1 seq=0
+e
+@token seq=1 pos=363 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=363 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=363 id=3832
+@text len=8 seq=3
+ subject
+@token seq=0 pos=364 id=61
+@text len=1 seq=0
+^
+@token seq=1 pos=364 id=3786
+@text len=9 seq=1
+ together
+@token seq=2 pos=364 id=1246
+@text len=4 seq=2
+ how
+@token seq=3 pos=364 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=365 id=87
+@text len=1 seq=0
+x
+@token seq=1 pos=365 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=365 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=365 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=366 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=366 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=366 id=3796
+@text len=6 seq=2
+ apply
+@token seq=3 pos=366 id=432
+@text len=3 seq=3
+ it
+@token seq=0 pos=367 id=220
+@text len=1 seq=0
+ 
+@token seq=1 pos=367 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=367 id=82668
+@text len=9 seq=2
+ calculus
+@token seq=3 pos=367 id=7460
+@text len=9 seq=3
+ requires
+@token seq=0 pos=368 id=16
+@text len=1 seq=0
+1
+@token seq=1 pos=368 id=88492
+@text len=8 seq=1
+Practice
+@token seq=2 pos=368 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=368 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=369 id=15170
+@text len=2 seq=0
+}{
+@token seq=1 pos=369 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=369 id=21321
+@text len=8 seq=2
+ physics
+@token seq=3 pos=369 id=2696
+@text len=4 seq=3
+ lot
+@token seq=0 pos=370 id=87
+@text len=1 seq=0
+x
+@token seq=1 pos=370 id=28800
+@text len=8 seq=1
+ Regular
+@token seq=2 pos=370 id=5322
+@text len=9 seq=2
+ problems
+@token seq=3 pos=370 id=315
+@text len=3 seq=3
+ of
+@token seq=0 pos=371 id=92
+@text len=1 seq=0
+}
+@token seq=1 pos=371 id=6588
+@text len=9 seq=1
+ practice
+@token seq=2 pos=371 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=371 id=882
+@text len=5 seq=3
+ time
+@token seq=0 pos=372 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=372 id=374
+@text len=3 seq=1
+ is
+@token seq=2 pos=372 id=1741
+@text len=5 seq=2
+ such
+@token seq=3 pos=372 id=323
+@text len=4 seq=3
+ and
+@token seq=0 pos=373 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=373 id=1376
+@text len=4 seq=1
+ key
+@token seq=2 pos=373 id=438
+@text len=3 seq=2
+ as
+@token seq=3 pos=373 id=5041
+@text len=7 seq=3
+ effort
+@token seq=0 pos=374 id=438
+@text len=3 seq=0
+ as
+@token seq=1 pos=374 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=374 id=11379
+@text len=7 seq=2
+ motion
+@token seq=3 pos=374 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=375 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=375 id=87761
+@text len=10 seq=1
+ mastering
+@token seq=2 pos=375 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=375 id=7341
+@text len=7 seq=3
+ master
+@token seq=0 pos=376 id=856
+@text len=2 seq=0
+ x
+@token seq=1 pos=376 id=82668
+@text len=9 seq=1
+ calculus
+@token seq=2 pos=376 id=5344
+@text len=6 seq=2
+ force
+@token seq=3 pos=376 id=432
+@text len=3 seq=3
+ it
+@token seq=0 pos=377 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=377 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=377 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=377 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=378 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=378 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=378 id=323
+@text len=4 seq=2
+ and
+@token seq=3 pos=378 id=1416
+@text len=3 seq=3
+ If
+@token seq=0 pos=379 id=19827
+@text len=11 seq=0
+ approaches
+@token seq=1 pos=379 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=379 id=4802
+@text len=7 seq=2
+ energy
+@token seq=3 pos=379 id=498
+@text len=4 seq=3
+ you
+@token seq=0 pos=380 id=220
+@text len=1 seq=0
+ 
+@token seq=1 pos=380 id=19432
+@text len=6 seq=1
+Review
+@token seq=2 pos=380 id=624
+@text len=2 seq=2
+.
+
+@token seq=3 pos=380 id=525
+@text len=4 seq=3
+ are
+@token seq=0 pos=381 id=15
+@text len=1 seq=0
+0
+@token seq=1 pos=381 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=381 id=256
+@text len=2 seq=2
+  
+@token seq=3 pos=381 id=3432
+@text len=7 seq=3
+ having
+@token seq=0 pos=382 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=382 id=28800
+@text len=8 seq=1
+ Regular
+@token seq=2 pos=382 id=481
+@text len=2 seq=2
+ -
+@token seq=3 pos=382 id=12264
+@text len=8 seq=3
+ trouble
+@token seq=0 pos=383 id=1446
+@text len=4 seq=0
+ You
+@token seq=1 pos=383 id=398
+@text len=2 seq=1
+ly
+@token seq=2 pos=383 id=3070
+@text len=3 seq=2
+ **
+@token seq=3 pos=383 id=448
+@text len=5 seq=3
+ with
+@token seq=0 pos=384 id=646
+@text len=4 seq=0
+ can
+@token seq=1 pos=384 id=3395
+@text len=7 seq=1
+ review
+@token seq=2 pos=384 id=50359
+@text len=12 seq=2
+Applications
+@token seq=3 pos=384 id=82668
+@text len=9 seq=3
+ calculus
+@token seq=0 pos=385 id=990
+@text len=4 seq=0
+ use
+@token seq=1 pos=385 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=385 id=304
+@text len=3 seq=2
+ in
+@token seq=3 pos=385 id=11
+@text len=1 seq=3
+,
+@token seq=0 pos=386 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=386 id=3684
+@text len=9 seq=1
+ material
+@token seq=2 pos=386 id=34200
+@text len=10 seq=2
+ Economics
+@token seq=3 pos=386 id=432
+@text len=3 seq=3
+ it
+@token seq=0 pos=387 id=7271
+@text len=11 seq=0
+ definition
+@token seq=1 pos=387 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=387 id=66963
+@text len=3 seq=2
+:**
+@token seq=3 pos=387 id=374
+@text len=3 seq=3
+ is
+@token seq=0 pos=388 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=388 id=54314
+@text len=10 seq=1
+ reinforce
+@token seq=2 pos=388 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=3 pos=388 id=2989
+@text len=10 seq=3
+ important
+@token seq=0 pos=389 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=389 id=8660
+@text len=14 seq=1
+ understanding
+@token seq=2 pos=389 id=1246
+@text len=4 seq=2
+ how
+@token seq=3 pos=389 id=311
+@text len=3 seq=3
+ to
+@token seq=0 pos=390 id=31805
+@text len=11 seq=0
+ derivative
+@token seq=1 pos=390 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=390 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=390 id=5931
+@text len=5 seq=3
+ seek
+@token seq=0 pos=391 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=391 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=391 id=3796
+@text len=6 seq=2
+ apply
+@token seq=3 pos=391 id=1492
+@text len=5 seq=3
+ help
+@token seq=0 pos=392 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=392 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=392 id=82668
+@text len=9 seq=2
+ calculus
+@token seq=3 pos=392 id=504
+@text len=5 seq=3
+ from
+@token seq=0 pos=393 id=419
+@text len=5 seq=0
+ this
+@token seq=1 pos=393 id=21
+@text len=1 seq=1
+6
+@token seq=2 pos=393 id=311
+@text len=3 seq=2
+ to
+@token seq=3 pos=393 id=264
+@text len=2 seq=3
+ a
+@token seq=0 pos=394 id=3930
+@text len=6 seq=0
+ limit
+@token seq=1 pos=394 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=394 id=6955
+@text len=9 seq=2
+ economic
+@token seq=3 pos=394 id=25302
+@text len=6 seq=3
+ tutor
+@token seq=0 pos=395 id=624
+@text len=2 seq=0
+.
+
+@token seq=1 pos=395 id=42296
+@text len=6 seq=1
+ Hands
+@token seq=2 pos=395 id=5322
+@text len=9 seq=2
+ problems
+@token seq=3 pos=395 id=476
+@text len=3 seq=3
+ or
+@token seq=0 pos=396 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=396 id=66354
+@text len=3 seq=1
+-On
+@token seq=2 pos=396 id=11
+@text len=1 seq=2
+,
+@token seq=3 pos=396 id=11079
+@text len=8 seq=3
+ teacher
+@token seq=0 pos=397 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=397 id=43282
+@text len=11 seq=1
+ Activities
+@token seq=2 pos=397 id=1741
+@text len=5 seq=2
+ such
+@token seq=3 pos=397 id=13
+@text len=1 seq=3
+.
+@token seq=0 pos=398 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=398 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=398 id=438
+@text len=3 seq=2
+ as
+@token seq=0 pos=399 id=51422
+@text len=7 seq=0
+Finding
+@token seq=1 pos=399 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=399 id=87178
+@text len=11 seq=2
+ maximizing
+@token seq=0 pos=400 id=12741
+@text len=4 seq=0
+ Der
+@token seq=1 pos=400 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=400 id=11372
+@text len=7 seq=2
+ profit
+@token seq=0 pos=401 id=344
+@text len=2 seq=0
+iv
+@token seq=1 pos=401 id=11212
+@text len=5 seq=1
+Graph
+@token seq=2 pos=401 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=402 id=5859
+@text len=6 seq=0
+atives
+@token seq=1 pos=402 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=402 id=76291
+@text len=11 seq=2
+ minimizing
+@token seq=0 pos=403 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=403 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=403 id=2783
+@text len=5 seq=2
+ cost
+@token seq=0 pos=404 id=21144
+@text len=9 seq=0
+ Consider
+@token seq=1 pos=404 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=404 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=405 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=405 id=4771
+@text len=6 seq=1
+ graph
+@token seq=2 pos=405 id=323
+@text len=4 seq=2
+ and
+@token seq=0 pos=406 id=31805
+@text len=11 seq=0
+ derivative
+@token seq=1 pos=406 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=406 id=9271
+@text len=8 seq=2
+ finding
+@token seq=0 pos=407 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=407 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=407 id=7192
+@text len=8 seq=2
+ maximum
+@token seq=0 pos=408 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=408 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=408 id=476
+@text len=3 seq=2
+ or
+@token seq=0 pos=409 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=409 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=409 id=8028
+@text len=8 seq=2
+ minimum
+@token seq=0 pos=410 id=15940
+@text len=3 seq=0
+sin
+@token seq=1 pos=410 id=50087
+@text len=10 seq=1
+ visualize
+@token seq=2 pos=410 id=2750
+@text len=7 seq=2
+ values
+@token seq=0 pos=411 id=2075
+@text len=2 seq=0
+(x
+@token seq=1 pos=411 id=5746
+@text len=10 seq=1
+ functions
+@token seq=2 pos=411 id=624
+@text len=2 seq=2
+.
+
+@token seq=0 pos=412 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=412 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=412 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=413 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=413 id=862
+@text len=6 seq=1
+ their
+@token seq=2 pos=413 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=414 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=414 id=42545
+@text len=12 seq=1
+ derivatives
+@token seq=2 pos=414 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=415 id=438
+@text len=3 seq=0
+ as
+@token seq=1 pos=415 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=415 id=50359
+@text len=12 seq=2
+Applications
+@token seq=0 pos=416 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=416 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=416 id=304
+@text len=3 seq=2
+ in
+@token seq=0 pos=417 id=856
+@text len=2 seq=0
+ x
+@token seq=1 pos=417 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=417 id=16595
+@text len=12 seq=2
+ Engineering
+@token seq=0 pos=418 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=418 id=11212
+@text len=5 seq=1
+Graph
+@token seq=2 pos=418 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=419 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=419 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=419 id=14934
+@text len=6 seq=2
+ Learn
+@token seq=0 pos=420 id=19827
+@text len=11 seq=0
+ approaches
+@token seq=1 pos=420 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=420 id=1246
+@text len=4 seq=2
+ how
+@token seq=0 pos=421 id=220
+@text len=1 seq=0
+ 
+@token seq=1 pos=421 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=421 id=311
+@text len=3 seq=2
+ to
+@token seq=0 pos=422 id=15
+@text len=1 seq=0
+0
+@token seq=1 pos=422 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=422 id=3796
+@text len=6 seq=2
+ apply
+@token seq=0 pos=423 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=423 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=423 id=82668
+@text len=9 seq=2
+ calculus
+@token seq=0 pos=424 id=1446
+@text len=4 seq=0
+ You
+@token seq=1 pos=424 id=4771
+@text len=6 seq=1
+ graph
+@token seq=2 pos=424 id=311
+@text len=3 seq=2
+ to
+@token seq=0 pos=425 id=646
+@text len=4 seq=0
+ can
+@token seq=1 pos=425 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=425 id=14667
+@text len=12 seq=2
+ engineering
+@token seq=0 pos=426 id=990
+@text len=4 seq=0
+ use
+@token seq=1 pos=426 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=426 id=5322
+@text len=9 seq=2
+ problems
+@token seq=0 pos=427 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=427 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=427 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=428 id=7271
+@text len=11 seq=0
+ definition
+@token seq=1 pos=428 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=428 id=1741
+@text len=5 seq=2
+ such
+@token seq=0 pos=429 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=429 id=7089
+@text len=5 seq=1
+ plot
+@token seq=2 pos=429 id=438
+@text len=3 seq=2
+ as
+@token seq=0 pos=430 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=430 id=5746
+@text len=10 seq=1
+ functions
+@token seq=2 pos=430 id=19734
+@text len=11 seq=2
+ electrical
+@token seq=0 pos=431 id=31805
+@text len=11 seq=0
+ derivative
+@token seq=1 pos=431 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=431 id=45021
+@text len=9 seq=2
+ circuits
+@token seq=0 pos=432 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=432 id=862
+@text len=6 seq=1
+ their
+@token seq=2 pos=432 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=433 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=433 id=42545
+@text len=12 seq=1
+ derivatives
+@token seq=2 pos=433 id=22148
+@text len=11 seq=2
+ mechanical
+@token seq=0 pos=434 id=419
+@text len=5 seq=0
+ this
+@token seq=1 pos=434 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=434 id=5942
+@text len=8 seq=2
+ systems
+@token seq=0 pos=435 id=624
+@text len=2 seq=0
+.
+
+@token seq=1 pos=435 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=435 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=436 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=436 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=436 id=323
+@text len=4 seq=2
+ and
+@token seq=0 pos=437 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=437 id=19598
+@text len=6 seq=1
+Online
+@token seq=2 pos=437 id=23759
+@text len=11 seq=2
+ structural
+@token seq=0 pos=438 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=438 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=438 id=6358
+@text len=9 seq=2
+ analysis
+@token seq=0 pos=439 id=51422
+@text len=7 seq=0
+Finding
+@token seq=1 pos=439 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=439 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=0 pos=440 id=29001
+@text len=7 seq=0
+ Integr
+@token seq=1 pos=440 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=440 id=14374
+@text len=3 seq=2
+###
+@token seq=0 pos=441 id=1127
+@text len=3 seq=0
+als
+@token seq=1 pos=441 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=441 id=220
+@text len=1 seq=2
+ 
+@token seq=0 pos=442 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=442 id=2860
+@text len=7 seq=1
+ online
+@token seq=2 pos=442 id=21
+@text len=1 seq=2
+6
+@token seq=0 pos=443 id=21144
+@text len=9 seq=0
+ Consider
+@token seq=1 pos=443 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=443 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=444 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=444 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=444 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=445 id=25098
+@text len=9 seq=0
+ integral
+@token seq=1 pos=445 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=445 id=48712
+@text len=5 seq=2
+Study
+@token seq=0 pos=446 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=446 id=11625
+@text len=6 seq=1
+ solve
+@token seq=2 pos=446 id=31359
+@text len=7 seq=2
+ Calcul
+@token seq=0 pos=447 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=447 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=447 id=355
+@text len=2 seq=2
+us
+@token seq=0 pos=448 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=448 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=448 id=2918
+@text len=5 seq=2
+ Text
+@token seq=0 pos=449 id=37018
+@text len=4 seq=0
+frac
+@token seq=1 pos=449 id=1779
+@text len=6 seq=1
+ check
+@token seq=2 pos=449 id=12110
+@text len=5 seq=2
+books
+@token seq=0 pos=450 id=90
+@text len=1 seq=0
+{
+@token seq=1 pos=450 id=697
+@text len=5 seq=1
+ your
+@token seq=2 pos=450 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=451 id=16
+@text len=1 seq=0
+1
+@token seq=1 pos=451 id=975
+@text len=5 seq=1
+ work
+@token seq=2 pos=451 id=1019
+@text len=3 seq=2
+**
+
+@token seq=0 pos=452 id=15170
+@text len=2 seq=0
+}{
+@token seq=1 pos=452 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=452 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=453 id=87
+@text len=1 seq=0
+x
+@token seq=1 pos=453 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=453 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=454 id=92
+@text len=1 seq=0
+}
+@token seq=1 pos=454 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=454 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=455 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=455 id=22
+@text len=1 seq=1
+7
+@token seq=2 pos=455 id=8851
+@text len=3 seq=2
+Cal
+@token seq=0 pos=456 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=456 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=456 id=41349
+@text len=5 seq=2
+culus
+@token seq=0 pos=457 id=438
+@text len=3 seq=0
+ as
+@token seq=1 pos=457 id=8800
+@text len=5 seq=1
+ Real
+@token seq=2 pos=457 id=2918
+@text len=5 seq=2
+ Text
+@token seq=0 pos=458 id=17767
+@text len=3 seq=0
+ \(
+@token seq=1 pos=458 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=458 id=12110
+@text len=5 seq=2
+books
+@token seq=0 pos=459 id=856
+@text len=2 seq=0
+ x
+@token seq=1 pos=459 id=10134
+@text len=5 seq=1
+World
+@token seq=2 pos=459 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=460 id=1124
+@text len=2 seq=0
+ \
+@token seq=1 pos=460 id=31525
+@text len=13 seq=1
+ Applications
+@token seq=2 pos=460 id=22201
+@text len=7 seq=2
+ Choose
+@token seq=0 pos=461 id=8
+@text len=1 seq=0
+)
+@token seq=1 pos=461 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=461 id=6467
+@text len=6 seq=2
+ books
+@token seq=0 pos=462 id=19827
+@text len=11 seq=0
+ approaches
+@token seq=1 pos=462 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=462 id=429
+@text len=5 seq=2
+ that
+@token seq=0 pos=463 id=54910
+@text len=9 seq=0
+ infinity
+@token seq=1 pos=463 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=463 id=525
+@text len=4 seq=2
+ are
+@token seq=0 pos=464 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=464 id=11212
+@text len=5 seq=1
+Graph
+@token seq=2 pos=464 id=14452
+@text len=9 seq=2
+ suitable
+@token seq=0 pos=465 id=1446
+@text len=4 seq=0
+ You
+@token seq=1 pos=465 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=465 id=369
+@text len=4 seq=2
+ for
+@token seq=0 pos=466 id=646
+@text len=4 seq=0
+ can
+@token seq=1 pos=466 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=466 id=697
+@text len=5 seq=2
+ your
+@token seq=0 pos=467 id=990
+@text len=4 seq=0
+ use
+@token seq=1 pos=467 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=467 id=2188
+@text len=6 seq=2
+ level
+@token seq=0 pos=468 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=468 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=468 id=315
+@text len=3 seq=2
+ of
+@token seq=0 pos=469 id=7271
+@text len=11 seq=0
+ definition
+@token seq=1 pos=469 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=469 id=3920
+@text len=6 seq=2
+ study
+@token seq=0 pos=470 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=470 id=4771
+@text len=6 seq=1
+ graph
+@token seq=2 pos=470 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=471 id=279
+@text len=4 seq=0
+ the
+@token seq=1 pos=471 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=471 id=4329
+@text len=5 seq=2
+ Some
+@token seq=0 pos=472 id=25098
+@text len=9 seq=0
+ integral
+@token seq=1 pos=472 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=472 id=11102
+@text len=12 seq=2
+ recommended
+@token seq=0 pos=473 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=473 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=473 id=6467
+@text len=6 seq=2
+ books
+@token seq=0 pos=474 id=1477
+@text len=5 seq=0
+ find
+@token seq=1 pos=474 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=474 id=2924
+@text len=8 seq=2
+ include
+@token seq=0 pos=475 id=419
+@text len=5 seq=0
+ this
+@token seq=1 pos=475 id=50087
+@text len=10 seq=1
+ visualize
+@token seq=2 pos=475 id=510
+@text len=2 seq=2
+:
+
+@token seq=0 pos=476 id=382
+@text len=3 seq=0
+.
+
+
+@token seq=1 pos=476 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=476 id=257
+@text len=4 seq=2
+    
+@token seq=0 pos=477 id=19
+@text len=1 seq=0
+4
+@token seq=1 pos=477 id=5025
+@text len=13 seq=1
+ relationship
+@token seq=2 pos=477 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=478 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=478 id=1948
+@text len=8 seq=1
+ between
+@token seq=2 pos=478 id=330
+@text len=2 seq=2
+ "
+@token seq=0 pos=479 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=479 id=5746
+@text len=10 seq=1
+ functions
+@token seq=2 pos=479 id=8851
+@text len=3 seq=2
+Cal
+@token seq=0 pos=480 id=88492
+@text len=8 seq=0
+Practice
+@token seq=1 pos=480 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=480 id=41349
+@text len=5 seq=2
+culus
+@token seq=0 pos=481 id=334
+@text len=2 seq=0
+**
+@token seq=1 pos=481 id=862
+@text len=6 seq=1
+ their
+@token seq=2 pos=481 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=482 id=510
+@text len=2 seq=0
+:
+
+@token seq=1 pos=482 id=42545
+@text len=12 seq=1
+ derivatives
+@token seq=2 pos=482 id=22752
+@text len=6 seq=2
+ Early
+@token seq=0 pos=483 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=483 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=483 id=4058
+@text len=6 seq=2
+ Trans
+@token seq=0 pos=484 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=484 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=484 id=66
+@text len=1 seq=2
+c
+@token seq=0 pos=485 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=485 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=485 id=28193
+@text len=6 seq=2
+endent
+@token seq=0 pos=486 id=88492
+@text len=8 seq=0
+Practice
+@token seq=1 pos=486 id=19598
+@text len=6 seq=1
+Online
+@token seq=2 pos=486 id=1127
+@text len=3 seq=2
+als
+@token seq=0 pos=487 id=44535
+@text len=9 seq=0
+ Problems
+@token seq=1 pos=487 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=487 id=1
+@text len=1 seq=2
+"
+@token seq=0 pos=488 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=488 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=488 id=553
+@text len=3 seq=2
+ by
+@token seq=0 pos=489 id=63284
+@text len=6 seq=0
+ Solve
+@token seq=1 pos=489 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=489 id=7801
+@text len=6 seq=2
+ James
+@token seq=0 pos=490 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=490 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=490 id=28768
+@text len=8 seq=2
+ Stewart
+@token seq=0 pos=491 id=8045
+@text len=8 seq=0
+ variety
+@token seq=1 pos=491 id=2860
+@text len=7 seq=1
+ online
+@token seq=2 pos=491 id=198
+@text len=1 seq=2
+
+
+@token seq=0 pos=492 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=492 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=492 id=257
+@text len=4 seq=2
+    
+@token seq=0 pos=493 id=5322
+@text len=9 seq=0
+ problems
+@token seq=1 pos=493 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=493 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=494 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=494 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=494 id=330
+@text len=2 seq=2
+ "
+@token seq=0 pos=495 id=54314
+@text len=10 seq=0
+ reinforce
+@token seq=1 pos=495 id=11625
+@text len=6 seq=1
+ solve
+@token seq=2 pos=495 id=8851
+@text len=3 seq=2
+Cal
+@token seq=0 pos=496 id=697
+@text len=5 seq=0
+ your
+@token seq=1 pos=496 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=496 id=41349
+@text len=5 seq=2
+culus
+@token seq=0 pos=497 id=8660
+@text len=14 seq=0
+ understanding
+@token seq=1 pos=497 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=497 id=1
+@text len=1 seq=2
+"
+@token seq=0 pos=498 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=498 id=1779
+@text len=6 seq=1
+ check
+@token seq=2 pos=498 id=553
+@text len=3 seq=2
+ by
+@token seq=0 pos=499 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=499 id=697
+@text len=5 seq=1
+ your
+@token seq=2 pos=499 id=7801
+@text len=6 seq=2
+ James
+@token seq=0 pos=500 id=18940
+@text len=9 seq=0
+ concepts
+@token seq=1 pos=500 id=975
+@text len=5 seq=1
+ work
+@token seq=2 pos=500 id=28768
+@text len=8 seq=2
+ Stewart
+@token seq=0 pos=501 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=501 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=501 id=198
+@text len=1 seq=2
+
+
+@token seq=0 pos=502 id=4329
+@text len=5 seq=0
+ Some
+@token seq=1 pos=502 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=502 id=257
+@text len=4 seq=2
+    
+@token seq=0 pos=503 id=4185
+@text len=7 seq=0
+ common
+@token seq=1 pos=503 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=503 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=504 id=5322
+@text len=9 seq=0
+ problems
+@token seq=1 pos=504 id=11212
+@text len=5 seq=1
+Graph
+@token seq=2 pos=504 id=330
+@text len=2 seq=2
+ "
+@token seq=0 pos=505 id=2924
+@text len=8 seq=0
+ include
+@token seq=1 pos=505 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=505 id=8851
+@text len=3 seq=2
+Cal
+@token seq=0 pos=506 id=9271
+@text len=8 seq=0
+ finding
+@token seq=1 pos=506 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=506 id=41349
+@text len=5 seq=2
+culus
+@token seq=0 pos=507 id=13388
+@text len=7 seq=0
+ limits
+@token seq=1 pos=507 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=507 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=508 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=508 id=1095
+@text len=5 seq=1
+ating
+@token seq=2 pos=508 id=22752
+@text len=6 seq=2
+ Early
+@token seq=0 pos=509 id=9271
+@text len=8 seq=0
+ finding
+@token seq=1 pos=509 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=509 id=4058
+@text len=6 seq=2
+ Trans
+@token seq=0 pos=510 id=42545
+@text len=12 seq=0
+ derivatives
+@token seq=1 pos=510 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=510 id=66
+@text len=1 seq=2
+c
+@token seq=0 pos=511 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=511 id=4771
+@text len=6 seq=1
+ graph
+@token seq=2 pos=511 id=408
+@text len=3 seq=2
+end
+@token seq=0 pos=512 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=512 id=287
+@text len=3 seq=1
+ing
+@token seq=2 pos=512 id=6296
+@text len=5 seq=2
+ental
+@token seq=0 pos=513 id=9271
+@text len=8 seq=0
+ finding
+@token seq=1 pos=513 id=5812
+@text len=7 seq=1
+ calcul
+@token seq=2 pos=513 id=23550
+@text len=10 seq=2
+ Functions
+@token seq=0 pos=514 id=8761
+@text len=7 seq=0
+ integr
+@token seq=1 pos=514 id=2973
+@text len=5 seq=1
+ators
+@token seq=2 pos=514 id=1
+@text len=1 seq=2
+"
+@token seq=0 pos=515 id=1127
+@text len=3 seq=0
+als
+@token seq=1 pos=515 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=515 id=553
+@text len=3 seq=2
+ by
+@token seq=0 pos=516 id=382
+@text len=3 seq=0
+.
+
+
+@token seq=1 pos=516 id=50087
+@text len=10 seq=1
+ visualize
+@token seq=2 pos=516 id=14325
+@text len=4 seq=2
+ Ron
+@token seq=0 pos=517 id=20
+@text len=1 seq=0
+5
+@token seq=1 pos=517 id=279
+@text len=4 seq=1
+ the
+@token seq=2 pos=517 id=85078
+@text len=7 seq=2
+ Larson
+@token seq=0 pos=518 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=518 id=5025
+@text len=13 seq=1
+ relationship
+@token seq=2 pos=518 id=198
+@text len=1 seq=2
+
+
+@token seq=0 pos=519 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=519 id=1948
+@text len=8 seq=1
+ between
+@token seq=2 pos=519 id=257
+@text len=4 seq=2
+    
+@token seq=0 pos=520 id=48712
+@text len=5 seq=0
+Study
+@token seq=1 pos=520 id=5746
+@text len=10 seq=1
+ functions
+@token seq=2 pos=520 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=521 id=16209
+@text len=10 seq=0
+ Resources
+@token seq=1 pos=521 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=521 id=330
+@text len=2 seq=2
+ "
+@token seq=0 pos=522 id=334
+@text len=2 seq=0
+**
+@token seq=1 pos=522 id=862
+@text len=6 seq=1
+ their
+@token seq=2 pos=522 id=8851
+@text len=3 seq=2
+Cal
+@token seq=0 pos=523 id=510
+@text len=2 seq=0
+:
+
+@token seq=1 pos=523 id=42545
+@text len=12 seq=1
+ derivatives
+@token seq=2 pos=523 id=41349
+@text len=5 seq=2
+culus
+@token seq=0 pos=524 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=524 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=524 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=525 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=525 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=525 id=22752
+@text len=6 seq=2
+ Early
+@token seq=0 pos=526 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=526 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=526 id=23550
+@text len=10 seq=2
+ Functions
+@token seq=0 pos=527 id=19598
+@text len=6 seq=0
+Online
+@token seq=1 pos=527 id=12768
+@text len=4 seq=1
+Real
+@token seq=2 pos=527 id=1
+@text len=1 seq=2
+"
+@token seq=0 pos=528 id=16209
+@text len=10 seq=0
+ Resources
+@token seq=1 pos=528 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=528 id=553
+@text len=3 seq=2
+ by
+@token seq=0 pos=529 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=529 id=10134
+@text len=5 seq=1
+World
+@token seq=2 pos=529 id=14325
+@text len=4 seq=2
+ Ron
+@token seq=0 pos=530 id=9192
+@text len=5 seq=0
+ Look
+@token seq=1 pos=530 id=31525
+@text len=13 seq=1
+ Applications
+@token seq=2 pos=530 id=85078
+@text len=7 seq=2
+ Larson
+@token seq=0 pos=531 id=369
+@text len=4 seq=0
+ for
+@token seq=1 pos=531 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=531 id=271
+@text len=2 seq=2
+
+
+
+@token seq=0 pos=532 id=1910
+@text len=5 seq=0
+ free
+@token seq=1 pos=532 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=532 id=14374
+@text len=3 seq=2
+###
+@token seq=0 pos=533 id=2860
+@text len=7 seq=0
+ online
+@token seq=1 pos=533 id=1931
+@text len=5 seq=1
+ real
+@token seq=2 pos=533 id=220
+@text len=1 seq=2
+ 
+@token seq=0 pos=534 id=4963
+@text len=10 seq=0
+ resources
+@token seq=1 pos=534 id=30084
+@text len=6 seq=1
+-world
+@token seq=2 pos=534 id=22
+@text len=1 seq=2
+7
+@token seq=0 pos=535 id=1741
+@text len=5 seq=0
+ such
+@token seq=1 pos=535 id=8357
+@text len=13 seq=1
+ applications
+@token seq=2 pos=535 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=536 id=438
+@text len=3 seq=0
+ as
+@token seq=1 pos=536 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=536 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=537 id=24287
+@text len=5 seq=0
+ Khan
+@token seq=1 pos=537 id=82668
+@text len=9 seq=1
+ calculus
+@token seq=2 pos=537 id=48712
+@text len=5 seq=2
+Study
+@token seq=0 pos=538 id=15815
+@text len=8 seq=0
+ Academy
+@token seq=1 pos=538 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=538 id=31359
+@text len=7 seq=2
+ Calcul
+@token seq=0 pos=539 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=539 id=1741
+@text len=5 seq=1
+ such
+@token seq=2 pos=539 id=355
+@text len=2 seq=2
+us
+@token seq=0 pos=540 id=6244
+@text len=5 seq=0
+ Cour
+@token seq=1 pos=540 id=438
+@text len=3 seq=1
+ as
+@token seq=2 pos=540 id=26984
+@text len=9 seq=2
+ Practice
+@token seq=0 pos=541 id=799
+@text len=3 seq=0
+ser
+@token seq=1 pos=541 id=21321
+@text len=8 seq=1
+ physics
+@token seq=2 pos=541 id=44535
+@text len=9 seq=2
+ Problems
+@token seq=0 pos=542 id=64
+@text len=1 seq=0
+a
+@token seq=1 pos=542 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=542 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=543 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=543 id=14667
+@text len=12 seq=1
+ engineering
+@token seq=2 pos=543 id=1019
+@text len=3 seq=2
+**
+
+@token seq=0 pos=544 id=476
+@text len=3 seq=0
+ or
+@token seq=1 pos=544 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=544 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=545 id=1578
+@text len=3 seq=0
+ ed
+@token seq=1 pos=545 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=545 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=546 id=55
+@text len=1 seq=0
+X
+@token seq=1 pos=546 id=27889
+@text len=10 seq=1
+ economics
+@token seq=2 pos=546 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=547 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=547 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=547 id=88492
+@text len=8 seq=2
+Practice
+@token seq=0 pos=548 id=892
+@text len=6 seq=0
+ which
+@token seq=1 pos=548 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=548 id=44535
+@text len=9 seq=2
+ Problems
+@token seq=0 pos=549 id=3010
+@text len=6 seq=0
+ offer
+@token seq=1 pos=549 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=549 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=550 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=550 id=23
+@text len=1 seq=1
+8
+@token seq=2 pos=550 id=26984
+@text len=9 seq=2
+ Practice
+@token seq=0 pos=551 id=13980
+@text len=8 seq=0
+ courses
+@token seq=1 pos=551 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=551 id=21828
+@text len=8 seq=2
+ solving
+@token seq=0 pos=552 id=518
+@text len=3 seq=0
+ at
+@token seq=1 pos=552 id=68967
+@text len=11 seq=1
+ Continuous
+@token seq=2 pos=552 id=5322
+@text len=9 seq=2
+ problems
+@token seq=0 pos=553 id=5257
+@text len=8 seq=0
+ various
+@token seq=1 pos=553 id=20909
+@text len=9 seq=1
+ Learning
+@token seq=2 pos=553 id=304
+@text len=3 seq=2
+ in
+@token seq=0 pos=554 id=5866
+@text len=7 seq=0
+ levels
+@token seq=1 pos=554 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=554 id=82668
+@text len=9 seq=2
+ calculus
+@token seq=0 pos=555 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=555 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=555 id=64203
+@text len=10 seq=2
+ textbooks
+@token seq=0 pos=556 id=28316
+@text len=8 seq=0
+ lengths
+@token seq=1 pos=556 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=556 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=557 id=624
+@text len=2 seq=0
+.
+
+@token seq=1 pos=557 id=94780
+@text len=10 seq=1
+Continuous
+@token seq=2 pos=557 id=1096
+@text len=5 seq=2
+ This
+@token seq=0 pos=558 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=558 id=20909
+@text len=9 seq=1
+ Learning
+@token seq=2 pos=558 id=686
+@text len=5 seq=2
+ will
+@token seq=0 pos=559 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=559 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=559 id=1492
+@text len=5 seq=2
+ help
+@token seq=0 pos=560 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=560 id=20297
+@text len=7 seq=1
+ Contin
+@token seq=2 pos=560 id=498
+@text len=4 seq=2
+ you
+@token seq=0 pos=561 id=1178
+@text len=4 seq=0
+Text
+@token seq=1 pos=561 id=1832
+@text len=5 seq=1
+ually
+@token seq=2 pos=561 id=1936
+@text len=6 seq=2
+ build
+@token seq=0 pos=562 id=12110
+@text len=5 seq=0
+books
+@token seq=1 pos=562 id=3960
+@text len=6 seq=1
+ learn
+@token seq=2 pos=562 id=697
+@text len=5 seq=2
+ your
+@token seq=0 pos=563 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=563 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=563 id=7361
+@text len=7 seq=2
+ skills
+@token seq=0 pos=564 id=5443
+@text len=4 seq=0
+ Use
+@token seq=1 pos=564 id=2647
+@text len=7 seq=1
+ update
+@token seq=2 pos=564 id=323
+@text len=4 seq=2
+ and
+@token seq=0 pos=565 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=565 id=697
+@text len=5 seq=1
+ your
+@token seq=2 pos=565 id=12136
+@text len=11 seq=2
+ confidence
+@token seq=0 pos=566 id=64203
+@text len=10 seq=0
+ textbooks
+@token seq=1 pos=566 id=8660
+@text len=14 seq=1
+ understanding
+@token seq=2 pos=566 id=624
+@text len=2 seq=2
+.
+
+@token seq=0 pos=567 id=429
+@text len=5 seq=0
+ that
+@token seq=1 pos=567 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=567 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=568 id=525
+@text len=4 seq=0
+ are
+@token seq=1 pos=568 id=82668
+@text len=9 seq=1
+ calculus
+@token seq=2 pos=568 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=569 id=8311
+@text len=12 seq=0
+ appropriate
+@token seq=1 pos=569 id=1526
+@text len=8 seq=1
+ through
+@token seq=2 pos=569 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=570 id=369
+@text len=4 seq=0
+ for
+@token seq=1 pos=570 id=501
+@text len=4 seq=1
+ new
+@token seq=2 pos=570 id=19598
+@text len=6 seq=2
+Online
+@token seq=0 pos=571 id=697
+@text len=5 seq=0
+ your
+@token seq=1 pos=571 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=571 id=16209
+@text len=10 seq=2
+ Resources
+@token seq=0 pos=572 id=2188
+@text len=6 seq=0
+ level
+@token seq=1 pos=572 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=572 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=573 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=573 id=7375
+@text len=6 seq=1
+ tools
+@token seq=2 pos=573 id=5443
+@text len=4 seq=2
+ Use
+@token seq=0 pos=574 id=4329
+@text len=5 seq=0
+ Some
+@token seq=1 pos=574 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=574 id=2860
+@text len=7 seq=2
+ online
+@token seq=0 pos=575 id=11102
+@text len=12 seq=0
+ recommended
+@token seq=1 pos=575 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=575 id=4963
+@text len=10 seq=2
+ resources
+@token seq=0 pos=576 id=21984
+@text len=6 seq=0
+ texts
+@token seq=1 pos=576 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=576 id=1075
+@text len=5 seq=2
+ like
+@token seq=0 pos=577 id=2924
+@text len=8 seq=0
+ include
+@token seq=1 pos=577 id=94780
+@text len=10 seq=1
+Continuous
+@token seq=2 pos=577 id=24287
+@text len=5 seq=2
+ Khan
+@token seq=0 pos=578 id=330
+@text len=2 seq=0
+ "
+@token seq=1 pos=578 id=20909
+@text len=9 seq=1
+ Learning
+@token seq=2 pos=578 id=15815
+@text len=8 seq=2
+ Academy
+@token seq=0 pos=579 id=8851
+@text len=3 seq=0
+Cal
+@token seq=1 pos=579 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=579 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=580 id=41349
+@text len=5 seq=0
+culus
+@token seq=1 pos=580 id=20297
+@text len=7 seq=1
+ Contin
+@token seq=2 pos=580 id=14865
+@text len=4 seq=2
+ MIT
+@token seq=0 pos=581 id=25
+@text len=1 seq=0
+:
+@token seq=1 pos=581 id=1832
+@text len=5 seq=1
+ually
+@token seq=2 pos=581 id=5264
+@text len=5 seq=2
+ Open
+@token seq=0 pos=582 id=22752
+@text len=6 seq=0
+ Early
+@token seq=1 pos=582 id=3960
+@text len=6 seq=1
+ learn
+@token seq=2 pos=582 id=23340
+@text len=6 seq=2
+Course
+@token seq=0 pos=583 id=4058
+@text len=6 seq=0
+ Trans
+@token seq=1 pos=583 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=583 id=71770
+@text len=4 seq=2
+Ware
+@token seq=0 pos=584 id=66
+@text len=1 seq=0
+c
+@token seq=1 pos=584 id=2647
+@text len=7 seq=1
+ update
+@token seq=2 pos=584 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=585 id=28193
+@text len=6 seq=0
+endent
+@token seq=1 pos=585 id=697
+@text len=5 seq=1
+ your
+@token seq=2 pos=585 id=323
+@text len=4 seq=2
+ and
+@token seq=0 pos=586 id=1127
+@text len=3 seq=0
+als
+@token seq=1 pos=586 id=8660
+@text len=14 seq=1
+ understanding
+@token seq=2 pos=586 id=1008
+@text len=6 seq=2
+ other
+@token seq=0 pos=587 id=1
+@text len=1 seq=0
+"
+@token seq=1 pos=587 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=587 id=2766
+@text len=6 seq=2
+ video
+@token seq=0 pos=588 id=553
+@text len=3 seq=0
+ by
+@token seq=1 pos=588 id=82668
+@text len=9 seq=1
+ calculus
+@token seq=2 pos=588 id=43812
+@text len=10 seq=2
+ tutorials
+@token seq=0 pos=589 id=7801
+@text len=6 seq=0
+ James
+@token seq=1 pos=589 id=1526
+@text len=8 seq=1
+ through
+@token seq=2 pos=589 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=0 pos=590 id=28768
+@text len=8 seq=0
+ Stewart
+@token seq=1 pos=590 id=501
+@text len=4 seq=1
+ new
+@token seq=2 pos=590 id=14374
+@text len=3 seq=2
+###
+@token seq=0 pos=591 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=591 id=7375
+@text len=6 seq=1
+ tools
+@token seq=2 pos=591 id=220
+@text len=1 seq=2
+ 
+@token seq=0 pos=592 id=330
+@text len=2 seq=0
+ "
+@token seq=1 pos=592 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=592 id=23
+@text len=1 seq=2
+8
+@token seq=0 pos=593 id=8851
+@text len=3 seq=0
+Cal
+@token seq=1 pos=593 id=14310
+@text len=13 seq=1
+ technologies
+@token seq=2 pos=593 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=594 id=41349
+@text len=5 seq=0
+culus
+@token seq=1 pos=594 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=594 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=595 id=1
+@text len=1 seq=0
+"
+@token seq=1 pos=595 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=595 id=48712
+@text len=5 seq=2
+Study
+@token seq=0 pos=596 id=553
+@text len=3 seq=0
+ by
+@token seq=1 pos=596 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=596 id=31359
+@text len=7 seq=2
+ Calcul
+@token seq=0 pos=597 id=7937
+@text len=8 seq=0
+ Michael
+@token seq=1 pos=597 id=24
+@text len=1 seq=1
+9
+@token seq=2 pos=597 id=355
+@text len=2 seq=2
+us
+@token seq=0 pos=598 id=3089
+@text len=3 seq=0
+ Sp
+@token seq=1 pos=598 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=598 id=369
+@text len=4 seq=2
+ for
+@token seq=0 pos=599 id=344
+@text len=2 seq=0
+iv
+@token seq=1 pos=599 id=20185
+@text len=7 seq=1
+ Visual
+@token seq=2 pos=599 id=32310
+@text len=5 seq=2
+ Exam
+@token seq=0 pos=600 id=585
+@text len=2 seq=0
+ak
+@token seq=1 pos=600 id=4849
+@text len=5 seq=1
+izing
+@token seq=2 pos=600 id=73335
+@text len=12 seq=2
+ Preparation
+@token seq=0 pos=601 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=601 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=601 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=602 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=602 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=602 id=1019
+@text len=3 seq=2
+**
+
+@token seq=0 pos=603 id=330
+@text len=2 seq=0
+ "
+@token seq=1 pos=603 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=603 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=604 id=8851
+@text len=3 seq=0
+Cal
+@token seq=1 pos=604 id=9594
+@text len=6 seq=1
+Visual
+@token seq=2 pos=604 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=605 id=41349
+@text len=5 seq=0
+culus
+@token seq=1 pos=605 id=4849
+@text len=5 seq=1
+izing
+@token seq=2 pos=605 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=606 id=1
+@text len=1 seq=0
+"
+@token seq=1 pos=606 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=606 id=19432
+@text len=6 seq=2
+Review
+@token seq=0 pos=607 id=553
+@text len=3 seq=0
+ by
+@token seq=1 pos=607 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=607 id=3377
+@text len=5 seq=2
+ Form
+@token seq=0 pos=608 id=7937
+@text len=8 seq=0
+ Michael
+@token seq=1 pos=608 id=46187
+@text len=9 seq=1
+ diagrams
+@token seq=2 pos=608 id=25541
+@text len=4 seq=2
+ulas
+@token seq=0 pos=609 id=3089
+@text len=3 seq=0
+ Sp
+@token seq=1 pos=609 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=609 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=610 id=344
+@text len=2 seq=0
+iv
+@token seq=1 pos=610 id=9124
+@text len=7 seq=1
+ visual
+@token seq=2 pos=610 id=10294
+@text len=7 seq=2
+ Review
+@token seq=0 pos=611 id=585
+@text len=2 seq=0
+ak
+@token seq=1 pos=611 id=7375
+@text len=6 seq=1
+ tools
+@token seq=2 pos=611 id=323
+@text len=4 seq=2
+ and
+@token seq=0 pos=612 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=612 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=612 id=3395
+@text len=7 seq=2
+ review
+@token seq=0 pos=613 id=892
+@text len=6 seq=0
+ which
+@token seq=1 pos=613 id=3535
+@text len=11 seq=1
+ understand
+@token seq=2 pos=613 id=678
+@text len=4 seq=2
+ all
+@token seq=0 pos=614 id=3421
+@text len=6 seq=0
+ cover
+@token seq=1 pos=614 id=18940
+@text len=9 seq=1
+ concepts
+@token seq=2 pos=614 id=279
+@text len=4 seq=2
+ the
+@token seq=0 pos=615 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=615 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=615 id=54079
+@text len=9 seq=2
+ formulas
+@token seq=0 pos=616 id=705
+@text len=3 seq=0
+ up
+@token seq=1 pos=616 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=616 id=498
+@text len=4 seq=2
+ you
+@token seq=0 pos=617 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=617 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=617 id=9498
+@text len=8 seq=2
+ learned
+@token seq=0 pos=618 id=2745
+@text len=5 seq=0
+ mult
+@token seq=1 pos=618 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=618 id=624
+@text len=2 seq=2
+.
+
+@token seq=0 pos=619 id=56398
+@text len=4 seq=0
+ivar
+@token seq=1 pos=619 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=619 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=620 id=2156
+@text len=5 seq=0
+iable
+@token seq=1 pos=620 id=9594
+@text len=6 seq=1
+Visual
+@token seq=2 pos=620 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=621 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=621 id=4849
+@text len=5 seq=1
+izing
+@token seq=2 pos=621 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=622 id=382
+@text len=3 seq=0
+.
+
+
+@token seq=1 pos=622 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=622 id=19432
+@text len=6 seq=2
+Review
+@token seq=0 pos=623 id=21
+@text len=1 seq=0
+6
+@token seq=1 pos=623 id=5443
+@text len=4 seq=1
+ Use
+@token seq=2 pos=623 id=26984
+@text len=9 seq=2
+ Practice
+@token seq=0 pos=624 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=624 id=46187
+@text len=9 seq=1
+ diagrams
+@token seq=2 pos=624 id=44535
+@text len=9 seq=2
+ Problems
+@token seq=0 pos=625 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=625 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=625 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=626 id=94780
+@text len=10 seq=0
+Continuous
+@token seq=1 pos=626 id=9124
+@text len=7 seq=1
+ visual
+@token seq=2 pos=626 id=63284
+@text len=6 seq=2
+ Solve
+@token seq=0 pos=627 id=20909
+@text len=9 seq=0
+ Learning
+@token seq=1 pos=627 id=7375
+@text len=6 seq=1
+ tools
+@token seq=2 pos=627 id=6588
+@text len=9 seq=2
+ practice
+@token seq=0 pos=628 id=334
+@text len=2 seq=0
+**
+@token seq=1 pos=628 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=628 id=5322
+@text len=9 seq=2
+ problems
+@token seq=0 pos=629 id=510
+@text len=2 seq=0
+:
+
+@token seq=1 pos=629 id=3535
+@text len=11 seq=1
+ understand
+@token seq=2 pos=629 id=311
+@text len=3 seq=2
+ to
+@token seq=0 pos=630 id=256
+@text len=2 seq=0
+  
+@token seq=1 pos=630 id=18940
+@text len=9 seq=1
+ concepts
+@token seq=2 pos=630 id=54314
+@text len=10 seq=2
+ reinforce
+@token seq=0 pos=631 id=481
+@text len=2 seq=0
+ -
+@token seq=1 pos=631 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=631 id=697
+@text len=5 seq=2
+ your
+@token seq=0 pos=632 id=3070
+@text len=3 seq=0
+ **
+@token seq=1 pos=632 id=5322
+@text len=9 seq=1
+ problems
+@token seq=2 pos=632 id=6832
+@text len=9 seq=2
+ learning
+@token seq=0 pos=633 id=19432
+@text len=6 seq=0
+Review
+@token seq=1 pos=633 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=633 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=0 pos=634 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=634 id=14374
+@text len=3 seq=1
+###
+@token seq=2 pos=634 id=14374
+@text len=3 seq=2
+###
+@token seq=0 pos=635 id=1032
+@text len=3 seq=0
+ Re
+@token seq=1 pos=635 id=220
+@text len=1 seq=1
+ 
+@token seq=2 pos=635 id=220
+@text len=1 seq=2
+ 
+@token seq=0 pos=636 id=27460
+@text len=5 seq=0
+visit
+@token seq=1 pos=636 id=16
+@text len=1 seq=1
+1
+@token seq=2 pos=636 id=24
+@text len=1 seq=2
+9
+@token seq=0 pos=637 id=95518
+@text len=3 seq=0
+**:
+@token seq=1 pos=637 id=15
+@text len=1 seq=1
+0
+@token seq=2 pos=637 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=638 id=28800
+@text len=8 seq=0
+ Regular
+@token seq=1 pos=638 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=638 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=639 id=398
+@text len=2 seq=0
+ly
+@token seq=1 pos=639 id=13023
+@text len=6 seq=1
+ Final
+@token seq=2 pos=639 id=48712
+@text len=5 seq=2
+Study
+@token seq=0 pos=640 id=3395
+@text len=7 seq=0
+ review
+@token seq=1 pos=640 id=25704
+@text len=5 seq=1
+ Tips
+@token seq=2 pos=640 id=448
+@text len=5 seq=2
+ with
+@token seq=0 pos=641 id=1128
+@text len=5 seq=0
+ what
+@token seq=1 pos=641 id=198
+@text len=1 seq=1
+
+
+@token seq=2 pos=641 id=264
+@text len=2 seq=2
+ a
+@token seq=0 pos=642 id=498
+@text len=4 seq=0
+ you
+@token seq=1 pos=642 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=642 id=29069
+@text len=8 seq=2
+ Teacher
+@token seq=0 pos=643 id=614
+@text len=5 seq=0
+ have
+@token seq=1 pos=643 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=643 id=476
+@text len=3 seq=2
+ or
+@token seq=0 pos=644 id=9498
+@text len=8 seq=0
+ learned
+@token seq=1 pos=644 id=38102
+@text len=4 seq=1
+Stay
+@token seq=2 pos=644 id=91191
+@text len=7 seq=2
+ Mentor
+@token seq=0 pos=645 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=645 id=18977
+@text len=4 seq=1
+ Mot
+@token seq=2 pos=645 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=646 id=64778
+@text len=8 seq=0
+ revisit
+@token seq=1 pos=646 id=54686
+@text len=6 seq=1
+ivated
+@token seq=2 pos=646 id=1019
+@text len=3 seq=2
+**
+
+@token seq=0 pos=647 id=432
+@text len=3 seq=0
+ it
+@token seq=1 pos=647 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=647 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=648 id=979
+@text len=5 seq=0
+ when
+@token seq=1 pos=648 id=13655
+@text len=5 seq=1
+ Keep
+@token seq=2 pos=648 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=649 id=5871
+@text len=10 seq=0
+ necessary
+@token seq=1 pos=649 id=6133
+@text len=9 seq=1
+ yourself
+@token seq=2 pos=649 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=650 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=650 id=26664
+@text len=10 seq=1
+ motivated
+@token seq=2 pos=650 id=45065
+@text len=7 seq=2
+Teacher
+@token seq=0 pos=651 id=576
+@text len=4 seq=0
+ The
+@token seq=1 pos=651 id=553
+@text len=3 seq=1
+ by
+@token seq=2 pos=651 id=476
+@text len=3 seq=2
+ or
+@token seq=0 pos=652 id=1376
+@text len=4 seq=0
+ key
+@token seq=1 pos=652 id=4460
+@text len=7 seq=1
+ trying
+@token seq=2 pos=652 id=91191
+@text len=7 seq=2
+ Mentor
+@token seq=0 pos=653 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=653 id=501
+@text len=4 seq=1
+ new
+@token seq=2 pos=653 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=654 id=87761
+@text len=10 seq=0
+ mastering
+@token seq=1 pos=654 id=2513
+@text len=7 seq=1
+ things
+@token seq=2 pos=654 id=17688
+@text len=10 seq=2
+ Sometimes
+@token seq=0 pos=655 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=655 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=655 id=11
+@text len=1 seq=2
+,
+@token seq=0 pos=656 id=374
+@text len=3 seq=0
+ is
+@token seq=1 pos=656 id=17003
+@text len=12 seq=1
+ challenging
+@token seq=2 pos=656 id=13336
+@text len=9 seq=2
+ teachers
+@token seq=0 pos=657 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=657 id=6133
+@text len=9 seq=1
+ yourself
+@token seq=2 pos=657 id=476
+@text len=3 seq=2
+ or
+@token seq=0 pos=658 id=3535
+@text len=11 seq=0
+ understand
+@token seq=1 pos=658 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=658 id=75607
+@text len=8 seq=2
+ mentors
+@token seq=0 pos=659 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=659 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=659 id=646
+@text len=4 seq=2
+ can
+@token seq=0 pos=660 id=3796
+@text len=6 seq=0
+ apply
+@token seq=1 pos=660 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=660 id=3410
+@text len=8 seq=2
+ provide
+@token seq=0 pos=661 id=18940
+@text len=9 seq=0
+ concepts
+@token seq=1 pos=661 id=38102
+@text len=4 seq=1
+Stay
+@token seq=2 pos=661 id=5107
+@text len=11 seq=2
+ additional
+@token seq=0 pos=662 id=15502
+@text len=10 seq=0
+ regularly
+@token seq=1 pos=662 id=52311
+@text len=9 seq=1
+ Flexible
+@token seq=2 pos=662 id=25709
+@text len=9 seq=2
+ insights
+@token seq=0 pos=663 id=382
+@text len=3 seq=0
+.
+
+
+@token seq=1 pos=663 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=663 id=323
+@text len=4 seq=2
+ and
+@token seq=0 pos=664 id=1359
+@text len=2 seq=0
+By
+@token seq=1 pos=664 id=2823
+@text len=3 seq=1
+ Be
+@token seq=2 pos=664 id=1492
+@text len=5 seq=2
+ help
+@token seq=0 pos=665 id=2701
+@text len=10 seq=0
+ following
+@token seq=1 pos=665 id=18776
+@text len=9 seq=1
+ flexible
+@token seq=2 pos=665 id=498
+@text len=4 seq=2
+ you
+@token seq=0 pos=666 id=1493
+@text len=6 seq=0
+ these
+@token seq=1 pos=666 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=666 id=3535
+@text len=11 seq=2
+ understand
+@token seq=0 pos=667 id=7354
+@text len=6 seq=0
+ steps
+@token seq=1 pos=667 id=1787
+@text len=5 seq=1
+ open
+@token seq=2 pos=667 id=279
+@text len=4 seq=2
+ the
+@token seq=0 pos=668 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=668 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=668 id=3684
+@text len=9 seq=2
+ material
+@token seq=0 pos=669 id=1667
+@text len=6 seq=0
+ using
+@token seq=1 pos=669 id=501
+@text len=4 seq=1
+ new
+@token seq=2 pos=669 id=2664
+@text len=7 seq=2
+ better
+@token seq=0 pos=670 id=1493
+@text len=6 seq=0
+ these
+@token seq=1 pos=670 id=6708
+@text len=6 seq=1
+ ideas
+@token seq=2 pos=670 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=0 pos=671 id=4963
+@text len=10 seq=0
+ resources
+@token seq=1 pos=671 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=671 id=14374
+@text len=3 seq=2
+###
+@token seq=0 pos=672 id=11
+@text len=1 seq=0
+,
+@token seq=1 pos=672 id=19827
+@text len=11 seq=1
+ approaches
+@token seq=2 pos=672 id=220
+@text len=1 seq=2
+ 
+@token seq=0 pos=673 id=498
+@text len=4 seq=0
+ you
+@token seq=1 pos=673 id=624
+@text len=2 seq=1
+.
+
+@token seq=2 pos=673 id=16
+@text len=1 seq=2
+1
+@token seq=0 pos=674 id=1265
+@text len=7 seq=0
+ should
+@token seq=1 pos=674 id=12
+@text len=1 seq=1
+-
+@token seq=2 pos=674 id=15
+@text len=1 seq=2
+0
+@token seq=0 pos=675 id=387
+@text len=3 seq=0
+ be
+@token seq=1 pos=675 id=3070
+@text len=3 seq=1
+ **
+@token seq=2 pos=675 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=676 id=2952
+@text len=5 seq=0
+ able
+@token seq=1 pos=676 id=38102
+@text len=4 seq=1
+Stay
+@token seq=2 pos=676 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=677 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=677 id=28924
+@text len=8 seq=1
+ Patient
+@token seq=2 pos=677 id=17814
+@text len=4 seq=2
+Take
+@token seq=0 pos=678 id=8722
+@text len=5 seq=0
+ gain
+@token seq=1 pos=678 id=95518
+@text len=3 seq=1
+**:
+@token seq=2 pos=678 id=18068
+@text len=6 seq=2
+ Notes
+@token seq=0 pos=679 id=264
+@text len=2 seq=0
+ a
+@token seq=1 pos=679 id=31359
+@text len=7 seq=1
+ Calcul
+@token seq=2 pos=679 id=323
+@text len=4 seq=2
+ and
+@token seq=0 pos=680 id=6437
+@text len=6 seq=0
+ solid
+@token seq=1 pos=680 id=355
+@text len=2 seq=1
+us
+@token seq=2 pos=680 id=26984
+@text len=9 seq=2
+ Practice
+@token seq=0 pos=681 id=8660
+@text len=14 seq=0
+ understanding
+@token seq=1 pos=681 id=646
+@text len=4 seq=1
+ can
+@token seq=2 pos=681 id=25
+@text len=1 seq=2
+:
+@token seq=0 pos=682 id=315
+@text len=3 seq=0
+ of
+@token seq=1 pos=682 id=387
+@text len=3 seq=1
+ be
+@token seq=2 pos=682 id=1019
+@text len=3 seq=2
+**
+
+@token seq=0 pos=683 id=82668
+@text len=9 seq=0
+ calculus
+@token seq=1 pos=683 id=17003
+@text len=12 seq=1
+ challenging
+@token seq=2 pos=683 id=256
+@text len=2 seq=2
+  
+@token seq=0 pos=684 id=323
+@text len=4 seq=0
+ and
+@token seq=1 pos=684 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=684 id=481
+@text len=2 seq=2
+ -
+@token seq=0 pos=685 id=387
+@text len=3 seq=0
+ be
+@token seq=1 pos=685 id=714
+@text len=4 seq=1
+ but
+@token seq=2 pos=685 id=3070
+@text len=3 seq=2
+ **
+@token seq=0 pos=686 id=2952
+@text len=5 seq=0
+ able
+@token seq=1 pos=686 id=448
+@text len=5 seq=1
+ with
+@token seq=2 pos=686 id=21667
+@text len=5 seq=2
+Notes
+@token seq=0 pos=687 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=687 id=3322
+@text len=7 seq=1
+ enough
+@token seq=2 pos=687 id=66963
+@text len=3 seq=2
+:**
+@token seq=0 pos=688 id=3796
+@text len=6 seq=0
+ apply
+@token seq=1 pos=688 id=6588
+@text len=9 seq=1
+ practice
+@token seq=2 pos=688 id=11778
+@text len=5 seq=2
+ Take
+@token seq=0 pos=689 id=432
+@text len=3 seq=0
+ it
+@token seq=1 pos=689 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=689 id=11682
+@text len=9 seq=2
+ detailed
+@token seq=0 pos=690 id=311
+@text len=3 seq=0
+ to
+@token seq=1 pos=690 id=29301
+@text len=9 seq=1
+ patience
+@token seq=2 pos=690 id=8388
+@text len=6 seq=2
+ notes
+@token seq=0 pos=691 id=501
+@text len=4 seq=0
+ new
+@token seq=1 pos=691 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=691 id=2337
+@text len=7 seq=2
+ during
+@token seq=0 pos=692 id=5322
+@text len=9 seq=0
+ problems
+@token seq=1 pos=692 id=498
+@text len=4 seq=1
+ you
+@token seq=2 pos=692 id=45132
+@text len=9 seq=2
+ lectures
+@token seq=0 pos=693 id=13
+@text len=1 seq=0
+.
+@token seq=1 pos=693 id=686
+@text len=5 seq=1
+ will
+@token seq=2 pos=693 id=13
+@text len=1 seq=2
+.
+@token seq=0 pos=694 id=7684
+@text len=5 seq=0
+ Good
+@token seq=1 pos=694 id=7341
+@text len=7 seq=1
+ master
+@token seq=2 pos=694 id=1096
+@text len=5 seq=2
+ This
+@token seq=0 pos=695 id=15019
+@text len=5 seq=0
+ luck
+@token seq=1 pos=695 id=432
+@text len=3 seq=1
+ it
+@token seq=2 pos=695 id=686
+@text len=5 seq=2
+ will
+@token seq=0 pos=696 id=0
+@text len=1 seq=0
+!
+@token seq=1 pos=696 id=382
+@text len=3 seq=1
+.
+
+
+@token seq=2 pos=696 id=1492
+@text len=5 seq=2
+ help
+@token seq=1 pos=697 id=1359
+@text len=2 seq=1
+By
+@token seq=2 pos=697 id=498
+@text len=4 seq=2
+ you
+@token seq=1 pos=698 id=2701
+@text len=10 seq=1
+ following
+@token seq=2 pos=698 id=3535
+@text len=11 seq=2
+ understand
+@token seq=1 pos=699 id=1493
+@text len=6 seq=1
+ these
+@token seq=2 pos=699 id=279
+@text len=4 seq=2
+ the
+@token seq=1 pos=700 id=7354
+@text len=6 seq=1
+ steps
+@token seq=2 pos=700 id=3684
+@text len=9 seq=2
+ material
+@token seq=1 pos=701 id=11
+@text len=1 seq=1
+,
+@token seq=2 pos=701 id=2664
+@text len=7 seq=2
+ better
+@token seq=1 pos=702 id=498
+@text len=4 seq=1
+ you
+@token seq=2 pos=702 id=323
+@text len=4 seq=2
+ and
+@token seq=1 pos=703 id=1265
+@text len=7 seq=1
+ should
+@token seq=2 pos=703 id=6099
+@text len=9 seq=2
+ remember
+@token seq=1 pos=704 id=387
+@text len=3 seq=1
+ be
+@token seq=2 pos=704 id=279
+@text len=4 seq=2
+ the
+@token seq=1 pos=705 id=2952
+@text len=5 seq=1
+ able
+@token seq=2 pos=705 id=3684
+@text len=9 seq=2
+ material
+@token seq=1 pos=706 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=706 id=2937
+@text len=6 seq=2
+ later
+@token seq=1 pos=707 id=8722
+@text len=5 seq=1
+ gain
+@token seq=2 pos=707 id=624
+@text len=2 seq=2
+.
+
+@token seq=1 pos=708 id=264
+@text len=2 seq=1
+ a
+@token seq=2 pos=708 id=256
+@text len=2 seq=2
+  
+@token seq=1 pos=709 id=19117
+@text len=7 seq=1
+ deeper
+@token seq=2 pos=709 id=481
+@text len=2 seq=2
+ -
+@token seq=1 pos=710 id=8660
+@text len=14 seq=1
+ understanding
+@token seq=2 pos=710 id=3070
+@text len=3 seq=2
+ **
+@token seq=1 pos=711 id=315
+@text len=3 seq=1
+ of
+@token seq=2 pos=711 id=88492
+@text len=8 seq=2
+Practice
+@token seq=1 pos=712 id=82668
+@text len=9 seq=1
+ calculus
+@token seq=2 pos=712 id=44535
+@text len=9 seq=2
+ Problems
+@token seq=1 pos=713 id=323
+@text len=4 seq=1
+ and
+@token seq=2 pos=713 id=66963
+@text len=3 seq=2
+:**
+@token seq=1 pos=714 id=387
+@text len=3 seq=1
+ be
+@token seq=2 pos=714 id=63284
+@text len=6 seq=2
+ Solve
+@token seq=1 pos=715 id=1632
+@text len=5 seq=1
+ well
+@token seq=2 pos=715 id=5322
+@text len=9 seq=2
+ problems
+@token seq=1 pos=716 id=87102
+@text len=9 seq=1
+-equipped
+@token seq=2 pos=716 id=323
+@text len=4 seq=2
+ and
+@token seq=1 pos=717 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=717 id=6588
+@text len=9 seq=2
+ practice
+@token seq=1 pos=718 id=4538
+@text len=6 seq=1
+ teach
+@token seq=2 pos=718 id=15502
+@text len=10 seq=2
+ regularly
+@token seq=1 pos=719 id=432
+@text len=3 seq=1
+ it
+@token seq=2 pos=719 id=311
+@text len=3 seq=2
+ to
+@token seq=1 pos=720 id=311
+@text len=3 seq=1
+ to
+@token seq=2 pos=720 id=54314
+@text len=10 seq=2
+ reinforce
+@token seq=1 pos=721 id=697
+@text len=5 seq=1
+ your
+@token seq=2 pos=721 id=697
+@text len=5 seq=2
+ your
+@token seq=1 pos=722 id=4143
+@text len=9 seq=1
+ students
+@token seq=2 pos=722 id=6832
+@text len=9 seq=2
+ learning
+@token seq=1 pos=723 id=13
+@text len=1 seq=1
+.
+@token seq=2 pos=723 id=382
+@text len=3 seq=2
+.
+
+
+@token seq=2 pos=724 id=1359
+@text len=2 seq=2
+By
+@token seq=2 pos=725 id=2701
+@text len=10 seq=2
+ following
+@token seq=2 pos=726 id=1493
+@text len=6 seq=2
+ these
+@token seq=2 pos=727 id=7354
+@text len=6 seq=2
+ steps
+@token seq=2 pos=728 id=11
+@text len=1 seq=2
+,
+@token seq=2 pos=729 id=498
+@text len=4 seq=2
+ you
+@token seq=2 pos=730 id=646
+@text len=4 seq=2
+ can
+@token seq=2 pos=731 id=1936
+@text len=6 seq=2
+ build
+@token seq=2 pos=732 id=697
+@text len=5 seq=2
+ your
+@token seq=2 pos=733 id=12136
+@text len=11 seq=2
+ confidence
+@token seq=2 pos=734 id=323
+@text len=4 seq=2
+ and
+@token seq=2 pos=735 id=5726
+@text len=8 seq=2
+ ability
+@token seq=2 pos=736 id=311
+@text len=3 seq=2
+ to
+@token seq=2 pos=737 id=11996
+@text len=8 seq=2
+ succeed
+@token seq=2 pos=738 id=304
+@text len=3 seq=2
+ in
+@token seq=2 pos=739 id=82668
+@text len=9 seq=2
+ calculus
+@token seq=2 pos=740 id=13
+@text len=1 seq=2
+.
+@token seq=2 pos=741 id=7684
+@text len=5 seq=2
+ Good
+@token seq=2 pos=742 id=15019
+@text len=5 seq=2
+ luck
+@token seq=2 pos=743 id=0
+@text len=1 seq=2
+!
+@gen seq=0 tokens=697 ms=63758.9 tok_per_s=10.93 stop=eos
+@gen seq=1 tokens=724 ms=63758.9 tok_per_s=11.36 stop=eos
+@gen seq=2 tokens=744 ms=63758.9 tok_per_s=11.67 stop=eos
+@gen seq=3 tokens=398 ms=63758.9 tok_per_s=6.24 stop=eos
+@genall sequences=4 tokens=2563 ms=63758.9 tok_per_s=40.20
+@done status=ok ms=64429.5

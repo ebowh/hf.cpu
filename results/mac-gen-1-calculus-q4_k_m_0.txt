@@ -1,6 +1,6 @@
 @begin id="" op=generate
 @prompt tokens=39 threads=2
-@prefill tokens=39 cached=0 ms=626.1 tok_per_s=62.29 kv_bytes=786432
+@prefill tokens=39 cached=0 ms=598.4 tok_per_s=65.17 kv_bytes=786432
 @token pos=0 id=95456
 @text len=9
 Certainly
@@ -365,5 +365,1759 @@ atives
 @token pos=119 id=30232
 @text len=6
  slope
-@gen tokens=120 ms=4099.4 tok_per_s=29.27 stop=length
-@done status=ok ms=4782.2
+@token pos=120 id=315
+@text len=3
+ of
+@token pos=121 id=264
+@text len=2
+ a
+@token pos=122 id=15655
+@text len=6
+ curve
+@token pos=123 id=518
+@text len=3
+ at
+@token pos=124 id=264
+@text len=2
+ a
+@token pos=125 id=3654
+@text len=8
+ certain
+@token pos=126 id=1459
+@text len=6
+ point
+@token pos=127 id=624
+@text len=2
+.
+
+@token pos=128 id=256
+@text len=2
+  
+@token pos=129 id=481
+@text len=2
+ -
+@token pos=130 id=3070
+@text len=3
+ **
+@token pos=131 id=1072
+@text len=3
+Int
+@token pos=132 id=14412
+@text len=3
+egr
+@token pos=133 id=1127
+@text len=3
+als
+@token pos=134 id=95518
+@text len=3
+**:
+@token pos=135 id=29001
+@text len=7
+ Integr
+@token pos=136 id=1127
+@text len=3
+als
+@token pos=137 id=525
+@text len=4
+ are
+@token pos=138 id=279
+@text len=4
+ the
+@token pos=139 id=14002
+@text len=9
+ opposite
+@token pos=140 id=315
+@text len=3
+ of
+@token pos=141 id=42545
+@text len=12
+ derivatives
+@token pos=142 id=13
+@text len=1
+.
+@token pos=143 id=2379
+@text len=5
+ They
+@token pos=144 id=525
+@text len=4
+ are
+@token pos=145 id=1483
+@text len=5
+ used
+@token pos=146 id=311
+@text len=3
+ to
+@token pos=147 id=1477
+@text len=5
+ find
+@token pos=148 id=5671
+@text len=6
+ areas
+@token pos=149 id=1212
+@text len=6
+ under
+@token pos=150 id=35933
+@text len=7
+ curves
+@token pos=151 id=11
+@text len=1
+,
+@token pos=152 id=26282
+@text len=8
+ volumes
+@token pos=153 id=315
+@text len=3
+ of
+@token pos=154 id=81386
+@text len=7
+ solids
+@token pos=155 id=11
+@text len=1
+,
+@token pos=156 id=323
+@text len=4
+ and
+@token pos=157 id=1008
+@text len=6
+ other
+@token pos=158 id=35972
+@text len=13
+ mathematical
+@token pos=159 id=32676
+@text len=11
+ quantities
+@token pos=160 id=382
+@text len=3
+.
+
+
+@token pos=161 id=17
+@text len=1
+2
+@token pos=162 id=13
+@text len=1
+.
+@token pos=163 id=3070
+@text len=3
+ **
+@token pos=164 id=44576
+@text len=7
+Concept
+@token pos=165 id=82
+@text len=1
+s
+@token pos=166 id=315
+@text len=3
+ of
+@token pos=167 id=31359
+@text len=7
+ Calcul
+@token pos=168 id=355
+@text len=2
+us
+@token pos=169 id=334
+@text len=2
+**
+@token pos=170 id=510
+@text len=2
+:
+
+@token pos=171 id=256
+@text len=2
+  
+@token pos=172 id=481
+@text len=2
+ -
+@token pos=173 id=3070
+@text len=3
+ **
+@token pos=174 id=94588
+@text len=6
+Limits
+@token pos=175 id=95518
+@text len=3
+**:
+@token pos=176 id=71855
+@text len=7
+ Limits
+@token pos=177 id=2138
+@text len=6
+ allow
+@token pos=178 id=498
+@text len=4
+ you
+@token pos=179 id=311
+@text len=3
+ to
+@token pos=180 id=3535
+@text len=11
+ understand
+@token pos=181 id=279
+@text len=4
+ the
+@token pos=182 id=7709
+@text len=9
+ behavior
+@token pos=183 id=315
+@text len=3
+ of
+@token pos=184 id=5746
+@text len=10
+ functions
+@token pos=185 id=438
+@text len=3
+ as
+@token pos=186 id=279
+@text len=4
+ the
+@token pos=187 id=1946
+@text len=6
+ input
+@token pos=188 id=19827
+@text len=11
+ approaches
+@token pos=189 id=264
+@text len=2
+ a
+@token pos=190 id=3151
+@text len=9
+ specific
+@token pos=191 id=897
+@text len=6
+ value
+@token pos=192 id=13
+@text len=1
+.
+@token pos=193 id=1752
+@text len=4
+ For
+@token pos=194 id=3110
+@text len=8
+ example
+@token pos=195 id=11
+@text len=1
+,
+@token pos=196 id=421
+@text len=3
+ if
+@token pos=197 id=498
+@text len=4
+ you
+@token pos=198 id=1366
+@text len=5
+ want
+@token pos=199 id=311
+@text len=3
+ to
+@token pos=200 id=1477
+@text len=5
+ find
+@token pos=201 id=279
+@text len=4
+ the
+@token pos=202 id=3930
+@text len=6
+ limit
+@token pos=203 id=315
+@text len=3
+ of
+@token pos=204 id=17767
+@text len=3
+ \(
+@token pos=205 id=1124
+@text len=2
+ \
+@token pos=206 id=37018
+@text len=4
+frac
+@token pos=207 id=90
+@text len=1
+{
+@token pos=208 id=68
+@text len=1
+e
+@token pos=209 id=61
+@text len=1
+^
+@token pos=210 id=87
+@text len=1
+x
+@token pos=211 id=481
+@text len=2
+ -
+@token pos=212 id=220
+@text len=1
+ 
+@token pos=213 id=16
+@text len=1
+1
+@token pos=214 id=15170
+@text len=2
+}{
+@token pos=215 id=87
+@text len=1
+x
+@token pos=216 id=92
+@text len=1
+}
+@token pos=217 id=1124
+@text len=2
+ \
+@token pos=218 id=8
+@text len=1
+)
+@token pos=219 id=438
+@text len=3
+ as
+@token pos=220 id=17767
+@text len=3
+ \(
+@token pos=221 id=856
+@text len=2
+ x
+@token pos=222 id=1124
+@text len=2
+ \
+@token pos=223 id=8
+@text len=1
+)
+@token pos=224 id=19827
+@text len=11
+ approaches
+@token pos=225 id=220
+@text len=1
+ 
+@token pos=226 id=15
+@text len=1
+0
+@token pos=227 id=11
+@text len=1
+,
+@token pos=228 id=498
+@text len=4
+ you
+@token pos=229 id=646
+@text len=4
+ can
+@token pos=230 id=990
+@text len=4
+ use
+@token pos=231 id=279
+@text len=4
+ the
+@token pos=232 id=7271
+@text len=11
+ definition
+@token pos=233 id=315
+@text len=3
+ of
+@token pos=234 id=279
+@text len=4
+ the
+@token pos=235 id=31805
+@text len=11
+ derivative
+@token pos=236 id=311
+@text len=3
+ to
+@token pos=237 id=1477
+@text len=5
+ find
+@token pos=238 id=419
+@text len=5
+ this
+@token pos=239 id=3930
+@text len=6
+ limit
+@token pos=240 id=624
+@text len=2
+.
+
+@token pos=241 id=256
+@text len=2
+  
+@token pos=242 id=481
+@text len=2
+ -
+@token pos=243 id=3070
+@text len=3
+ **
+@token pos=244 id=22171
+@text len=3
+Der
+@token pos=245 id=344
+@text len=2
+iv
+@token pos=246 id=5859
+@text len=6
+atives
+@token pos=247 id=95518
+@text len=3
+**:
+@token pos=248 id=12741
+@text len=4
+ Der
+@token pos=249 id=344
+@text len=2
+iv
+@token pos=250 id=5859
+@text len=6
+atives
+@token pos=251 id=2138
+@text len=6
+ allow
+@token pos=252 id=498
+@text len=4
+ you
+@token pos=253 id=311
+@text len=3
+ to
+@token pos=254 id=1477
+@text len=5
+ find
+@token pos=255 id=279
+@text len=4
+ the
+@token pos=256 id=4379
+@text len=5
+ rate
+@token pos=257 id=315
+@text len=3
+ of
+@token pos=258 id=2297
+@text len=7
+ change
+@token pos=259 id=315
+@text len=3
+ of
+@token pos=260 id=264
+@text len=2
+ a
+@token pos=261 id=729
+@text len=9
+ function
+@token pos=262 id=13
+@text len=1
+.
+@token pos=263 id=1752
+@text len=4
+ For
+@token pos=264 id=3110
+@text len=8
+ example
+@token pos=265 id=11
+@text len=1
+,
+@token pos=266 id=279
+@text len=4
+ the
+@token pos=267 id=31805
+@text len=11
+ derivative
+@token pos=268 id=315
+@text len=3
+ of
+@token pos=269 id=17767
+@text len=3
+ \(
+@token pos=270 id=1124
+@text len=2
+ \
+@token pos=271 id=15940
+@text len=3
+sin
+@token pos=272 id=2075
+@text len=2
+(x
+@token pos=273 id=8
+@text len=1
+)
+@token pos=274 id=1124
+@text len=2
+ \
+@token pos=275 id=8
+@text len=1
+)
+@token pos=276 id=374
+@text len=3
+ is
+@token pos=277 id=17767
+@text len=3
+ \(
+@token pos=278 id=1124
+@text len=2
+ \
+@token pos=279 id=9407
+@text len=3
+cos
+@token pos=280 id=2075
+@text len=2
+(x
+@token pos=281 id=8
+@text len=1
+)
+@token pos=282 id=1124
+@text len=2
+ \
+@token pos=283 id=568
+@text len=2
+).
+@token pos=284 id=1096
+@text len=5
+ This
+@token pos=285 id=374
+@text len=3
+ is
+@token pos=286 id=264
+@text len=2
+ a
+@token pos=287 id=15811
+@text len=12
+ fundamental
+@token pos=288 id=7286
+@text len=8
+ concept
+@token pos=289 id=304
+@text len=3
+ in
+@token pos=290 id=82668
+@text len=9
+ calculus
+@token pos=291 id=624
+@text len=2
+.
+
+@token pos=292 id=256
+@text len=2
+  
+@token pos=293 id=481
+@text len=2
+ -
+@token pos=294 id=3070
+@text len=3
+ **
+@token pos=295 id=1072
+@text len=3
+Int
+@token pos=296 id=14412
+@text len=3
+egr
+@token pos=297 id=1127
+@text len=3
+als
+@token pos=298 id=95518
+@text len=3
+**:
+@token pos=299 id=29001
+@text len=7
+ Integr
+@token pos=300 id=1127
+@text len=3
+als
+@token pos=301 id=2138
+@text len=6
+ allow
+@token pos=302 id=498
+@text len=4
+ you
+@token pos=303 id=311
+@text len=3
+ to
+@token pos=304 id=1477
+@text len=5
+ find
+@token pos=305 id=279
+@text len=4
+ the
+@token pos=306 id=3082
+@text len=5
+ area
+@token pos=307 id=1212
+@text len=6
+ under
+@token pos=308 id=264
+@text len=2
+ a
+@token pos=309 id=15655
+@text len=6
+ curve
+@token pos=310 id=13
+@text len=1
+.
+@token pos=311 id=1752
+@text len=4
+ For
+@token pos=312 id=3110
+@text len=8
+ example
+@token pos=313 id=11
+@text len=1
+,
+@token pos=314 id=279
+@text len=4
+ the
+@token pos=315 id=25098
+@text len=9
+ integral
+@token pos=316 id=315
+@text len=3
+ of
+@token pos=317 id=17767
+@text len=3
+ \(
+@token pos=318 id=1124
+@text len=2
+ \
+@token pos=319 id=37018
+@text len=4
+frac
+@token pos=320 id=90
+@text len=1
+{
+@token pos=321 id=16
+@text len=1
+1
+@token pos=322 id=15170
+@text len=2
+}{
+@token pos=323 id=87
+@text len=1
+x
+@token pos=324 id=92
+@text len=1
+}
+@token pos=325 id=1124
+@text len=2
+ \
+@token pos=326 id=8
+@text len=1
+)
+@token pos=327 id=374
+@text len=3
+ is
+@token pos=328 id=17767
+@text len=3
+ \(
+@token pos=329 id=1124
+@text len=2
+ \
+@token pos=330 id=2261
+@text len=2
+ln
+@token pos=331 id=2075
+@text len=2
+(x
+@token pos=332 id=8
+@text len=1
+)
+@token pos=333 id=1124
+@text len=2
+ \
+@token pos=334 id=568
+@text len=2
+).
+@token pos=335 id=1096
+@text len=5
+ This
+@token pos=336 id=374
+@text len=3
+ is
+@token pos=337 id=2441
+@text len=8
+ another
+@token pos=338 id=15811
+@text len=12
+ fundamental
+@token pos=339 id=7286
+@text len=8
+ concept
+@token pos=340 id=304
+@text len=3
+ in
+@token pos=341 id=82668
+@text len=9
+ calculus
+@token pos=342 id=382
+@text len=3
+.
+
+
+@token pos=343 id=18
+@text len=1
+3
+@token pos=344 id=13
+@text len=1
+.
+@token pos=345 id=3070
+@text len=3
+ **
+@token pos=346 id=40381
+@text len=8
+Examples
+@token pos=347 id=334
+@text len=2
+**
+@token pos=348 id=510
+@text len=2
+:
+
+@token pos=349 id=256
+@text len=2
+  
+@token pos=350 id=481
+@text len=2
+ -
+@token pos=351 id=3070
+@text len=3
+ **
+@token pos=352 id=51422
+@text len=7
+Finding
+@token pos=353 id=71855
+@text len=7
+ Limits
+@token pos=354 id=95518
+@text len=3
+**:
+@token pos=355 id=21144
+@text len=9
+ Consider
+@token pos=356 id=279
+@text len=4
+ the
+@token pos=357 id=3930
+@text len=6
+ limit
+@token pos=358 id=315
+@text len=3
+ of
+@token pos=359 id=17767
+@text len=3
+ \(
+@token pos=360 id=1124
+@text len=2
+ \
+@token pos=361 id=37018
+@text len=4
+frac
+@token pos=362 id=90
+@text len=1
+{
+@token pos=363 id=68
+@text len=1
+e
+@token pos=364 id=61
+@text len=1
+^
+@token pos=365 id=87
+@text len=1
+x
+@token pos=366 id=481
+@text len=2
+ -
+@token pos=367 id=220
+@text len=1
+ 
+@token pos=368 id=16
+@text len=1
+1
+@token pos=369 id=15170
+@text len=2
+}{
+@token pos=370 id=87
+@text len=1
+x
+@token pos=371 id=92
+@text len=1
+}
+@token pos=372 id=1124
+@text len=2
+ \
+@token pos=373 id=8
+@text len=1
+)
+@token pos=374 id=438
+@text len=3
+ as
+@token pos=375 id=17767
+@text len=3
+ \(
+@token pos=376 id=856
+@text len=2
+ x
+@token pos=377 id=1124
+@text len=2
+ \
+@token pos=378 id=8
+@text len=1
+)
+@token pos=379 id=19827
+@text len=11
+ approaches
+@token pos=380 id=220
+@text len=1
+ 
+@token pos=381 id=15
+@text len=1
+0
+@token pos=382 id=13
+@text len=1
+.
+@token pos=383 id=1446
+@text len=4
+ You
+@token pos=384 id=646
+@text len=4
+ can
+@token pos=385 id=990
+@text len=4
+ use
+@token pos=386 id=279
+@text len=4
+ the
+@token pos=387 id=7271
+@text len=11
+ definition
+@token pos=388 id=315
+@text len=3
+ of
+@token pos=389 id=279
+@text len=4
+ the
+@token pos=390 id=31805
+@text len=11
+ derivative
+@token pos=391 id=311
+@text len=3
+ to
+@token pos=392 id=1477
+@text len=5
+ find
+@token pos=393 id=419
+@text len=5
+ this
+@token pos=394 id=3930
+@text len=6
+ limit
+@token pos=395 id=624
+@text len=2
+.
+
+@token pos=396 id=256
+@text len=2
+  
+@token pos=397 id=481
+@text len=2
+ -
+@token pos=398 id=3070
+@text len=3
+ **
+@token pos=399 id=51422
+@text len=7
+Finding
+@token pos=400 id=12741
+@text len=4
+ Der
+@token pos=401 id=344
+@text len=2
+iv
+@token pos=402 id=5859
+@text len=6
+atives
+@token pos=403 id=95518
+@text len=3
+**:
+@token pos=404 id=21144
+@text len=9
+ Consider
+@token pos=405 id=279
+@text len=4
+ the
+@token pos=406 id=31805
+@text len=11
+ derivative
+@token pos=407 id=315
+@text len=3
+ of
+@token pos=408 id=17767
+@text len=3
+ \(
+@token pos=409 id=1124
+@text len=2
+ \
+@token pos=410 id=15940
+@text len=3
+sin
+@token pos=411 id=2075
+@text len=2
+(x
+@token pos=412 id=8
+@text len=1
+)
+@token pos=413 id=1124
+@text len=2
+ \
+@token pos=414 id=8
+@text len=1
+)
+@token pos=415 id=438
+@text len=3
+ as
+@token pos=416 id=17767
+@text len=3
+ \(
+@token pos=417 id=856
+@text len=2
+ x
+@token pos=418 id=1124
+@text len=2
+ \
+@token pos=419 id=8
+@text len=1
+)
+@token pos=420 id=19827
+@text len=11
+ approaches
+@token pos=421 id=220
+@text len=1
+ 
+@token pos=422 id=15
+@text len=1
+0
+@token pos=423 id=13
+@text len=1
+.
+@token pos=424 id=1446
+@text len=4
+ You
+@token pos=425 id=646
+@text len=4
+ can
+@token pos=426 id=990
+@text len=4
+ use
+@token pos=427 id=279
+@text len=4
+ the
+@token pos=428 id=7271
+@text len=11
+ definition
+@token pos=429 id=315
+@text len=3
+ of
+@token pos=430 id=279
+@text len=4
+ the
+@token pos=431 id=31805
+@text len=11
+ derivative
+@token pos=432 id=311
+@text len=3
+ to
+@token pos=433 id=1477
+@text len=5
+ find
+@token pos=434 id=419
+@text len=5
+ this
+@token pos=435 id=624
+@text len=2
+.
+
+@token pos=436 id=256
+@text len=2
+  
+@token pos=437 id=481
+@text len=2
+ -
+@token pos=438 id=3070
+@text len=3
+ **
+@token pos=439 id=51422
+@text len=7
+Finding
+@token pos=440 id=29001
+@text len=7
+ Integr
+@token pos=441 id=1127
+@text len=3
+als
+@token pos=442 id=95518
+@text len=3
+**:
+@token pos=443 id=21144
+@text len=9
+ Consider
+@token pos=444 id=279
+@text len=4
+ the
+@token pos=445 id=25098
+@text len=9
+ integral
+@token pos=446 id=315
+@text len=3
+ of
+@token pos=447 id=17767
+@text len=3
+ \(
+@token pos=448 id=1124
+@text len=2
+ \
+@token pos=449 id=37018
+@text len=4
+frac
+@token pos=450 id=90
+@text len=1
+{
+@token pos=451 id=16
+@text len=1
+1
+@token pos=452 id=15170
+@text len=2
+}{
+@token pos=453 id=87
+@text len=1
+x
+@token pos=454 id=92
+@text len=1
+}
+@token pos=455 id=1124
+@text len=2
+ \
+@token pos=456 id=8
+@text len=1
+)
+@token pos=457 id=438
+@text len=3
+ as
+@token pos=458 id=17767
+@text len=3
+ \(
+@token pos=459 id=856
+@text len=2
+ x
+@token pos=460 id=1124
+@text len=2
+ \
+@token pos=461 id=8
+@text len=1
+)
+@token pos=462 id=19827
+@text len=11
+ approaches
+@token pos=463 id=54910
+@text len=9
+ infinity
+@token pos=464 id=13
+@text len=1
+.
+@token pos=465 id=1446
+@text len=4
+ You
+@token pos=466 id=646
+@text len=4
+ can
+@token pos=467 id=990
+@text len=4
+ use
+@token pos=468 id=279
+@text len=4
+ the
+@token pos=469 id=7271
+@text len=11
+ definition
+@token pos=470 id=315
+@text len=3
+ of
+@token pos=471 id=279
+@text len=4
+ the
+@token pos=472 id=25098
+@text len=9
+ integral
+@token pos=473 id=311
+@text len=3
+ to
+@token pos=474 id=1477
+@text len=5
+ find
+@token pos=475 id=419
+@text len=5
+ this
+@token pos=476 id=382
+@text len=3
+.
+
+
+@token pos=477 id=19
+@text len=1
+4
+@token pos=478 id=13
+@text len=1
+.
+@token pos=479 id=3070
+@text len=3
+ **
+@token pos=480 id=88492
+@text len=8
+Practice
+@token pos=481 id=334
+@text len=2
+**
+@token pos=482 id=510
+@text len=2
+:
+
+@token pos=483 id=256
+@text len=2
+  
+@token pos=484 id=481
+@text len=2
+ -
+@token pos=485 id=3070
+@text len=3
+ **
+@token pos=486 id=88492
+@text len=8
+Practice
+@token pos=487 id=44535
+@text len=9
+ Problems
+@token pos=488 id=95518
+@text len=3
+**:
+@token pos=489 id=63284
+@text len=6
+ Solve
+@token pos=490 id=264
+@text len=2
+ a
+@token pos=491 id=8045
+@text len=8
+ variety
+@token pos=492 id=315
+@text len=3
+ of
+@token pos=493 id=5322
+@text len=9
+ problems
+@token pos=494 id=311
+@text len=3
+ to
+@token pos=495 id=54314
+@text len=10
+ reinforce
+@token pos=496 id=697
+@text len=5
+ your
+@token pos=497 id=8660
+@text len=14
+ understanding
+@token pos=498 id=315
+@text len=3
+ of
+@token pos=499 id=82668
+@text len=9
+ calculus
+@token pos=500 id=18940
+@text len=9
+ concepts
+@token pos=501 id=13
+@text len=1
+.
+@token pos=502 id=4329
+@text len=5
+ Some
+@token pos=503 id=4185
+@text len=7
+ common
+@token pos=504 id=5322
+@text len=9
+ problems
+@token pos=505 id=2924
+@text len=8
+ include
+@token pos=506 id=9271
+@text len=8
+ finding
+@token pos=507 id=13388
+@text len=7
+ limits
+@token pos=508 id=11
+@text len=1
+,
+@token pos=509 id=9271
+@text len=8
+ finding
+@token pos=510 id=42545
+@text len=12
+ derivatives
+@token pos=511 id=11
+@text len=1
+,
+@token pos=512 id=323
+@text len=4
+ and
+@token pos=513 id=9271
+@text len=8
+ finding
+@token pos=514 id=8761
+@text len=7
+ integr
+@token pos=515 id=1127
+@text len=3
+als
+@token pos=516 id=382
+@text len=3
+.
+
+
+@token pos=517 id=20
+@text len=1
+5
+@token pos=518 id=13
+@text len=1
+.
+@token pos=519 id=3070
+@text len=3
+ **
+@token pos=520 id=48712
+@text len=5
+Study
+@token pos=521 id=16209
+@text len=10
+ Resources
+@token pos=522 id=334
+@text len=2
+**
+@token pos=523 id=510
+@text len=2
+:
+
+@token pos=524 id=256
+@text len=2
+  
+@token pos=525 id=481
+@text len=2
+ -
+@token pos=526 id=3070
+@text len=3
+ **
+@token pos=527 id=19598
+@text len=6
+Online
+@token pos=528 id=16209
+@text len=10
+ Resources
+@token pos=529 id=95518
+@text len=3
+**:
+@token pos=530 id=9192
+@text len=5
+ Look
+@token pos=531 id=369
+@text len=4
+ for
+@token pos=532 id=1910
+@text len=5
+ free
+@token pos=533 id=2860
+@text len=7
+ online
+@token pos=534 id=4963
+@text len=10
+ resources
+@token pos=535 id=1741
+@text len=5
+ such
+@token pos=536 id=438
+@text len=3
+ as
+@token pos=537 id=24287
+@text len=5
+ Khan
+@token pos=538 id=15815
+@text len=8
+ Academy
+@token pos=539 id=11
+@text len=1
+,
+@token pos=540 id=6244
+@text len=5
+ Cour
+@token pos=541 id=799
+@text len=3
+ser
+@token pos=542 id=64
+@text len=1
+a
+@token pos=543 id=11
+@text len=1
+,
+@token pos=544 id=476
+@text len=3
+ or
+@token pos=545 id=1578
+@text len=3
+ ed
+@token pos=546 id=55
+@text len=1
+X
+@token pos=547 id=11
+@text len=1
+,
+@token pos=548 id=892
+@text len=6
+ which
+@token pos=549 id=3010
+@text len=6
+ offer
+@token pos=550 id=82668
+@text len=9
+ calculus
+@token pos=551 id=13980
+@text len=8
+ courses
+@token pos=552 id=518
+@text len=3
+ at
+@token pos=553 id=5257
+@text len=8
+ various
+@token pos=554 id=5866
+@text len=7
+ levels
+@token pos=555 id=323
+@text len=4
+ and
+@token pos=556 id=28316
+@text len=8
+ lengths
+@token pos=557 id=624
+@text len=2
+.
+
+@token pos=558 id=256
+@text len=2
+  
+@token pos=559 id=481
+@text len=2
+ -
+@token pos=560 id=3070
+@text len=3
+ **
+@token pos=561 id=1178
+@text len=4
+Text
+@token pos=562 id=12110
+@text len=5
+books
+@token pos=563 id=95518
+@text len=3
+**:
+@token pos=564 id=5443
+@text len=4
+ Use
+@token pos=565 id=82668
+@text len=9
+ calculus
+@token pos=566 id=64203
+@text len=10
+ textbooks
+@token pos=567 id=429
+@text len=5
+ that
+@token pos=568 id=525
+@text len=4
+ are
+@token pos=569 id=8311
+@text len=12
+ appropriate
+@token pos=570 id=369
+@text len=4
+ for
+@token pos=571 id=697
+@text len=5
+ your
+@token pos=572 id=2188
+@text len=6
+ level
+@token pos=573 id=13
+@text len=1
+.
+@token pos=574 id=4329
+@text len=5
+ Some
+@token pos=575 id=11102
+@text len=12
+ recommended
+@token pos=576 id=21984
+@text len=6
+ texts
+@token pos=577 id=2924
+@text len=8
+ include
+@token pos=578 id=330
+@text len=2
+ "
+@token pos=579 id=8851
+@text len=3
+Cal
+@token pos=580 id=41349
+@text len=5
+culus
+@token pos=581 id=25
+@text len=1
+:
+@token pos=582 id=22752
+@text len=6
+ Early
+@token pos=583 id=4058
+@text len=6
+ Trans
+@token pos=584 id=66
+@text len=1
+c
+@token pos=585 id=28193
+@text len=6
+endent
+@token pos=586 id=1127
+@text len=3
+als
+@token pos=587 id=1
+@text len=1
+"
+@token pos=588 id=553
+@text len=3
+ by
+@token pos=589 id=7801
+@text len=6
+ James
+@token pos=590 id=28768
+@text len=8
+ Stewart
+@token pos=591 id=11
+@text len=1
+,
+@token pos=592 id=330
+@text len=2
+ "
+@token pos=593 id=8851
+@text len=3
+Cal
+@token pos=594 id=41349
+@text len=5
+culus
+@token pos=595 id=1
+@text len=1
+"
+@token pos=596 id=553
+@text len=3
+ by
+@token pos=597 id=7937
+@text len=8
+ Michael
+@token pos=598 id=3089
+@text len=3
+ Sp
+@token pos=599 id=344
+@text len=2
+iv
+@token pos=600 id=585
+@text len=2
+ak
+@token pos=601 id=11
+@text len=1
+,
+@token pos=602 id=323
+@text len=4
+ and
+@token pos=603 id=330
+@text len=2
+ "
+@token pos=604 id=8851
+@text len=3
+Cal
+@token pos=605 id=41349
+@text len=5
+culus
+@token pos=606 id=1
+@text len=1
+"
+@token pos=607 id=553
+@text len=3
+ by
+@token pos=608 id=7937
+@text len=8
+ Michael
+@token pos=609 id=3089
+@text len=3
+ Sp
+@token pos=610 id=344
+@text len=2
+iv
+@token pos=611 id=585
+@text len=2
+ak
+@token pos=612 id=11
+@text len=1
+,
+@token pos=613 id=892
+@text len=6
+ which
+@token pos=614 id=3421
+@text len=6
+ cover
+@token pos=615 id=82668
+@text len=9
+ calculus
+@token pos=616 id=705
+@text len=3
+ up
+@token pos=617 id=311
+@text len=3
+ to
+@token pos=618 id=2745
+@text len=5
+ mult
+@token pos=619 id=56398
+@text len=4
+ivar
+@token pos=620 id=2156
+@text len=5
+iable
+@token pos=621 id=82668
+@text len=9
+ calculus
+@token pos=622 id=382
+@text len=3
+.
+
+
+@token pos=623 id=21
+@text len=1
+6
+@token pos=624 id=13
+@text len=1
+.
+@token pos=625 id=3070
+@text len=3
+ **
+@token pos=626 id=94780
+@text len=10
+Continuous
+@token pos=627 id=20909
+@text len=9
+ Learning
+@token pos=628 id=334
+@text len=2
+**
+@token pos=629 id=510
+@text len=2
+:
+
+@token pos=630 id=256
+@text len=2
+  
+@token pos=631 id=481
+@text len=2
+ -
+@token pos=632 id=3070
+@text len=3
+ **
+@token pos=633 id=19432
+@text len=6
+Review
+@token pos=634 id=323
+@text len=4
+ and
+@token pos=635 id=1032
+@text len=3
+ Re
+@token pos=636 id=27460
+@text len=5
+visit
+@token pos=637 id=95518
+@text len=3
+**:
+@token pos=638 id=28800
+@text len=8
+ Regular
+@token pos=639 id=398
+@text len=2
+ly
+@token pos=640 id=3395
+@text len=7
+ review
+@token pos=641 id=1128
+@text len=5
+ what
+@token pos=642 id=498
+@text len=4
+ you
+@token pos=643 id=614
+@text len=5
+ have
+@token pos=644 id=9498
+@text len=8
+ learned
+@token pos=645 id=323
+@text len=4
+ and
+@token pos=646 id=64778
+@text len=8
+ revisit
+@token pos=647 id=432
+@text len=3
+ it
+@token pos=648 id=979
+@text len=5
+ when
+@token pos=649 id=5871
+@text len=10
+ necessary
+@token pos=650 id=13
+@text len=1
+.
+@token pos=651 id=576
+@text len=4
+ The
+@token pos=652 id=1376
+@text len=4
+ key
+@token pos=653 id=311
+@text len=3
+ to
+@token pos=654 id=87761
+@text len=10
+ mastering
+@token pos=655 id=82668
+@text len=9
+ calculus
+@token pos=656 id=374
+@text len=3
+ is
+@token pos=657 id=311
+@text len=3
+ to
+@token pos=658 id=3535
+@text len=11
+ understand
+@token pos=659 id=323
+@text len=4
+ and
+@token pos=660 id=3796
+@text len=6
+ apply
+@token pos=661 id=18940
+@text len=9
+ concepts
+@token pos=662 id=15502
+@text len=10
+ regularly
+@token pos=663 id=382
+@text len=3
+.
+
+
+@token pos=664 id=1359
+@text len=2
+By
+@token pos=665 id=2701
+@text len=10
+ following
+@token pos=666 id=1493
+@text len=6
+ these
+@token pos=667 id=7354
+@text len=6
+ steps
+@token pos=668 id=323
+@text len=4
+ and
+@token pos=669 id=1667
+@text len=6
+ using
+@token pos=670 id=1493
+@text len=6
+ these
+@token pos=671 id=4963
+@text len=10
+ resources
+@token pos=672 id=11
+@text len=1
+,
+@token pos=673 id=498
+@text len=4
+ you
+@token pos=674 id=1265
+@text len=7
+ should
+@token pos=675 id=387
+@text len=3
+ be
+@token pos=676 id=2952
+@text len=5
+ able
+@token pos=677 id=311
+@text len=3
+ to
+@token pos=678 id=8722
+@text len=5
+ gain
+@token pos=679 id=264
+@text len=2
+ a
+@token pos=680 id=6437
+@text len=6
+ solid
+@token pos=681 id=8660
+@text len=14
+ understanding
+@token pos=682 id=315
+@text len=3
+ of
+@token pos=683 id=82668
+@text len=9
+ calculus
+@token pos=684 id=323
+@text len=4
+ and
+@token pos=685 id=387
+@text len=3
+ be
+@token pos=686 id=2952
+@text len=5
+ able
+@token pos=687 id=311
+@text len=3
+ to
+@token pos=688 id=3796
+@text len=6
+ apply
+@token pos=689 id=432
+@text len=3
+ it
+@token pos=690 id=311
+@text len=3
+ to
+@token pos=691 id=501
+@text len=4
+ new
+@token pos=692 id=5322
+@text len=9
+ problems
+@token pos=693 id=13
+@text len=1
+.
+@token pos=694 id=7684
+@text len=5
+ Good
+@token pos=695 id=15019
+@text len=5
+ luck
+@token pos=696 id=0
+@text len=1
+!
+@gen tokens=697 ms=25692.4 tok_per_s=27.13 stop=eos
+@done status=ok ms=26349.4
