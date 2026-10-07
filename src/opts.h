@@ -37,6 +37,7 @@ typedef struct {
     char    *system;            /* system prompt text */
     char    *system_file;
     int      prefix_cache;
+    int      profile;
     int      chat;             /* hfc_chat: 0 raw, 1 auto, 2 chatml, 3 llama3 */
     char    *prompt;
     char    *prompt_file;

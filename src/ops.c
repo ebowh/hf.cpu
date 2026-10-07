@@ -590,6 +590,19 @@ static hfc_status parse_ids(const char *s, uint32_t **ids, size_t *n, uint32_t n
 
 #define HFC_MAX_SEQ 64
 
+static void emit_profile(hfc_out *o, const char *stage, double extra_sample)
+{
+    static const char *names[HFC_PROF_N] = { "embed", "glue", "qkv", "attn", "wo", "gate_up", "silu", "down", "head", "quant" };
+    double p[HFC_PROF_N];
+    char v[HFC_PROF_N][24], smp[24];
+    int i;
+    hfc_prof_take(p);
+    for (i = 0; i < HFC_PROF_N; i++) snprintf(v[i], sizeof v[i], "%.1f", p[i] * 1000.0);
+    snprintf(smp, sizeof smp, "%.1f", extra_sample * 1000.0);
+    hfc_out_event(o, "profile", "stage", stage, names[0], v[0], names[1], v[1], names[2], v[2], names[3], v[3], names[4], v[4],
+                  names[5], v[5], names[6], v[6], names[7], v[7], names[8], v[8], names[9], v[9], "sample", smp, (const char *)NULL);
+}
+
 typedef struct {
     hfc_rng        rng;
     hfc_ctx       *ctx;
@@ -623,7 +636,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     size_t nseq = 1, step;
     char d_n[24];
     hfc_status rc;
-    double t0, t_prefill, t_dec0;
+    double t0, t_prefill, t_dec0, t_sample = 0.0;
     const char *stop0 = "length";
     char a[64], b[64], c[64], d[64], e[64];
     int top_n = eff->logprobs > 64 ? 64 : eff->logprobs;
@@ -684,6 +697,8 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     snprintf(b, sizeof b, "%d", hfc_pool_size(pool));
     hfc_out_event(&s->out, "prompt", "tokens", a, "threads", b, (const char *)NULL);
 
+    hfc_prof_enable(eff->profile);
+    if (eff->profile) { double junk[HFC_PROF_N]; hfc_prof_take(junk); }
     t0 = pal_now();
     for (pos = cached; pos < n_prompt; ) {
         size_t nb = n_prompt - pos < batch ? n_prompt - pos : batch;
@@ -702,6 +717,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     hfc_out_event(&s->out, "prefill", "tokens", a, "cached", e, "ms", b, "tok_per_s", c, "kv_bytes", d, (const char *)NULL);
 
     sp.temp = (float)eff->temp; sp.top_k = eff->top_k; sp.top_p = (float)eff->top_p; sp.min_p = (float)eff->min_p;
+    if (eff->profile) emit_profile(&s->out, "prefill", 0.0);
     nseq = (size_t)eff->n;
     snprintf(d_n, sizeof d_n, "%lu", (unsigned long)nseq);
     if (nseq > 1 && nseq > batch) { snprintf(msg, cap, "--n %lu exceeds --batch %lu", (unsigned long)nseq, (unsigned long)batch); rc = HFC_EINVAL; goto out; }
@@ -733,7 +749,10 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
             char sq[24], pos_[24], ids_[24], lp_[32];
             if (!g->active) continue;
             snprintf(sq, sizeof sq, "%lu", (unsigned long)si);
-            if ((rc = hfc_sample(g->logits, nvocab, &sp, &g->rng, &tok)) != HFC_OK) { snprintf(msg, cap, "sampling failed"); goto out; }
+            { double ts = eff->profile ? pal_now() : 0.0;
+              rc = hfc_sample(g->logits, nvocab, &sp, &g->rng, &tok);
+              if (eff->profile) t_sample += pal_now() - ts; }
+            if (rc != HFC_OK) { snprintf(msg, cap, "sampling failed"); goto out; }
             if (res->tok && hfc_tok_is_eog(res->tok, tok)) { g->stop = "eos"; g->active = 0; continue; }
             snprintf(pos_, sizeof pos_, "%lu", (unsigned long)step);
             snprintf(ids_, sizeof ids_, "%u", tok);
@@ -778,6 +797,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
         }
         if (rc != HFC_OK) { snprintf(msg, cap, "decode failed at token %lu: %s", (unsigned long)step, hfc_strerror(rc)); goto out; }
     }
+    if (eff->profile) emit_profile(&s->out, "decode", t_sample);
     {
         double dt = pal_now() - t_dec0;
         size_t si, total = 0;
@@ -806,6 +826,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     }
     rc = HFC_OK;
 out:
+    hfc_prof_enable(0);
     if (gs) { size_t si; for (si = 0; si < nseq; si++) if (gs[si].ctx != ctx) hfc_ctx_free(gs[si].ctx); }
     hfc_free(gs); hfc_free(lbuf); hfc_free(tmpl);
     hfc_free(logits);

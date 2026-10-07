@@ -72,4 +72,10 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
  * max_batch >= n, normally the fork base) supplies the working memory. logits receives n rows of n_vocab. */
 hfc_status hfc_ctx_forward_multi(hfc_ctx *scratch, hfc_ctx **seqs, const uint32_t *tokens, size_t n, float *logits);
 
+/* Per-phase wall-clock accounting for the forward pass, seconds. Off by default. */
+enum { HFC_PROF_EMBED, HFC_PROF_GLUE, HFC_PROF_QKV, HFC_PROF_ATTN, HFC_PROF_WO, HFC_PROF_GU, HFC_PROF_SILU,
+       HFC_PROF_DOWN, HFC_PROF_HEAD, HFC_PROF_QUANT, HFC_PROF_N };
+void hfc_prof_enable(int on);
+void hfc_prof_take(double out[HFC_PROF_N]);   /* returns and clears the totals */
+
 #endif

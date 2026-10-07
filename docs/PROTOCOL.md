@@ -88,6 +88,10 @@ errors exit 2. In `--stdin-mode none`, a failed request exits 1.
 
 The resident model keeps one inference context. After a `generate` request it holds the KV state of the prompt plus the tokens generated (all but the last sampled one). The next request reuses the longest common token prefix, always re-evaluating at least its last prompt token, so repeated system prompts and multi-turn conversations only pay for what is new. Results are bit-identical with and without reuse (`--no-prefix-cache` turns it off). The cache is dropped when another model is loaded, `--threads`/`--ctx-max`/`--batch` change, or a request fails midway. It lives in memory only; a persistent on-disk cache is a later step.
 
+## Profiling
+
+`generate --profile` adds two `@profile` events (`stage=prefill` and `stage=decode`) with the wall-clock milliseconds spent in each part of the forward pass (embed, glue = norms/rope/KV writes/residuals, qkv, attn, wo, gate_up, silu, down, head = the final projection to logits, quant = activation quantization) plus `sample`. The phases of the decode stage add up to roughly the decode time; matmul phases include their thread-pool synchronization.
+
 ## Fan-out (`--n N`, 2..64)
 
 `generate --n N` decodes N continuations of one prompt together: the prompt is prefilled once, each sequence gets a fork of the KV state (full 64-token blocks are shared read-only, the partial block is copied) and every decode step reads the weights once for all active sequences, which is where the speedup comes from on memory-bound machines. Sequence i samples with seed `--seed + i`, and its tokens are bit-identical to a single run with that seed. With `--n` above 1 the `@token`, `@text` and `@gen` events carry `seq=i`, and a final `@genall sequences= tokens= ms= tok_per_s=` reports the aggregate. N is limited by `--batch`. The prefix cache afterwards holds the prompt only.

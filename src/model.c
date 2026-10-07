@@ -3,6 +3,7 @@
 #include "mathx.h"
 #include "ggtype.h"
 #include "pool.h"
+#include "pal.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -328,6 +329,21 @@ static hfc_status kv_reserve(hfc_ctx *c, size_t upto)
     return HFC_OK;
 }
 
+/* ---- optional per-phase timing (--profile) --------------------------------------------------- */
+
+static int    g_prof_on;
+static double g_prof[HFC_PROF_N], g_prof_quant;
+
+void hfc_prof_enable(int on) { g_prof_on = on; }
+void hfc_prof_take(double out[HFC_PROF_N])
+{
+    int i;
+    for (i = 0; i < HFC_PROF_N; i++) { out[i] = g_prof[i]; g_prof[i] = 0; }
+    g_prof_quant = 0;
+}
+#define PROF_BEGIN double pt_ = g_prof_on ? pal_now() : 0.0
+#define PROF(i) do { if (g_prof_on) { double n_ = pal_now(); g_prof[i] += n_ - pt_ - g_prof_quant; g_prof[HFC_PROF_QUANT] += g_prof_quant; g_prof_quant = 0; pt_ = n_; } } while (0)
+
 /* ---- parallel matrix products ----------------------------------------------------------------- */
 
 #define HFC_TILE_BYTES (96 * 1024)    /* activation bytes kept hot while weight rows stream past */
@@ -435,8 +451,12 @@ static hfc_status matmat(hfc_ctx *c, const mm_job *jobs, int njobs, const float 
         if (ty == 8 || ty == 2 || ty == 6) need8 = 1;
         else if (ty == 12 || ty == 13 || ty == 14) needk = 1;
     }
-    if (need8) quantize_rows(c, xf, n, cols, c->qa);
-    if (needk) quantize_rows_k(c, xf, n, cols, c->qk);
+    {
+        double q0 = g_prof_on ? pal_now() : 0.0;
+        if (need8) quantize_rows(c, xf, n, cols, c->qa);
+        if (needk) quantize_rows_k(c, xf, n, cols, c->qk);
+        if (g_prof_on) g_prof_quant += pal_now() - q0;
+    }
     tk.c = c; tk.jobs = jobs; tk.njobs = njobs; tk.xf = xf; tk.xq = c->qa; tk.xk = c->qk; tk.n = n;
     hfc_pool_run(c->pool, mm_run, &tk);
     for (i = 0; i < c->nth; i++) if (c->err[i] != HFC_OK) return c->err[i];
@@ -530,6 +550,7 @@ static hfc_status forward_impl(hfc_ctx *c, hfc_ctx **seqs, const uint32_t *token
     size_t E = (size_t)hp->n_embd, QD = (size_t)hp->n_head * hp->head_dim, KD = c->kvdim, F = (size_t)hp->n_ff;
     size_t hd = (size_t)hp->head_dim, pos0 = c->n_pos, t, l, h;
     hfc_status rc;
+    PROF_BEGIN;
 
     if (n == 0 || n > c->max_batch) return HFC_EINVAL;
     if (seqs) {
@@ -549,6 +570,7 @@ static hfc_status forward_impl(hfc_ctx *c, hfc_ctx **seqs, const uint32_t *token
         if ((rc = hfc_dequant_row(m->tok_embd.type, row, c->x + t * E, E)) != HFC_OK) return rc;
     }
 
+    PROF(HFC_PROF_EMBED);
     for (l = 0; l < (size_t)hp->n_layer; l++) {
         const hfc_layer *L = &m->layers[l];
         mm_job qkv[3], gu[2], one;
@@ -559,7 +581,9 @@ static hfc_status forward_impl(hfc_ctx *c, hfc_ctx **seqs, const uint32_t *token
         qkv[0].w = &L->wq; qkv[0].bias = L->bq; qkv[0].y = c->q;
         qkv[1].w = &L->wk; qkv[1].bias = L->bk; qkv[1].y = c->kk;
         qkv[2].w = &L->wv; qkv[2].bias = L->bv; qkv[2].y = c->vv;
+        PROF(HFC_PROF_GLUE);
         if ((rc = matmat(c, qkv, 3, c->xn, n)) != HFC_OK) return rc;
+        PROF(HFC_PROF_QKV);
         for (t = 0; t < n; t++) {
             float *q = c->q + t * QD, *kx = c->kk + t * KD;
             const hfc_ctx *sc = seqs ? seqs[t] : c;
@@ -575,22 +599,30 @@ static hfc_status forward_impl(hfc_ctx *c, hfc_ctx **seqs, const uint32_t *token
             k->f32_to_f16(kx, kb + off * KD, KD);
             k->f32_to_f16(c->vv + t * KD, vb + off * KD, KD);
         }
+        PROF(HFC_PROF_GLUE);
         at.c = c; at.seqs = seqs; at.l = l; at.n = n; at.pos0 = pos0;
         hfc_pool_run(c->pool, attn_run, &at);
+        PROF(HFC_PROF_ATTN);
         one.w = &L->wo; one.bias = NULL; one.y = c->o;
         if ((rc = matmat(c, &one, 1, c->att, n)) != HFC_OK) return rc;
+        PROF(HFC_PROF_WO);
         { size_t i; for (i = 0; i < n * E; i++) c->x[i] += c->o[i]; }
 
         for (t = 0; t < n; t++) hfc_rmsnorm(c->x + t * E, L->ffn_norm, c->xn + t * E, E, hp->rms_eps);
         gu[0].w = &L->gate; gu[0].bias = NULL; gu[0].y = c->gate;
         gu[1].w = &L->up;   gu[1].bias = NULL; gu[1].y = c->up;
+        PROF(HFC_PROF_GLUE);
         if ((rc = matmat(c, gu, 2, c->xn, n)) != HFC_OK) return rc;
+        PROF(HFC_PROF_GU);
         st.gate = c->gate; st.up = c->up; st.count = n * F;
         hfc_pool_run(c->pool, silu_run, &st);
+        PROF(HFC_PROF_SILU);
         one.w = &L->down; one.bias = NULL; one.y = c->o;
         if ((rc = matmat(c, &one, 1, c->gate, n)) != HFC_OK) return rc;
+        PROF(HFC_PROF_DOWN);
         { size_t i; for (i = 0; i < n * E; i++) c->x[i] += c->o[i]; }
     }
+    PROF(HFC_PROF_GLUE);
     if (seqs) for (t = 0; t < n; t++) seqs[t]->n_pos++;
     else c->n_pos = pos0 + n;
 
@@ -599,7 +631,10 @@ static hfc_status forward_impl(hfc_ctx *c, hfc_ctx **seqs, const uint32_t *token
         size_t first = seqs ? 0 : n - 1;
         for (t = first; t < n; t++) hfc_rmsnorm(c->x + t * E, m->out_norm, c->xn + (t - first) * E, E, hp->rms_eps);
         lj.w = &m->output; lj.bias = NULL; lj.y = logits;
-        return matmat(c, &lj, 1, c->xn, n - first);
+        PROF(HFC_PROF_GLUE);
+        rc = matmat(c, &lj, 1, c->xn, n - first);
+        PROF(HFC_PROF_HEAD);
+        return rc;
     }
     return HFC_OK;
 }
