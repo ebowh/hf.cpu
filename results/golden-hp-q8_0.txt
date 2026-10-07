@@ -1,0 +1,14 @@
+plain    ids   FAIL  agree 22/48 tokens, max |dlogprob| 0.0959  prefill 31.8 t/s  decode 20.1 t/s
+           first difference at token 22: golden 4126, ours 9806
+plain    text  FAIL  agree 22/48 tokens, max |dlogprob| 0.0959  prefill 30.1 t/s  decode 19.0 t/s
+           first difference at token 22: golden 4126, ours 9806
+code     ids   FAIL  agree 48/48 tokens, max |dlogprob| 0.0606  prefill 29.4 t/s  decode 20.0 t/s
+code     text  FAIL  agree 48/48 tokens, max |dlogprob| 0.0606  prefill 30.2 t/s  decode 19.4 t/s
+chatml   ids   FAIL  agree 48/48 tokens, max |dlogprob| 0.0583  prefill 37.7 t/s  decode 19.3 t/s
+chatml   text  FAIL  agree 48/48 tokens, max |dlogprob| 0.0583  prefill 37.4 t/s  decode 19.6 t/s
+unicode  ids   FAIL  agree 48/48 tokens, max |dlogprob| 0.0974  prefill 35.3 t/s  decode 19.2 t/s
+unicode  text  FAIL  agree 48/48 tokens, max |dlogprob| 0.0974  prefill 35.2 t/s  decode 19.8 t/s
+long     ids   FAIL  agree 48/48 tokens, max |dlogprob| 0.0731  prefill 38.0 t/s  decode 17.8 t/s
+long     text  FAIL  agree 48/48 tokens, max |dlogprob| 0.0731  prefill 36.6 t/s  decode 17.9 t/s
+
+10 check(s) failed
