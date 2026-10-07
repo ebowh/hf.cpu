@@ -4,9 +4,9 @@ CFLAGS  ?= -O2
 WARN     = -std=c99 -Wall -Wextra -pedantic
 LDLIBS   = -pthread -lm
 
-LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o
-HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h
-TESTS  = tests/test_opts
+LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o src/ggtype.o src/gguf.o
+HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h src/ggtype.h src/gguf.h
+TESTS  = tests/test_opts tests/test_gguf
 
 .SUFFIXES: .c .o
 .c.o:
@@ -25,8 +25,17 @@ $(LIBOBJ): $(HDR)
 tests/test_opts: tests/test_opts.c tests/t.h $(LIBOBJ)
 	$(CC) $(WARN) $(CFLAGS) -o $@ tests/test_opts.c $(LIBOBJ) $(LDLIBS)
 
+tests/test_gguf: tests/test_gguf.c tests/t.h tests/gguf_builder.h $(LIBOBJ)
+	$(CC) $(WARN) $(CFLAGS) -o $@ tests/test_gguf.c $(LIBOBJ) $(LDLIBS)
+
 test: $(TESTS)
 	@for t in $(TESTS); do ./$$t || exit 1; done
 
 clean:
 	rm -f src/*.o $(TESTS) hfcpu
+
+# Rebuild everything with AddressSanitizer + UBSan and run the tests.
+asan:
+	$(MAKE) clean
+	$(MAKE) test CFLAGS="-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=undefined"
+	$(MAKE) clean
