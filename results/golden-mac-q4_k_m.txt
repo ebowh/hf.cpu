@@ -1,0 +1,20 @@
+plain    ids   OK    agree 28/48 tokens, max |dlogprob| 0.1169, mean 0.0273, bias -0.0066 (diverged at a near-tie, gap 0.090)  prefill 23.9 t/s  decode 29.0 t/s
+           first difference at token 28: golden 22375, ours 37685
+plain    text  OK    agree 28/48 tokens, max |dlogprob| 0.1169, mean 0.0273, bias -0.0066 (diverged at a near-tie, gap 0.090)  prefill 23.7 t/s  decode 29.0 t/s
+           first difference at token 28: golden 22375, ours 37685
+code     ids   OK    agree 15/48 tokens, max |dlogprob| 0.0648, mean 0.0171, bias +0.0139 (diverged at a near-tie, gap 0.038)  prefill 23.8 t/s  decode 29.4 t/s
+           first difference at token 15: golden 320, ours 75698
+code     text  OK    agree 15/48 tokens, max |dlogprob| 0.0648, mean 0.0171, bias +0.0139 (diverged at a near-tie, gap 0.038)  prefill 23.9 t/s  decode 29.4 t/s
+           first difference at token 15: golden 320, ours 75698
+chatml   ids   FAIL  agree 26/48 tokens, max |dlogprob| 0.1039, mean 0.0237, bias +0.0040  prefill 37.6 t/s  decode 28.4 t/s
+           first difference at token 26: golden 320, ours 358
+chatml   text  FAIL  agree 26/48 tokens, max |dlogprob| 0.1039, mean 0.0237, bias +0.0040  prefill 37.7 t/s  decode 28.8 t/s
+           first difference at token 26: golden 320, ours 358
+unicode  ids   FAIL  agree 48/48 tokens, max |dlogprob| 0.1956, mean 0.0231, bias -0.0002  prefill 34.9 t/s  decode 29.4 t/s
+unicode  text  FAIL  agree 48/48 tokens, max |dlogprob| 0.1956, mean 0.0231, bias -0.0002  prefill 35.0 t/s  decode 29.4 t/s
+long     ids   OK    agree  6/48 tokens, max |dlogprob| 0.1251, mean 0.0376, bias -0.0298 (diverged at a near-tie, gap 0.019)  prefill 42.0 t/s  decode 26.4 t/s
+           first difference at token 6: golden 979, ours 1091
+long     text  OK    agree  6/48 tokens, max |dlogprob| 0.1251, mean 0.0376, bias -0.0298 (diverged at a near-tie, gap 0.019)  prefill 41.3 t/s  decode 26.5 t/s
+           first difference at token 6: golden 979, ours 1091
+
+4 check(s) failed
