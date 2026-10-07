@@ -44,6 +44,21 @@ const char *hfc_strerror(hfc_status s)
     return "unknown error";
 }
 
+const char *hfc_status_name(hfc_status s)
+{
+    switch (s) {
+    case HFC_OK:      return "ok";
+    case HFC_ENOMEM:  return "ENOMEM";
+    case HFC_EINVAL:  return "EINVAL";
+    case HFC_EIO:     return "EIO";
+    case HFC_EFORMAT: return "EFORMAT";
+    case HFC_ERANGE:  return "ERANGE";
+    case HFC_ENOTSUP: return "ENOTSUP";
+    case HFC_EEOF:    return "EEOF";
+    }
+    return "EUNKNOWN";
+}
+
 void *hfc_malloc(size_t n)
 {
     void *p;

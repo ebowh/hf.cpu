@@ -4,15 +4,20 @@ CFLAGS  ?= -O2
 WARN     = -std=c99 -Wall -Wextra -pedantic
 LDLIBS   = -pthread -lm
 
-LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o src/ggtype.o src/gguf.o
-HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h src/ggtype.h src/gguf.h
+LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o src/ggtype.o src/gguf.o src/proto.o src/ops.o
+HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h src/ggtype.h src/gguf.h src/proto.h src/ops.h
 TESTS  = tests/test_opts tests/test_gguf
 
 .SUFFIXES: .c .o
 .c.o:
 	$(CC) $(WARN) $(CFLAGS) -c -o $@ $<
 
-all: $(LIBOBJ)
+all: hfcpu
+
+hfcpu: src/main.o $(LIBOBJ)
+	$(CC) $(WARN) $(CFLAGS) -o $@ src/main.o $(LIBOBJ) $(LDLIBS)
+
+src/main.o: $(HDR)
 
 # The AVX2 kernels need ISA flags; the file is empty on other architectures.
 src/kern_avx2.o: src/kern_avx2.c src/kern.h
@@ -28,8 +33,13 @@ tests/test_opts: tests/test_opts.c tests/t.h $(LIBOBJ)
 tests/test_gguf: tests/test_gguf.c tests/t.h tests/gguf_builder.h $(LIBOBJ)
 	$(CC) $(WARN) $(CFLAGS) -o $@ tests/test_gguf.c $(LIBOBJ) $(LDLIBS)
 
-test: $(TESTS)
+test: hfcpu $(TESTS)
 	@for t in $(TESTS); do ./$$t || exit 1; done
+	perl tests/e2e.pl ./hfcpu
+
+# Compare dequantizers with upstream ggml-quants.c: make diff-dequant REF=/path/to/ggml/src
+diff-dequant:
+	perl tests/diff_dequant.pl $(REF)
 
 clean:
 	rm -f src/*.o $(TESTS) hfcpu

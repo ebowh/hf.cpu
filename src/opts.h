@@ -46,6 +46,7 @@ typedef struct {
     int      logprobs;          /* top-N logprobs per token, 0 = off */
     int      stop_on_repeat;
     double   timeout;           /* seconds, 0 = none */
+    int      list_tensors;      /* inspect: also list every tensor */
 } hfc_opts;
 
 void       hfc_opts_defaults(hfc_opts *o);

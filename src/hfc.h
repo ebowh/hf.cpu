@@ -21,6 +21,7 @@ typedef enum {
 } hfc_status;
 
 const char *hfc_strerror(hfc_status s);
+const char *hfc_status_name(hfc_status s);   /* "ok", "ENOMEM", ... */
 
 /* ---- checked allocation ------------------------------------------------ */
 
