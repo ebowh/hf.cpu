@@ -79,6 +79,7 @@ static void test_attacks(void)
     gb_t b;
     uint64_t dim[2] = { 4, 4 };
     uint64_t huge[2] = { 1ull << 40, 1ull << 40 };
+    uint64_t dim9[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
     memset(&b, 0, sizeof b); gb_put(&b, "GGUX", 4); gb_u32(&b, 3); gb_u64(&b, 0); gb_u64(&b, 0);
     CHECK(open_img(&b) == HFC_EFORMAT); free(b.p);
@@ -127,7 +128,7 @@ static void test_attacks(void)
     CHECK(open_img(&b) == HFC_ERANGE); free(b.p);
     memset(&b, 0, sizeof b); gb_header(&b, 3, 1, 0); gb_tensor(&b, "t", 0, dim, 0, 0); gb_align(&b, 32);
     CHECK(open_img(&b) == HFC_EFORMAT); free(b.p);
-    memset(&b, 0, sizeof b); gb_header(&b, 3, 1, 0); gb_tensor(&b, "t", 9, dim, 0, 0); gb_align(&b, 32);
+    memset(&b, 0, sizeof b); gb_header(&b, 3, 1, 0); gb_tensor(&b, "t", 9, dim9, 0, 0); gb_align(&b, 32);
     CHECK(open_img(&b) != HFC_OK); free(b.p);
 
     /* tensor beyond end; offset overflow; row not multiple of block */
