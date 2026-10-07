@@ -16,6 +16,8 @@ typedef struct {
     int             machine_ready;
     unsigned long   n_requests, n_errors;
     struct hfc_resident *res;     /* model kept loaded between requests */
+    struct hfc_pool *pool;        /* worker threads, created on first use */
+    int             pool_n;
 } hfc_session;
 
 void hfc_session_close(hfc_session *s);

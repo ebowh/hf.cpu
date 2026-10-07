@@ -20,4 +20,12 @@ void hfc_rmsnorm(const float *x, const float *w, float *y, size_t n, float eps);
 /* In-place softmax over x[0..n). */
 void hfc_softmax(float *x, size_t n);
 
+/* Deterministic cos and sin of a float angle (|theta| up to ~1e6): computed in
+ * double with only + - * / so every platform gets the same bits. */
+void hfc_cos_sin(float theta, float *c, float *s);
+
+/* base^(-2/n_rot) as a float, deterministic (square-root chain when n_rot is a
+ * power of two). */
+float hfc_rope_theta_scale(float base, int n_rot);
+
 #endif

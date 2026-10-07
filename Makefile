@@ -4,8 +4,8 @@ CFLAGS  ?= -O2
 WARN     = -std=c99 -Wall -Wextra -pedantic -ffp-contract=off
 LDLIBS   = -pthread -lm
 
-LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o src/ggtype.o src/gguf.o src/proto.o src/ops.o src/tok.o src/unitab.o src/mathx.o src/model.o src/sample.o
-HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h src/ggtype.h src/gguf.h src/proto.h src/ops.h src/tok.h src/unitab.h src/mathx.h src/model.h src/sample.h
+LIBOBJ = src/mem.o src/pal.o src/probe.o src/kern_generic.o src/kern_avx2.o src/opts.o src/ggtype.o src/gguf.o src/proto.o src/ops.o src/tok.o src/unitab.o src/mathx.o src/model.o src/sample.o src/pool.o
+HDR    = src/hfc.h src/pal.h src/probe.h src/kern.h src/opts.h src/ggtype.h src/gguf.h src/proto.h src/ops.h src/tok.h src/unitab.h src/mathx.h src/model.h src/sample.h src/pool.h
 TESTS  = tests/test_opts tests/test_gguf tests/test_tok tests/test_kern
 
 .SUFFIXES: .c .o

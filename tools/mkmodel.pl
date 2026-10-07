@@ -2,21 +2,21 @@
 # mkmodel.pl - write a tiny random-weight transformer GGUF (no tokenizer) for tests.
 #
 #   perl tools/mkmodel.pl OUT.gguf [--arch qwen2|qwen3|llama] [--wtype f32|f16|q8_0]
-#                         [--layers 2] [--vocab 300] [--seed 1]
+#                         [--layers 2] [--vocab 300] [--seed 1] [--size tiny|big] [--deq OUT]
 # Dimensions: embed 64, 4 heads / 2 KV heads (head_dim 16), FFN 128.
-use strict;
+# --size big: embed 512, 8 heads (2 KV, head_dim 64), FFN 2048, for speed tests.use strict;
 use warnings;
 use Getopt::Long;
 
-my ($arch, $wtype, $layers, $vocab, $seed, $deq) = ('qwen2', 'f32', 2, 300, 1, undef);
-GetOptions('deq=s' => \$deq, 'arch=s' => \$arch, 'wtype=s' => \$wtype, 'layers=i' => \$layers, 'vocab=i' => \$vocab, 'seed=i' => \$seed)
+my ($arch, $wtype, $layers, $vocab, $seed, $deq, $size) = ('qwen2', 'f32', 2, 300, 1, undef, 'tiny');
+GetOptions('size=s' => \$size, 'deq=s' => \$deq, 'arch=s' => \$arch, 'wtype=s' => \$wtype, 'layers=i' => \$layers, 'vocab=i' => \$vocab, 'seed=i' => \$seed)
     or die "bad options\n";
 my $out = shift or die "usage: $0 OUT.gguf [options]\n";
 die "unknown arch\n" unless $arch =~ /^(qwen2|qwen3|llama)$/;
 die "unknown wtype\n" unless $wtype =~ /^(f32|f16|q8_0)$/;
 srand($seed);
 
-my ($E, $H, $HKV, $HD, $FF) = (64, 4, 2, 16, 128);
+my ($E, $H, $HKV, $HD, $FF) = $size eq 'big' ? (512, 8, 2, 64, 2048) : (64, 4, 2, 16, 128);
 my %TYPEID = (f32 => 0, f16 => 1, q8_0 => 8);
 
 sub u32 { pack('V', $_[0]) }
@@ -36,7 +36,7 @@ sub f2h {                      # float -> IEEE half bits (round to nearest, no s
     $h++ if ($m & 0x1fff) > 0x1000;
     return $s | $h;
 }
-sub gauss { my $s = 0; $s += rand() for 1 .. 6; return ($s - 3.0) / 0.7071; }   # ~N(0,1)
+sub gauss { return (rand() * 2 - 1) * 1.7 if $size eq 'big'; my $s = 0; $s += rand() for 1 .. 6; return ($s - 3.0) / 0.7071; }   # big models: uniform noise (faster)   # ~N(0,1)
 
 sub encode {
     my ($vals, $deqout) = @_;   # flat list of floats; $deqout receives the values the file really stores

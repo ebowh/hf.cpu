@@ -12,6 +12,7 @@
 #include "pal.h"
 #include "tok.h"
 #include "model.h"
+#include "pool.h"
 #include "sample.h"
 
 #include <stdio.h>
@@ -386,6 +387,29 @@ void hfc_session_close(hfc_session *s)
 {
     resident_free(s->res);
     s->res = NULL;
+    hfc_pool_free(s->pool);
+    s->pool = NULL;
+}
+
+/* The pool matches --threads (0 = one thread per physical core). */
+static hfc_status session_pool(hfc_session *s, hfc_pool **out)
+{
+    int n = s->session->threads;
+    if (n <= 0) {
+        if (!s->cpu_ready) { hfc_cpu_detect(&s->cpu); s->cpu_ready = 1; }
+        n = s->cpu.physical > 0 ? s->cpu.physical : 1;
+    }
+    if (n > 64) n = 64;
+    if (!s->pool || s->pool_n != n) {
+        hfc_pool *p;
+        hfc_status rc = hfc_pool_new(&p, n);
+        if (rc != HFC_OK) return rc;
+        hfc_pool_free(s->pool);
+        s->pool = p;
+        s->pool_n = n;
+    }
+    *out = s->pool;
+    return HFC_OK;
 }
 
 static hfc_status resident_get(hfc_session *s, const char *path, hfc_resident **out, char *msg, size_t cap)
@@ -455,6 +479,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     uint32_t *ids = NULL;
     size_t n_prompt = 0, ngen_max, i, pos, ctx_max, nvocab;
     hfc_ctx *ctx = NULL;
+    hfc_pool *pool = NULL;
     float *logits = NULL;
     hfc_sampler sp;
     hfc_rng rng;
@@ -495,12 +520,14 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     if (ngen_max > (size_t)s->session->ctx_max - n_prompt) { ngen_max = (size_t)s->session->ctx_max - n_prompt; stop = "ctx"; }
     ctx_max = n_prompt + ngen_max;
     if (batch > n_prompt) batch = n_prompt;
-    if ((rc = hfc_ctx_new(&ctx, res->model, ctx_max, batch)) != HFC_OK) { snprintf(msg, cap, "cannot allocate the inference context: %s", hfc_strerror(rc)); goto out; }
+    if ((rc = session_pool(s, &pool)) != HFC_OK) { snprintf(msg, cap, "cannot start worker threads: %s", hfc_strerror(rc)); goto out; }
+    if ((rc = hfc_ctx_new(&ctx, res->model, ctx_max, batch, pool)) != HFC_OK) { snprintf(msg, cap, "cannot allocate the inference context: %s", hfc_strerror(rc)); goto out; }
     logits = (float *)hfc_malloc(nvocab * sizeof(float));
     if (!logits) { rc = HFC_ENOMEM; snprintf(msg, cap, "out of memory"); goto out; }
 
     snprintf(a, sizeof a, "%lu", (unsigned long)n_prompt);
-    hfc_out_event(&s->out, "prompt", "tokens", a, (const char *)NULL);
+    snprintf(b, sizeof b, "%d", hfc_pool_size(pool));
+    hfc_out_event(&s->out, "prompt", "tokens", a, "threads", b, (const char *)NULL);
 
     t0 = pal_now();
     for (pos = 0; pos < n_prompt; ) {
@@ -577,6 +604,102 @@ out:
     return rc;
 }
 
+static int cmp_dbl2(const void *a, const void *b)
+{
+    double x = *(const double *)a, y = *(const double *)b;
+    return x < y ? -1 : x > y;
+}
+
+static hfc_status op_bench(hfc_session *s, const hfc_opts *eff, char *msg, size_t cap)
+{
+    hfc_resident *res = NULL;
+    hfc_status rc;
+    int list[64], nl = 0, li, reps = eff->probe_reps > 0 ? eff->probe_reps : 1;
+    size_t nprompt = (size_t)eff->bench_prompt, ngen = (size_t)eff->bench_gen, i;
+    uint32_t *ids = NULL;
+    float *logits = NULL;
+    size_t nvocab, batch = (size_t)(s->session->batch > 0 ? s->session->batch : 64);
+
+    if (!eff->model) { snprintf(msg, cap, "bench needs --model PATH"); return HFC_EINVAL; }
+    if ((rc = resident_get(s, eff->model, &res, msg, cap)) != HFC_OK) return rc;
+    nvocab = (size_t)res->model->hp.n_vocab;
+    if (nprompt + ngen > (size_t)s->session->ctx_max) { snprintf(msg, cap, "bench-prompt + bench-gen exceeds --ctx-max"); return HFC_ERANGE; }
+    if (eff->bench_threads) {
+        const char *p = eff->bench_threads;
+        while (*p && nl < 64) {
+            char *end;
+            long v = strtol(p, &end, 10);
+            if (end == p || v < 1 || v > 64) { snprintf(msg, cap, "bad --bench-threads list"); return HFC_EINVAL; }
+            list[nl++] = (int)v;
+            p = end;
+            while (*p == ',' || *p == ' ') p++;
+        }
+    } else {
+        int phys, v;
+        if (!s->cpu_ready) { hfc_cpu_detect(&s->cpu); s->cpu_ready = 1; }
+        phys = s->cpu.physical > 0 ? s->cpu.physical : 1;
+        for (v = 1; v <= phys && nl < 64; v++) list[nl++] = v;
+        if (s->cpu.logical > phys && nl < 64) list[nl++] = s->cpu.logical;
+    }
+    if (nl == 0) { snprintf(msg, cap, "empty --bench-threads list"); return HFC_EINVAL; }
+    ids = (uint32_t *)hfc_malloc((nprompt + 1) * sizeof(uint32_t));
+    logits = (float *)hfc_malloc(nvocab * sizeof(float));
+    if (!ids || !logits) { hfc_free(ids); hfc_free(logits); snprintf(msg, cap, "out of memory"); return HFC_ENOMEM; }
+    { uint64_t x = 88172645463325252ull;
+      uint32_t span = nvocab < 2000 ? (uint32_t)nvocab : 2000;
+      for (i = 0; i < nprompt; i++) { x ^= x << 13; x ^= x >> 7; x ^= x << 17; ids[i] = (uint32_t)(x % span); } }
+
+    for (li = 0; li < nl; li++) {
+        double pf[64], dc[64];
+        int r;
+        char a[32], b[32], c[32], d[32], e[32];
+        hfc_pool *pool = NULL;
+        if (reps > 64) reps = 64;
+        if ((rc = hfc_pool_new(&pool, list[li])) != HFC_OK) { snprintf(msg, cap, "cannot start %d threads", list[li]); goto out; }
+        for (r = 0; r < reps; r++) {
+            hfc_ctx *ctx = NULL;
+            size_t pos;
+            double t0, t1, t2;
+            if ((rc = hfc_ctx_new(&ctx, res->model, nprompt + ngen, batch > nprompt ? nprompt : batch, pool)) != HFC_OK) {
+                snprintf(msg, cap, "cannot allocate the inference context: %s", hfc_strerror(rc)); hfc_pool_free(pool); goto out;
+            }
+            t0 = pal_now();
+            for (pos = 0; pos < nprompt; ) {
+                size_t nb = nprompt - pos < batch ? nprompt - pos : batch;
+                rc = hfc_ctx_forward(ctx, ids + pos, nb, pos + nb == nprompt ? logits : NULL);
+                if (rc != HFC_OK) { snprintf(msg, cap, "bench prefill failed: %s", hfc_strerror(rc)); hfc_ctx_free(ctx); hfc_pool_free(pool); goto out; }
+                pos += nb;
+            }
+            t1 = pal_now();
+            for (i = 0; i < ngen; i++) {
+                uint32_t tok = 0;
+                size_t j;
+                for (j = 1; j < nvocab; j++) if (logits[j] > logits[tok]) tok = (uint32_t)j;
+                rc = hfc_ctx_forward(ctx, &tok, 1, logits);
+                if (rc != HFC_OK) { snprintf(msg, cap, "bench decode failed: %s", hfc_strerror(rc)); hfc_ctx_free(ctx); hfc_pool_free(pool); goto out; }
+            }
+            t2 = pal_now();
+            pf[r] = (double)nprompt / (t1 - t0);
+            dc[r] = (double)ngen / (t2 - t1);
+            hfc_ctx_free(ctx);
+        }
+        hfc_pool_free(pool);
+        qsort(pf, (size_t)reps, sizeof(double), cmp_dbl2);
+        qsort(dc, (size_t)reps, sizeof(double), cmp_dbl2);
+        snprintf(a, sizeof a, "%d", list[li]);
+        snprintf(b, sizeof b, "%.2f", pf[reps / 2]);
+        snprintf(c, sizeof c, "%.2f", dc[reps / 2]);
+        snprintf(d, sizeof d, "%lu", (unsigned long)nprompt);
+        snprintf(e, sizeof e, "%lu", (unsigned long)ngen);
+        hfc_out_event(&s->out, "bench", "threads", a, "prefill_tok_s", b, "decode_tok_s", c, "prompt_tokens", d, "gen_tokens", e, (const char *)NULL);
+    }
+    rc = HFC_OK;
+out:
+    hfc_free(ids);
+    hfc_free(logits);
+    return rc;
+}
+
 /* ---- dispatch ----------------------------------------------------------------- */
 
 void hfc_emit_failed_request(hfc_session *s, const char *id, hfc_status st, const char *msg)
@@ -600,11 +723,12 @@ hfc_status hfc_run_request(hfc_session *s, const hfc_opts *eff, const char *body
     if (strcmp(op, "echo") == 0)         rc = op_echo(s, eff, body, body_len, has_body, msg, sizeof msg);
     else if (strcmp(op, "inspect") == 0) rc = op_inspect(s, eff, msg, sizeof msg);
     else if (strcmp(op, "doctor") == 0)  rc = op_doctor(s, eff, msg, sizeof msg);
+    else if (strcmp(op, "bench") == 0)    rc = op_bench(s, eff, msg, sizeof msg);
     else if (strcmp(op, "tokenize") == 0) rc = op_tokenize(s, eff, body, body_len, has_body, msg, sizeof msg);
     else if (strcmp(op, "generate") == 0) rc = op_generate(s, eff, body, body_len, has_body, msg, sizeof msg);
     else {
         rc = HFC_EINVAL;
-        snprintf(msg, sizeof msg, "unknown --op '%s' (generate, inspect, doctor, tokenize, echo)", op);
+        snprintf(msg, sizeof msg, "unknown --op '%s' (generate, inspect, doctor, tokenize, bench, echo)", op);
     }
     snprintf(ms, sizeof ms, "%.1f", (pal_now() - t0) * 1000.0);
     if (rc == HFC_OK) {

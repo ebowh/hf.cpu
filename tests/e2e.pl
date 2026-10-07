@@ -178,6 +178,22 @@ for my $n (1 .. 40) {
     ok(($r & 127) == 0 && $out =~ /\@done status=(ok|error)/, "generate: allocation failure #$n handled (exit " . ($r >> 8) . ")");
 }
 
+# ---- threads: results must not depend on the thread count -----------------------------------
+{
+    my $ids = join(' ', map { ($_ * 37) % 300 } 1 .. 90);
+    my @sums;
+    for my $t (1, 2, 3, 4) {
+        ($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '$ids' --temp 0 --max-tokens 8 --logprobs 3 --threads $t");
+        my @tl = grep { /^\@token / } split /\n/, $o;
+        push @sums, join("\n", @tl);
+        ok(@tl == 8 && $o =~ /threads=$t\b/, "threads=$t: ran with that many threads");
+    }
+    ok($sums[0] eq $sums[1] && $sums[1] eq $sums[2] && $sums[2] eq $sums[3], 'output is bit-identical for 1, 2, 3 and 4 threads');
+    ($o, $e, $x) = run("--stdin-mode none --op bench --model '$tiny' --bench-prompt 64 --bench-gen 8 --bench-threads 1,2");
+    my @b = $o =~ /\@bench threads=(\d+) prefill_tok_s=([0-9.]+) decode_tok_s=([0-9.]+)/g;
+    ok(@b == 6 && $b[1] > 0 && $b[2] > 0 && $b[0] == 1 && $b[3] == 2, 'bench: one line per thread count with positive rates');
+}
+
 # ---- robustness: closed stdout must not crash or hang --------------------------------------
 my $many = join('', map { "p$_$RS" } 1 .. 2000);
 spew("$tmp/many", $many);

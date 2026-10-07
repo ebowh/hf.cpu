@@ -132,6 +132,31 @@ static void test_f32(const hfc_kernels *k)
     }
 }
 
+static void test_sincos(void)
+{
+    int i, bad = 0;
+    float worst = 0;
+    for (i = 0; i < 400000; i++) {
+        float th = (i < 1000) ? (float)i * 0.01f : (float)(rnd() % 40000000) / 1000.0f;   /* up to 40000 rad */
+        float c, s;
+        double rc = cos((double)th), rs_ = sin((double)th);
+        float e1, e2;
+        hfc_cos_sin(th, &c, &s);
+        e1 = fabsf(c - (float)rc); e2 = fabsf(s - (float)rs_);
+        if (e1 > worst) worst = e1;
+        if (e2 > worst) worst = e2;
+        if (e1 > 1.2e-7f || e2 > 1.2e-7f) bad++;          /* within 1 ulp of the correctly rounded value */
+    }
+    CHECK(bad == 0);
+    {   float c, s;
+        hfc_cos_sin(0.0f, &c, &s);   CHECK(c == 1.0f && s == 0.0f);
+        hfc_cos_sin(-3.0f, &c, &s);  CHECK_NEAR(c, cos(-3.0), 1e-7); CHECK_NEAR(s, sin(-3.0), 1e-7);
+    }
+    CHECK_NEAR(hfc_rope_theta_scale(1000000.0f, 64), pow(1000000.0, -2.0 / 64.0), 7e-8);
+    CHECK_NEAR(hfc_rope_theta_scale(10000.0f, 128), pow(10000.0, -2.0 / 128.0), 7e-8);
+    CHECK_NEAR(hfc_rope_theta_scale(10000.0f, 96), pow(10000.0, -2.0 / 96.0), 7e-8);
+}
+
 static void test_norm_softmax(void)
 {
     float x[5] = { 1, 2, 3, 4, 5 }, w[5] = { 1, 1, 2, 2, 0.5f }, y[5], s[4] = { 1, 2, 3, 4 }, tot = 0;
@@ -157,6 +182,7 @@ int main(void)
     fprintf(stderr, "kernel sets under test: generic, %s\n", k->isa);
     test_expf();
     test_norm_softmax();
+    test_sincos();
     test_f16(g);
     test_q8(g, g);
     test_f32(g);

@@ -9,6 +9,8 @@
 #include "hfc.h"
 #include "kern.h"
 
+struct hfc_pool;
+
 typedef struct {
     const gguf_tensor   *t;
     const unsigned char *data;
@@ -53,7 +55,7 @@ typedef struct hfc_ctx hfc_ctx;
 
 #define HFC_KV_BLOCK_TOKENS 64
 
-hfc_status hfc_ctx_new(hfc_ctx **out, const hfc_model *m, size_t ctx_max, size_t max_batch);
+hfc_status hfc_ctx_new(hfc_ctx **out, const hfc_model *m, size_t ctx_max, size_t max_batch, struct hfc_pool *pool);
 void       hfc_ctx_free(hfc_ctx *c);
 size_t     hfc_ctx_pos(const hfc_ctx *c);          /* tokens currently in the KV cache */
 size_t     hfc_ctx_kv_bytes(const hfc_ctx *c);     /* bytes of KV memory allocated */

@@ -50,6 +50,9 @@ typedef struct {
     double   timeout;           /* seconds, 0 = none */
     int      list_tensors;      /* inspect: also list every tensor */
     int      parse_special;     /* tokenize: recognise special tokens such as <|im_start|> in the text */
+    int      bench_prompt;      /* bench: prompt tokens */
+    int      bench_gen;         /* bench: tokens to decode */
+    char    *bench_threads;     /* bench: thread counts to try, e.g. "1,2,4" (default: 1..physical cores) */
     int      probe_sustained;   /* doctor: seconds of all-core load to expose throttling, 0 = skip */
     int      probe_reps;        /* doctor: repeat the bandwidth sweep this many times (median, range) */
 } hfc_opts;
