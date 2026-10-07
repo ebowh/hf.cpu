@@ -12,8 +12,8 @@ use lib $Bin;
 use GGQ qw(dequant_blocks type_info);
 
 our $wtype = 'f32';
-my ($arch, $layers, $vocab, $seed, $deq, $size) = ('qwen2', 2, 300, 1, undef, 'tiny');
-GetOptions('size=s' => \$size, 'deq=s' => \$deq, 'arch=s' => \$arch, 'wtype=s' => \$wtype, 'layers=i' => \$layers, 'vocab=i' => \$vocab, 'seed=i' => \$seed)
+my ($arch, $layers, $vocab, $seed, $deq, $size, $tokfile) = ('qwen2', 2, 300, 1, undef, 'tiny', undef);
+GetOptions('tokenizer=s' => \$tokfile, 'size=s' => \$size, 'deq=s' => \$deq, 'arch=s' => \$arch, 'wtype=s' => \$wtype, 'layers=i' => \$layers, 'vocab=i' => \$vocab, 'seed=i' => \$seed)
     or die "bad options\n";
 my $out = shift or die "usage: $0 OUT.gguf [options]\n";
 die "unknown arch\n" unless $arch =~ /^(qwen2|qwen3|llama)$/;
@@ -126,6 +126,26 @@ my $kvs = kv_str('general.architecture', $arch) . kv_str('general.name', "tiny $
         . kv_u32("$arch.attention.head_count", $H) . kv_u32("$arch.attention.head_count_kv", $HKV)
         . kv_f32("$arch.attention.layer_norm_rms_epsilon", 1e-6) . kv_f32("$arch.rope.freq_base", 10000.0);
 my $nkv = 10;
+if (defined $tokfile) {                       # copy the tokenizer.* key/value pairs of another GGUF (so text can be generated)
+    open(my $tf, '<:raw', $tokfile) or die "cannot read $tokfile: $!\n";
+    local $/; my $d = <$tf>; close $tf;
+    die "not a GGUF\n" unless substr($d, 0, 4) eq 'GGUF';
+    my $p = 8; my ($nt, $nk) = unpack('Q< Q<', substr($d, $p, 16)); $p += 16;
+    my @sz = (1, 1, 2, 2, 4, 4, 4, 1);
+    my $skip; $skip = sub {
+        my $t = shift;
+        if ($t <= 7) { $p += $sz[$t]; }
+        elsif ($t == 8) { my $l = unpack('Q<', substr($d, $p, 8)); $p += 8 + $l; }
+        elsif ($t == 9) { my ($et, $n) = unpack('V Q<', substr($d, $p, 12)); $p += 12; $skip->($et) for 1 .. $n; }
+        else { $p += 8; }
+    };
+    for (1 .. $nk) {
+        my $start = $p;
+        my $kl = unpack('Q<', substr($d, $p, 8)); my $key = substr($d, $p + 8, $kl); $p += 8 + $kl;
+        my $t = unpack('V', substr($d, $p, 4)); $p += 4; $skip->($t);
+        if ($key =~ /^tokenizer\./) { $kvs .= substr($d, $start, $p - $start); $nkv++; }
+    }
+}
 my ($infos, $blob) = ('', '');
 for my $t (@tens) {
     my ($name, $dims, $id, $data) = @$t;

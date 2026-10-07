@@ -17,7 +17,13 @@
 #define HFC_VERSION "0.0.1-phase0"
 
 static volatile sig_atomic_t g_sigint = 0;
-static void on_sigint(int sig) { (void)sig; g_sigint = 1; }
+/* SIGINT ends the running request (generation stops and reports stop=cancel); when idle it ends the process.
+ * SIGTERM always ends both. */
+static void on_sigint(int sig)
+{
+    if (sig == SIGINT && hfc_busy) hfc_cancel = 1;
+    else { g_sigint = 1; hfc_cancel = 1; }
+}
 
 static void install_signals(void)
 {

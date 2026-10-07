@@ -61,6 +61,7 @@ static const opt_def defs[] = {
     { "seed",           K_U64,  OFF(seed),           S_REQUEST, NOLIM, NULL, "RNG seed (deterministic)" },
     { "max-tokens",     K_INT,  OFF(max_tokens),     S_REQUEST, 1, 1 << 24, NULL, "maximum new tokens" },
     { "logprobs",       K_INT,  OFF(logprobs),       S_REQUEST, 0, 100, NULL, "top-N logprobs per token, 0 = off" },
+    { "stop",           K_STR,  OFF(stop),           S_REQUEST, NOLIM, NULL, "generate: stop before this text; escapes \\n \\t \\xHH, several strings separated by \\x1f" },
     { "stop-on-repeat", K_BOOL, OFF(stop_on_repeat), S_REQUEST, NOLIM, NULL, "stop on repetition loops" },
     { "timeout",        K_DBL,  OFF(timeout),        S_REQUEST, 0, 1e7, NULL, "per-request time limit in seconds, 0 = none" },
     { "list-tensors",   K_BOOL, OFF(list_tensors),   S_REQUEST, NOLIM, NULL, "inspect: list every tensor" },

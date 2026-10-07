@@ -17,8 +17,12 @@ typedef enum {
     HFC_EFORMAT,   /* malformed or hostile input file */
     HFC_ERANGE,    /* size or offset out of range / overflow */
     HFC_ENOTSUP,   /* valid but not implemented */
+    HFC_ECANCEL,   /* request cancelled or timed out */
     HFC_EEOF       /* clean end of input */
 } hfc_status;
+
+extern volatile int hfc_cancel;   /* set by the signal handler to end the running request */
+extern volatile int hfc_busy;     /* a request is running */
 
 const char *hfc_strerror(hfc_status s);
 const char *hfc_status_name(hfc_status s);   /* "ok", "ENOMEM", ... */

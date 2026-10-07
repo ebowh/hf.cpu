@@ -603,6 +603,9 @@ static void emit_profile(hfc_out *o, const char *stage, double extra_sample)
                   names[5], v[5], names[6], v[6], names[7], v[7], names[8], v[8], names[9], v[9], "sample", smp, (const char *)NULL);
 }
 
+volatile int hfc_cancel;
+volatile int hfc_busy;
+
 typedef struct {
     hfc_rng        rng;
     hfc_ctx       *ctx;
@@ -611,7 +614,83 @@ typedef struct {
     const char    *stop;
     size_t         generated, npend;
     unsigned char  pend[16];
+    unsigned char *hb;          /* text held back until it cannot be the start of a stop string */
+    size_t         hb_len, hb_cap;
 } gseq;
+
+typedef struct { unsigned char *buf; size_t n, maxlen; size_t off[8], len[8]; } stopset;
+
+static int hexv(int c) { return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1; }
+
+/* --stop: backslash escapes (\n \t \r \\ \xHH); several stop strings are separated by \x1f. */
+static hfc_status stops_parse(const char *src, stopset *ss)
+{
+    size_t n = src ? strlen(src) : 0, i, o = 0, start = 0;
+    memset(ss, 0, sizeof *ss);
+    if (n == 0) return HFC_OK;
+    ss->buf = (unsigned char *)hfc_malloc(n + 1);
+    if (!ss->buf) return HFC_ENOMEM;
+    for (i = 0; i < n; i++) {
+        unsigned char c = (unsigned char)src[i];
+        if (c == '\\' && i + 1 < n) {
+            char e = src[i + 1];
+            if (e == 'n') { c = '\n'; i++; } else if (e == 't') { c = '\t'; i++; } else if (e == 'r') { c = '\r'; i++; }
+            else if (e == '\\') { c = '\\'; i++; }
+            else if (e == 'x' && i + 3 < n + 0 && hexv(src[i + 2]) >= 0 && hexv(src[i + 3]) >= 0) { c = (unsigned char)(hexv(src[i + 2]) * 16 + hexv(src[i + 3])); i += 3; }
+        }
+        if (c == 0x1f) {
+            if (o > start && ss->n < 8) { ss->off[ss->n] = start; ss->len[ss->n] = o - start; ss->n++; }
+            start = o;
+            continue;
+        }
+        ss->buf[o++] = c;
+    }
+    if (o > start && ss->n < 8) { ss->off[ss->n] = start; ss->len[ss->n] = o - start; ss->n++; }
+    for (i = 0; i < ss->n; i++) if (ss->len[i] > ss->maxlen) ss->maxlen = ss->len[i];
+    return HFC_OK;
+}
+
+static const unsigned char *find_bytes(const unsigned char *h, size_t hl, const unsigned char *nd, size_t nl)
+{
+    size_t i;
+    if (nl == 0 || hl < nl) return NULL;
+    for (i = 0; i + nl <= hl; i++) if (h[i] == nd[0] && memcmp(h + i, nd, nl) == 0) return h + i;
+    return NULL;
+}
+
+static void emit_text(hfc_out *o, const char *seq, const void *data, size_t len);
+
+/* Append text for one sequence; releases what can no longer be part of a stop string. Returns 1 when a
+ * stop string was found (the text before it is released, the sequence is finished). */
+static int seq_feed(gseq *g, hfc_out *o, const char *sq, const unsigned char *data, size_t len, const stopset *ss, int flush)
+{
+    size_t safe, i;
+    int hit = 0;
+    if (g->hb_len + len > g->hb_cap) {
+        size_t nc = g->hb_cap ? g->hb_cap : 64;
+        unsigned char *nb;
+        while (nc < g->hb_len + len) nc *= 2;
+        nb = (unsigned char *)hfc_realloc(g->hb, nc);
+        if (!nb) { emit_text(o, sq, data, len); return 0; }      /* out of memory: no stop checking, but no lost text */
+        g->hb = nb; g->hb_cap = nc;
+    }
+    if (len) { memcpy(g->hb + g->hb_len, data, len); g->hb_len += len; }
+    safe = g->hb_len;
+    if (ss && ss->n && !flush) {
+        const unsigned char *best = NULL;
+        for (i = 0; i < ss->n; i++) {
+            const unsigned char *p = find_bytes(g->hb, g->hb_len, ss->buf + ss->off[i], ss->len[i]);
+            if (p && (!best || p < best)) best = p;
+        }
+        if (best) { safe = (size_t)(best - g->hb); hit = 1; }
+        else if (g->hb_len >= ss->maxlen) safe = hfc_utf8_complete_prefix(g->hb, g->hb_len - (ss->maxlen - 1));
+        else safe = 0;
+    }
+    if (safe) emit_text(o, sq, g->hb, safe);
+    if (hit) g->hb_len = 0;
+    else { memmove(g->hb, g->hb + safe, g->hb_len - safe); g->hb_len -= safe; }
+    return hit;
+}
 
 static void emit_text(hfc_out *o, const char *seq, const void *data, size_t len)
 {
@@ -638,19 +717,24 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     hfc_status rc;
     double t0, t_prefill, t_dec0, t_sample = 0.0;
     const char *stop0 = "length";
+    stopset ss;
+    double t_req = pal_now();
+    int abort_why = 0;
     char a[64], b[64], c[64], d[64], e[64];
     int top_n = eff->logprobs > 64 ? 64 : eff->logprobs;
     size_t batch = (size_t)(s->session->batch > 0 ? s->session->batch : 64);
 
     memset(&t, 0, sizeof t);
+    memset(&ss, 0, sizeof ss);
     if (!eff->model) { snprintf(msg, cap, "generate needs --model PATH"); return HFC_EINVAL; }
-    if ((rc = resident_get(s, eff->model, &res, msg, cap)) != HFC_OK) return rc;
+    if ((rc = stops_parse(eff->stop, &ss)) != HFC_OK) { snprintf(msg, cap, "out of memory"); return rc; }
+    if ((rc = resident_get(s, eff->model, &res, msg, cap)) != HFC_OK) { hfc_free(ss.buf); return rc; }
     nvocab = (size_t)res->model->hp.n_vocab;
 
     if (eff->prompt_ids) {
-        if (has_body || eff->prompt || eff->prompt_file) { snprintf(msg, cap, "--prompt-ids cannot be combined with a text prompt"); return HFC_EINVAL; }
-        if (eff->system || eff->system_file || eff->chat) { snprintf(msg, cap, "--prompt-ids is already tokenized: --system and --chat do not apply"); return HFC_EINVAL; }
-        if ((rc = parse_ids(eff->prompt_ids, &ids, &n_prompt, (uint32_t)nvocab, msg, cap)) != HFC_OK) return rc;
+        if (has_body || eff->prompt || eff->prompt_file) { snprintf(msg, cap, "--prompt-ids cannot be combined with a text prompt"); rc = HFC_EINVAL; goto out; }
+        if (eff->system || eff->system_file || eff->chat) { snprintf(msg, cap, "--prompt-ids is already tokenized: --system and --chat do not apply"); rc = HFC_EINVAL; goto out; }
+        if ((rc = parse_ids(eff->prompt_ids, &ids, &n_prompt, (uint32_t)nvocab, msg, cap)) != HFC_OK) goto out;
     } else {
         if ((rc = resolve_texts(eff, body, body_len, has_body, &t, msg, cap)) != HFC_OK) return rc;
         if (!res->tok) { snprintf(msg, cap, "this model has no usable tokenizer (%s); use --prompt-ids", res->tok_err); rc = HFC_ENOTSUP; goto out; }
@@ -702,6 +786,8 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     t0 = pal_now();
     for (pos = cached; pos < n_prompt; ) {
         size_t nb = n_prompt - pos < batch ? n_prompt - pos : batch;
+        if (hfc_cancel) abort_why = 1; else if (eff->timeout > 0 && pal_now() - t_req > eff->timeout) abort_why = 2;
+        if (abort_why) { snprintf(msg, cap, "%s during prefill", abort_why == 1 ? "cancelled" : "timed out"); rc = HFC_ECANCEL; goto out; }
         rc = hfc_ctx_forward(ctx, ids + pos, nb, pos + nb == n_prompt ? logits : NULL);
         if (rc != HFC_OK) { snprintf(msg, cap, "prefill failed at token %lu: %s", (unsigned long)pos, hfc_strerror(rc)); goto out; }
         pos += nb;
@@ -739,6 +825,12 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     t_dec0 = pal_now();
     for (step = 0; step < ngen_max; step++) {
         hfc_ctx *act_ctx[HFC_MAX_SEQ];
+        if (hfc_cancel) abort_why = 1; else if (eff->timeout > 0 && pal_now() - t_req > eff->timeout) abort_why = 2;
+        if (abort_why) {
+            size_t k2;
+            for (k2 = 0; k2 < nseq; k2++) if (gs[k2].active) { gs[k2].stop = abort_why == 1 ? "cancel" : "timeout"; gs[k2].active = 0; }
+            break;
+        }
         uint32_t act_tok[HFC_MAX_SEQ];
         size_t act_idx[HFC_MAX_SEQ], nact = 0, si;
         for (si = 0; si < nseq; si++) {
@@ -777,13 +869,14 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
                     memcpy(buf, g->pend, g->npend);
                     memcpy(buf + g->npend, piece, plen);
                     take = hfc_utf8_complete_prefix(buf, g->npend + plen);
-                    if (take) emit_text(&s->out, nseq > 1 ? sq : NULL, buf, take);
                     g->npend = g->npend + plen - take;
-                    if (g->npend > sizeof g->pend) { emit_text(&s->out, nseq > 1 ? sq : NULL, buf + take, g->npend); g->npend = 0; }
+                    if (g->npend > sizeof g->pend) { take += g->npend; g->npend = 0; }      /* not valid UTF-8: pass the bytes on */
                     else memcpy(g->pend, buf + take, g->npend);
+                    if (take && seq_feed(g, &s->out, nseq > 1 ? sq : NULL, buf, take, &ss, 0)) { g->stop = "stop"; g->active = 0; g->npend = 0; }
                     hfc_free(buf);
                 }
             }
+            if (!g->active) continue;
             if (step + 1 == ngen_max) { g->active = 0; continue; }
             act_ctx[nact] = g->ctx; act_tok[nact] = tok; act_idx[nact] = si; nact++;
         }
@@ -804,7 +897,8 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
         for (si = 0; si < nseq; si++) {
             gseq *g = &gs[si];
             char sq[24];
-            if (g->npend) { snprintf(sq, sizeof sq, "%lu", (unsigned long)si); emit_text(&s->out, nseq > 1 ? sq : NULL, g->pend, g->npend); }
+            snprintf(sq, sizeof sq, "%lu", (unsigned long)si);
+            if (strcmp(g->stop, "stop") != 0) seq_feed(g, &s->out, nseq > 1 ? sq : NULL, g->pend, g->npend, &ss, 1);
             total += g->generated;
         }
         for (si = 0; si < nseq; si++) {
@@ -826,8 +920,10 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     }
     rc = HFC_OK;
 out:
+    hfc_free(ss.buf);
     hfc_prof_enable(0);
     if (gs) { size_t si; for (si = 0; si < nseq; si++) if (gs[si].ctx != ctx) hfc_ctx_free(gs[si].ctx); }
+    if (gs) { size_t si; for (si = 0; si < nseq; si++) hfc_free(gs[si].hb); }
     hfc_free(gs); hfc_free(lbuf); hfc_free(tmpl);
     hfc_free(logits);
     if (rc != HFC_OK && res && touched) kv_drop(res);            /* the cached state may be half-written */
@@ -951,6 +1047,7 @@ hfc_status hfc_run_request(hfc_session *s, const hfc_opts *eff, const char *body
     char ms[48];
 
     s->n_requests++;
+    hfc_busy = 1;
     hfc_out_event(&s->out, "begin", "id", eff->id ? eff->id : "", "op", op, (const char *)NULL);
     if (strcmp(op, "echo") == 0)         rc = op_echo(s, eff, body, body_len, has_body, msg, sizeof msg);
     else if (strcmp(op, "inspect") == 0) rc = op_inspect(s, eff, msg, sizeof msg);
@@ -962,6 +1059,8 @@ hfc_status hfc_run_request(hfc_session *s, const hfc_opts *eff, const char *body
         rc = HFC_EINVAL;
         snprintf(msg, sizeof msg, "unknown --op '%s' (generate, inspect, doctor, tokenize, bench, echo)", op);
     }
+    hfc_busy = 0;
+    hfc_cancel = 0;
     snprintf(ms, sizeof ms, "%.1f", (pal_now() - t0) * 1000.0);
     if (rc == HFC_OK) {
         hfc_out_event(&s->out, "done", "status", "ok", "ms", ms, (const char *)NULL);

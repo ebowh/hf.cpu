@@ -39,6 +39,7 @@ const char *hfc_strerror(hfc_status s)
     case HFC_EFORMAT: return "malformed input";
     case HFC_ERANGE:  return "size out of range";
     case HFC_ENOTSUP: return "not supported";
+    case HFC_ECANCEL: return "cancelled";
     case HFC_EEOF:    return "end of input";
     }
     return "unknown error";
@@ -54,6 +55,7 @@ const char *hfc_status_name(hfc_status s)
     case HFC_EFORMAT: return "EFORMAT";
     case HFC_ERANGE:  return "ERANGE";
     case HFC_ENOTSUP: return "ENOTSUP";
+    case HFC_ECANCEL: return "ECANCEL";
     case HFC_EEOF:    return "EEOF";
     }
     return "EUNKNOWN";

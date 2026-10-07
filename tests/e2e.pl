@@ -227,6 +227,45 @@ for my $n (1 .. 40) {
     ok($x != 0 && $o =~ /out of range/, 'fan-out: --n above 64 is refused');
 }
 
+# text generation with stop strings, timeout and cancellation (a random-weight model with a real tokenizer)
+{
+    my $txt = "$tmp/txt.gguf";
+    system("perl '$root/tools/mkmodel.pl' '$txt' --arch qwen2 --wtype f32 --vocab 20000 --seed 9 --tokenizer '$root/tests/data/ggml-vocab-qwen2.gguf' >/dev/null") == 0 or die;
+    my $textof = sub {                      # concatenate the @text payloads of one response
+        my $r = shift; my $out = '';
+        while ($r =~ /\G.*?^\@text len=(\d+)\n/msgc) { my $n = $1; $out .= substr($r, pos($r), $n); pos($r) += $n; }
+        return $out;
+    };
+    my $base = "--stdin-mode none --op generate --model '$txt' --prompt 'Hello world' --temp 0 --max-tokens 60";
+    ($o, $e, $x) = run($base);
+    my $full = $textof->($o);
+    ok($x == 0 && length($full) > 20 && $o =~ /stop=length/, 'text: baseline generation produces text');
+    my $stop;
+    for my $i (8 .. length($full) - 4) { my $c = substr($full, $i, 3); if ($c =~ /^[A-Za-z0-9]{3}$/ && index($full, $c) == $i) { $stop = $c; last; } }
+    ok(defined $stop, 'text: found a stop candidate in the baseline text');
+    if (defined $stop) {
+        ($o, $e, $x) = run("$base --stop '$stop'");
+        my $cut = $textof->($o);
+        ok($cut eq substr($full, 0, index($full, $stop)) && $o =~ /stop=stop/, "text: --stop '$stop' truncates before the match");
+        ($o, $e, $x) = run("$base --stop 'QQQQQ\\x1f$stop'");
+        ok($textof->($o) eq $cut, 'text: several stop strings separated by \x1f');
+        ($o, $e, $x) = run("$base --stop 'QQQQQ'");
+        ok($textof->($o) eq $full && $o =~ /stop=length/, 'text: a stop string that never occurs changes nothing');
+    }
+    ($o, $e, $x) = run("--stdin-mode none --op generate --model '$txt' --prompt 'Hello world' --max-tokens 60 --timeout 0.0000001");
+    ok($x != 0 && $o =~ /code=ECANCEL/ && $o =~ /timed out/, 'timeout: expired before prefill is reported as an error');
+    # cancellation: SIGINT during a long generation ends the request cleanly and keeps the output
+    my $pid = fork();
+    if (!$pid) { open(STDOUT, '>', "$tmp/cancel.out"); open(STDERR, '>', "$tmp/cancel.err"); exec($bin, split(/ /, "--stdin-mode none --op generate --model $txt --prompt-ids 1,2,3 --temp 0 --max-tokens 400000")); exit 127; }
+    select(undef, undef, undef, 1.0);
+    kill 'INT', $pid;
+    my $t0 = time; my $reaped = 0;
+    while (time - $t0 < 20) { if (waitpid($pid, 1) == $pid) { $reaped = 1; last; } select(undef, undef, undef, 0.1); }
+    kill 'KILL', $pid unless $reaped;
+    my $co = slurp("$tmp/cancel.out");
+    ok($reaped && ($? >> 8) == 0 && $co =~ /\@gen tokens=\d+ .*stop=cancel/ && $co =~ /\@done status=ok/, 'cancel: SIGINT ends the running request with stop=cancel');
+}
+
 # chat templates: segmented tokenization equals tokenizing the formatted string, and user text cannot forge markers
 ($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --chat chatml --system '  Be brief.\n' --prompt '\nHello  world'");
 my ($chat_ids) = $o =~ /ids="([^"]*)"/;
