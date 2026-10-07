@@ -1,6 +1,6 @@
 # hf.cpu: design-space exploration
 
-Status: research notes, no code. Facts verified by web search are marked **[V]**. Everything else is from memory or derived by me, and is marked **[M]** (memory) or **[D]** (derived estimate). Treat [M] and [D] as hypotheses until checked against sources or measurements.
+Status: research notes, no code. Facts verified by web search are marked **[V]**. Everything else is from memory or derived by me, and is marked **[M]** (memory) or **[D]** (derived estimate). Treat [M] and [D] as hypotheses until checked against sources or measurements. Updated after your decisions on tooling (Perl), fan-out, resident protocol, platforms and disk.
 
 Targets: HP EliteBook 850 G6 (8th-gen U-series, likely 4C/8T, 32 GB) and MacBook Pro early 2015 (Broadwell 2C/4T, 16 GB LPDDR3-1866, 4 MB L3). Both are AVX2+FMA+F16C, with no AVX-512 and no VNNI.
 
@@ -56,7 +56,9 @@ The block library must cover the union of these.
 | Qwen3.5 (0.8B, 2B, 4B, 9B) | Hybrid: Gated DeltaNet (linear attention) and full attention at 3:1. 0.8B: 18 GDN + 6 attn layers. 9B: 24 GDN + 8 attn. Natively multimodal. Context 262k | [V] |
 | LFM2.5 (350M, 1.2B, 2.6B...) | Gated short convolutions interleaved with GQA. A VL line (450M/1.6B/3B) and an 8B-A1B MoE variant also exist | [V] |
 | Ling-3.0-tiny | MoE 7.9B total, 1.3B active. 24 layers, 3x Kimi Delta Attention (KDA) then 1x Multi-head Latent Attention (MLA). 8-of-128 routed experts plus 1 shared. 256k ctx | [V] |
-| Ornith-1.5-9B | **Unknown to me.** Inspect its GGUF | - |
+| Ornith-1.5-9B | Dense 9B, MIT license, 32k context, coding/agentic tuned. Described as "building upon Qwen3.5 and Gemma4 architectures", so probably a Qwen3.5-style GDN hybrid. GGUFs exist. The HF page is blocked from my sandbox, so I could not read `config.json`. **Confirm the layer pattern from the file** | [V] third-party listing only |
+| Gemma 3 270M / 1B / 4B | Sandwich norms (pre and post), GeGLU, QK-norm, 5:1 local:global attention with sliding windows (270M: 15 of 18 layers local), dual RoPE bases (local vs global), tied embeddings. **262k vocab**: in the 270M model ~170M of ~270M params are embeddings. 4B adds a SigLIP vision tower | [V] 270M and vocab, rest [M] |
+| Gemma 4 E2B / E4B (and Gemma 3n E2B/E4B) | "Effective" parameter counts via **Per-Layer Embeddings (PLE)**: 2.3B/4.5B effective out of 5B/8B total. Sliding window 512, local:global 4:1 (E2B) / 5:1 (E4B), last layer always global, GQA, 128k ctx. **KV sharing**: later layers reuse earlier layers' KV (E2B: 35 layers but 15 KV-producing; E4B: 42 layers, 24 KV-producing). Multimodal | [V] |
 
 **Findings:**
 - **MiniCPM5 being plain Llama means the day-one target is easy.** Start there.
@@ -64,7 +66,12 @@ The block library must cover the union of these.
 - **Hybrids are a gift on this hardware.** Qwen3.5-9B has 8 attention layers instead of 36, so KV traffic is cut about 4x. Long context becomes affordable. Hybrids are probably the best models for this project.
 - **MoE is great for decode bandwidth.** Ling reads about 1.3B active params per token, so decode speed is comparable to a 1.3B model. It needs ~4.5 GB at Q4 resident. It breaks "verify k tokens for the price of one": the union of experts across k tokens approaches all of them.
 - **MLA and KDA are exotic.** llama.cpp support for these may lag, so check GGUF availability before committing to them.
-- **Vision (LFM2.5-VL, Qwen3.5):** a ViT encoder plus projector, usually shipped as a separate `mmproj` GGUF in llama.cpp. It needs image decode and preprocessing in C, and ViT prefill is expensive. Cache image embeddings on disk, content-addressed by image hash (§6).
+- **Gemma changes four engine decisions:**
+  1. **Huge vocab means lm_head dominates small models.** 262k x hidden is a large fraction of every token's bytes for the 270M-1B models. Sparse lm_head (constrained decoding), fused top-k, and reduced-vocab drafting (FR-Spec) matter far more than for Qwen.
+  2. **PLE tables are lookup tables, not matmul weights.** Only one row per token per layer is read. Keep them in a separate cold region of the sidecar, `MADV_RANDOM`, excluded from the resident-set budget, and let the page cache decide. This is the perfect mmap use case, and it is why E2B/E4B fit comfortably on 16 GB.
+  3. **Sliding-window layers need ring-buffer KV** bounded at the window (512-1024), so their blocks are recycled as the window slides. Persistent-cache reuse then has the same "valid only at certain positions" caveat as recurrent state unless the old local KV is kept (§6).
+  4. **Cross-layer KV sharing** means the layer-to-KV-slot map is part of the spec, and the KV block holds only the KV-producing layers.
+- **Vision (LFM2.5-VL, Qwen3.5, Gemma):** a ViT encoder plus projector, usually shipped as a separate `mmproj` GGUF in llama.cpp. It needs image decode and preprocessing in C, and ViT prefill is expensive. Cache image embeddings on disk, content-addressed by image hash (§6).
 
 First deliverable of any tool: `inspect <gguf>`. It prints architecture, hyperparameters, layer pattern, tensor types and which blocks are missing from our library.
 
@@ -144,8 +151,14 @@ A small, self-contained C inference engine **specific to DeepSeek V4 Flash**, no
 - **Adaptive `k`**: tune online from observed acceptance and the measured ridge point (§1). Sizes beyond 3-4 are probably wasted here. Disable on MoE or measure, because the union of experts erodes the benefit.
 - Tree verification costs compute, so it is probably not worth it on 2 cores.
 
-### 4.4 Batched fan-out (an exception to "one inference at a time")
-Parallel sampling of `n` continuations (best-of-n, self-consistency, retries after a failed gate) shares the prefix, and decode of `n` sequences together costs far less than `n` x one sequence because weights are read once. The multi-vector kernel from §4.1 gives it nearly for free. Worth exposing as `n=` in a request. **Question for you in §12.**
+### 4.4 Batched fan-out (in scope, decided)
+Parallel sampling of `n` continuations (best-of-n, self-consistency, retries after a failed gate) shares the prefix, and decode of `n` sequences together costs far less than `n` x one sequence because weights are read once. The multi-vector kernel from §4.1 gives it nearly for free.
+- Request parameter `--n N` (and later per-branch parameters such as seed or temperature lists). One prefill, then fork the KV at the shared prefix: block-pointer sharing with copy-on-write of the tail block, plus a state snapshot copy for recurrent layers.
+- The same machinery serves **N different prompts** in one request (map over chunks with the same model), where shared-prefix detection dedupes whatever overlaps.
+- Throughput grows with `n` until the compute ridge (§1), around n = 3-4 on the MacBook and a bit higher on the EliteBook. Beyond that it is linear. The planner caps the effective decode batch at the measured ridge and runs the rest in waves. Cap `n` by memory too (KV per branch).
+- Output is demultiplexed with a branch index in each streamed event (§11).
+- MoE caveat: the expert union across `n` branches grows toward all experts, so the gain is smaller for Ling.
+- Interaction with speculation: both consume the same spare-compute budget. A batch of `n` branches with draft `k` costs `n x (k+1)` rows, so the planner picks one or the other (or splits the budget), not both at full size.
 
 ### 4.5 lm_head and sampling
 - Fuse top-k / argmax into the lm_head loop, so the full vocab logits are not materialized for greedy decoding.
@@ -281,14 +294,19 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 **Automation tiers:**
 - **Tier 0:** the GGUF's architecture string maps to a spec in our library, so it runs. This covers every llama.cpp-supported model.
 - **Tier 1 (semi-automatic, the realistic goal):** read `modeling_*.py` / `modular_*.py` plus `config.json` and emit a spec draft. An LLM-assisted generator (me) can do this well, because the output is a small structured file and not arbitrary code. A human reviews it.
-- **Tier 2:** trace the HF model with `torch.export` / `torch.fx` using a tiny dummy config to get an op graph, then pattern-match onto fused blocks. Unmatched ops fall back to a small portable set of reference primitives (elementwise, reductions, matmul, softmax, gather, conv1d, scan), so any model **runs slowly but correctly** while known blocks get fast kernels. This is the escape hatch for novel architectures. It is fragile for `trust_remote_code` models and dynamic control flow.
+- **Tier 2 (dropped, given the Perl-only tooling decision):** tracing HF models with `torch.export` / `torch.fx` needs Python and PyTorch. What replaces it is a **generic reference-primitive fallback in the engine itself** (elementwise, reductions, matmul, softmax, gather, conv1d, scan) so a spec using an unknown op composition still **runs slowly but correctly** while known blocks get fast kernels.
 - **Not feasible:** fully automatic from arbitrary Python or custom CUDA kernels.
 
-**The validation harness is what makes semi-automation safe.** Run the HF model on a tiny input, dump per-layer activations via hooks, run the engine, and bisect to the first diverging op. Same harness against llama.cpp output serves as the oracle for GGUF models. Without it, generated specs are untrustworthy.
+**What Perl tooling can and cannot do** (core modules only: `JSON::PP`, `Digest::SHA`, `Time::HiRes`, `File::Temp`, `Getopt::Long`, `pack`/`unpack`; avoid CPAN):
+- **Can:** parse `config.json`, `generation_config.json`, `tokenizer_config.json`, the safetensors header (JSON after an 8-byte length), and GGUF metadata/tensor tables. Emit and lint spec files. Print the `inspect` coverage report (which blocks a model needs vs what the engine has). Build sidecars (repack is a byte-shuffling job, but it is heavy for Perl at multi-GB scale, so **the repack tool should be a C mode of the engine itself**, with Perl orchestrating). Drive test runs, diff logits files, bisect divergences, manage the cache directory, and generate the machine-profile report.
+- **Cannot:** parse arbitrary Python source reliably, or run HF models. The "read `modeling_*.py` and draft a spec" step is therefore done by me (or you) reading the source as text, and the spec is reviewed by hand. Perl just lints it.
+- **Ground truth for validation without Python:** (1) llama.cpp/ik_llama.cpp binaries as the oracle for every architecture they support, which covers all your current models; (2) our scalar reference kernels as the oracle for the SIMD kernels; (3) for an architecture llama.cpp lacks, per-layer HF activation dumps generated once on any machine that has PyTorch, stored as plain binary fixtures, and consumed by the C engine and Perl diff tools. Perl itself never needs PyTorch.
+
+**The validation harness is what makes semi-automation safe.** Feed a tiny prompt, dump per-layer activations from the engine (a `--dump-layers` debug mode), diff against the oracle, and bisect to the first diverging op. Without it, hand- or LLM-written specs are untrustworthy.
 
 **Interpreted spec vs generated C:** interpret the spec. Per-layer graph dispatch costs microseconds against millisecond tokens. Shape specialization (head_dim 64/80/96/128/256) can be macro-instantiated inside kernels. Generated C is only needed for a genuinely **new block type**, which is the rare case and does need human or LLM-written kernel code.
 
-**Offline tooling in Python** (spec generator, harness, converter) seems unavoidable because the source of truth is Python. The runtime stays pure C. **Question for you in §12.**
+**Offline tooling is Perl** (decided), runtime and heavy byte-crunching tools are C. See the capability split above.
 
 **Minimal block set for your list:** RMSNorm, GQA with QK-norm, RoPE variants, SwiGLU, tied embeddings, muP scalings, short gated conv (LFM), gated delta rule (Qwen3.5), KDA + MLA (Ling), MoE with shared experts and sigmoid router, ViT + projector (VL). The first few cover MiniCPM5 and Qwen3-4B. The rest arrive roughly in this order.
 
@@ -307,37 +325,114 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 
 ## 11. Process model and protocol
 
-- **stdin/stdout/stderr only.** Suggested framing: length-prefixed header + body requests. Streaming events on stdout (token text, logprobs, done + stats). Structured `key=value` log lines on stderr with levels. Emacs can read these with its native S-expression or JSON parsers. Pass images and big blobs as file paths.
-- **One-shot vs resident.** With the sidecar mmapped and the page cache warm, **process-per-stage startup is nearly free** (target ~100 ms). That gives perfect memory reclamation, crash containment and per-stage rlimits. A persistent stream mode (multiple requests, explicit `load`/`reset`) is still useful for chat. Supporting both costs little.
-- **Cancellation**: poll stdin non-blocking between tokens for a control message, plus signal handling.
-- **Request types**: `generate`, `tokenize`, `score` (perplexity/logprobs), `classify` (label logits), `embed` (if wanted), `warm`, `inspect`, `doctor`, `load`/`unload`, `cache gc`.
+**Decided: one resident process that loads once and serves many requests for a long time.** stdin/stdout/stderr only. Two input modes, chosen at startup:
+
+**Mode A: argv-lines.** Each stdin line is one request, written as command-line parameters (`--n 4 --temp 0.7 --prompt-file /tmp/p.txt`).
+- Parsed with POSIX-shell-style word splitting only: single quotes, double quotes with `\"` and `\\`, backslash. **No expansion** (no `$`, globs, backticks), so request lines are safe to build from untrusted text.
+- The same option parser serves the real command line and each request line. Startup options are the defaults, and request options override them per request. This keeps one flag vocabulary for the whole engine.
+- Prompt text should normally come via `--prompt-file PATH` (or `--prompt-fd`, or `--prompt-inline-hex`), because a newline-terminated line cannot carry arbitrary prompts. A short `--prompt 'text'` is allowed, with `\n` escapes.
+- Fits shell scripts and `perl` pipelines well: `print $fh "--model qwen3 --n 3 --prompt-file $f\n"`.
+
+**Mode B: record stream.** stdin carries request bodies (prompts) separated by a single `RECORD_SEPARATOR` byte.
+- Suggested value: ASCII 0x1E (RS), configurable with `--record-sep BYTE`. Prompt text containing that byte is an error (or escapable via a configurable escape byte). Using a length-prefixed variant is an alternative for fully binary-safe bodies.
+- Per-request parameters come from the startup command line (applied to every record). To override per record without a second channel, an optional **header**: a record may start with an argv-style parameter line terminated by ASCII 0x1F (UNIT_SEPARATOR), then the body. No 0x1F means the whole record is the body and all params are defaults.
+- Fits Emacs well: it concatenates buffer text + `\x1e` and `process-send-string`.
+
+**Common to both modes**
+- **Output** mirrors input framing. In record mode, each response ends with the same RS byte. In argv mode, each response ends with a line `\n`-terminated trailer event, and a request id may be passed with `--id`. Events on stdout: token text deltas, logprobs, branch index (for `--n`), `done` with stats (tokens, prefill and decode rates, cache hit length, KV bytes, timings), or `error` with a code. Log and progress lines go to stderr as `level key=value ...` (prefill progress, cache hit/miss, memory plan, thrash warnings). Emacs can parse either stream with native readers. A machine-readable stats line per request lets pipeline controllers evaluate gates and tuning.
+- **Requests are processed strictly one at a time, in order.** EOF on stdin ends the session cleanly (flush, save cache, exit 0).
+- **Cancellation**: between tokens (and between layers during long prefill) the engine polls stdin non-blocking for a control line (`!cancel`, `!id N`) and checks a signal flag (`SIGINT` cancels the current request but keeps the process alive; `SIGTERM` exits after saving). In record mode control lines use a reserved first byte so they cannot be confused with prompts. This is an open detail, listed in §12.
+- **Model switching inside the process**: `--model NAME` per request. The engine keeps an LRU of resident (mmapped) models under a memory budget. An unneeded model's pages are released with `MADV_DONTNEED`/`fadvise` (§5), so a pipeline that alternates 4B and 9B models costs only page-cache residency, not reload parsing, thanks to sidecars. `--model` may name a registry entry or a path.
+- **Long-running hygiene**: no heap growth per request (arena reset per request), a leak counter reported in `doctor`, periodic cache GC, re-stat of model files so a replaced GGUF is detected and the sidecar rebuilt, `SIGHUP` re-reads the registry and settings, and a per-request watchdog (`--timeout`). Crash recovery is the supervisor's job: the persistent cache is crash-safe (atomic publishes), so a restart loses nothing but process warmth.
+- **Process-per-stage still works** for free (stdin EOF after one request) and gives hard isolation when wanted.
+- **Request types**: `generate`, `tokenize`, `score` (perplexity/logprobs), `classify` (label logits), `embed` (if wanted), `warm`, `inspect`, `doctor`, `load`/`unload`, `cache gc`. Selected with `--op NAME`, default `generate`.
 - **Chat templates**: GGUF embeds Jinja. A full Jinja engine in C is heavy. Options: let Emacs/Lisp apply templates, with the engine taking raw text and parsing special tokens, or ship a tiny Jinja subset interpreter, or store per-model templates in the registry. I would start with the first.
 
 ---
 
-## 12. Open questions for you
+## 12. Decisions so far and remaining questions
 
-1. **Python for offline tooling** (spec generation, validation harness, quant/sidecar helpers): acceptable, with the runtime pure C?
-2. **Batched fan-out** (`n` continuations of one prefix in one request): in scope? It is the biggest cheap throughput win and shares kernels with speculation.
-3. **Quality gates**: do you want `classify` / `score` / logprob outputs as first-class request types?
-4. **Platforms**: macOS on the 2015 MBP is a hard constraint (no `O_DIRECT`, no strict overcommit, different `madvise` semantics, no thread affinity). Linux on the EliteBook? Is macOS the one that must be bit-for-bit identical to Linux?
-5. **Vision** (LFM2.5-VL, Qwen3.5 multimodal): needed early, or after text is solid?
-6. **Quantizing / converting**: is it fine to rely on llama.cpp's `llama-quantize` and the HF converter offline, with our engine only consuming GGUFs and building sidecars?
-7. **Disk budget** for caches on each machine, and the disk type (NVMe vs SATA) on the EliteBook.
-8. **Ornith-1.5-9B**: where is it published and in what architecture? I could not identify it.
+**Decided (by you):**
+- Offline tooling is **Perl**. The runtime and byte-heavy tools are C.
+- **Batched fan-out** is in scope (§4.4).
+- Resident, load-once, many-requests process with two stdin modes: argv-lines and RS-separated records (§11).
+- Platforms: Linux on the EliteBook, macOS on the MacBook, and FreeBSD should also work (§14).
+- Disk: EliteBook 512 GB NVMe (to be confirmed), MacBook 256 GB SSD. Cache budget is a setting (§15).
+
+**Decided (by me, say if you disagree):**
+- macOS, Linux and FreeBSD behave **identically in results** (bit-identical logits on the same ISA) and differ only in the platform layer (§14).
+- Offline repack/sidecar building is a C mode of the engine, orchestrated by Perl.
+- Templates are applied by the client (Emacs) at first, with the engine taking raw text and parsing special tokens (§11).
+
+**Still open:**
+1. **Quality-gate request types**: are `classify` / `score` / logprob outputs wanted as first-class (my assumption: yes)?
+2. **Vision** (LFM2.5-VL, Qwen3.5, Gemma 3/4): early, or after text is solid? It costs an image decoder, a ViT and a second GGUF (`mmproj`).
+3. **Quantizing / converting**: OK to rely on llama.cpp's `llama-quantize` and converter offline, with our engine consuming GGUFs and building sidecars?
+4. **Control channel in record mode**: reserved leading byte for `!cancel`, or a second file descriptor (`--control-fd 3`) which Emacs can also open? The fd is cleaner but less portable to simple pipelines.
+5. **Ornith-1.5-9B config**: please paste its `config.json` (or `layer_types`), since HF is blocked from my sandbox and I only have a third-party description.
+6. **Exact hardware**: EliteBook CPU model and DIMM population (one or two DIMMs matters 2x for bandwidth) and macOS version on the MacBook (Monterey 12 is the last official release for that model, as far as I recall).
+7. **Which Gemma sizes**: 270M, 1B, 4B, Gemma 3n E2B/E4B, Gemma 4 E2B/E4B, all of them?
 
 ---
 
-## 13. Suggested phasing (for discussion)
+## 14. Portability: Linux, macOS, FreeBSD
 
-0. **Foundations**: GGUF reader (hardened), type table, scalar reference kernels, tokenizer (BPE/SentencePiece), machine probe and profile file.
+**Policy: identical results, platform-specific mechanisms.** All numerical code is the same C on every OS. Hot paths use our own `exp`/`tanh`/`erf` polynomials (no libm differences), fixed reduction order (§4.1), and no data-dependent threading order, so logits are **bit-identical across OSes and thread counts on the same ISA**. Sidecar and cache files are little-endian, offset-based and portable between the machines as long as the ISA layout tag matches (AVX2 on both). That also lets you warm a cache on one machine and copy it to the other.
+
+**A thin platform abstraction layer (PAL)** is the only place `#ifdef` lives:
+
+| Concern | Linux | macOS | FreeBSD |
+|---|---|---|---|
+| CPU features, cache sizes | CPUID first (`cpuid.h`), sysfs `cache/index*` as cross-check | CPUID, `sysctl hw.l2cachesize` / `hw.l3cachesize` / `hw.cachelinesize` | CPUID, `sysctl hw.*` (limited) |
+| Memory availability | `/proc/meminfo` (`MemAvailable`, `CommitLimit`), cgroups | `host_statistics64` / `vm_stat` (free + inactive), no strict commit | `sysctl vm.stats.vm.*`, `vm.overcommit` flags, `RLIMIT_*` |
+| Overcommit semantics | strict mode 2 possible, rules in §5 | no strict accounting, compression and swap instead | optional accounting via `vm.overcommit`, swap-backed. **Verify** the actual semantics when porting |
+| mmap + advice | `madvise` (`WILLNEED`, `DONTNEED`, `RANDOM`, `HUGEPAGE`, `COLD`/`PAGEOUT`), `MAP_POPULATE` | `madvise` subset, no `MAP_POPULATE`; superpages via `VM_FLAGS_SUPERPAGE_SIZE_2MB` | `madvise`, `MAP_ALIGNED_SUPER` |
+| File cache control | `posix_fadvise`, `O_DIRECT`, `sync_file_range` | `fcntl(F_NOCACHE)`, `F_RDADVISE`, no `posix_fadvise` | `posix_fadvise`, `O_DIRECT` |
+| Durability | `fdatasync` | **`fcntl(F_FULLFSYNC)`** (plain `fsync` does not flush the drive cache) | `fsync` |
+| Preallocation | `fallocate` / `posix_fallocate` | `fcntl(F_PREALLOCATE)` + `ftruncate` | `posix_fallocate` |
+| Thread pinning | `sched_setaffinity` | affinity tags are only hints. Measure whether it matters; likely skip | `cpuset_setaffinity` |
+| Low-priority mode | `nice`, `SCHED_IDLE` | QoS class background (`pthread_set_qos_class_self_np`) | `nice`, `rtprio` idle |
+| Locks | `flock` / `fcntl` locks | `flock` | `flock` |
+| Futex / sleeping barriers | `futex` | `__ulock_wait` or pthread cond (Apple's private API, avoid) | `_umtx_op` or pthread cond |
+
+**Everything above has a portable fallback** (plain `pread`, `pthread` cond, no advice) so a new platform is a stub PAL first and an optimized one later. The fallback must be correct, never silently wrong.
+
+**Build:** plain C99, POSIX `make` subset (BSD make and GNU make both work, so no GNU-isms), `cc` = clang or gcc, per-ISA files compiled with explicit `-m` flags selected by a tiny `make` variable or script. The build must **not** need Perl. Only the offline tools do (Perl ships with macOS, and on FreeBSD is `pkg install perl5`). No third-party libraries at all.
+
+**Per-platform notes:**
+- **macOS on the 2015 MBP:** Intel x86_64. Last officially supported macOS is, as I recall, Monterey, so keep the toolchain compatible with Xcode 14-era clang and avoid newer SDK-only APIs. Thermal throttling is severe, and macOS gives less control, so the calibrator's sustained-throughput test and the "good-citizen" mode matter more here. Apple's compressed memory can make `RSS` misleading.
+- **FreeBSD:** similar to Linux for mmap and fadvise, no sysfs, so rely on CPUID plus `sysctl`. ZFS is common on FreeBSD, and ZFS's ARC **double-caches** mmapped files and does not play well with `mmap` + page cache. Prefer UFS (or accept a larger memory reserve) for the weights/cache directory. Not an issue for your two machines, but a thing to note when it is tested.
+- **Linux (EliteBook):** strict overcommit testing happens here (VM or cgroup), plus perf counters. The same tests run on macOS where the mechanisms exist.
+- **CI matrix:** Linux x86_64 (primary), macOS x86_64, FreeBSD x86_64 in a VM, and a scalar-only build to prove the fallback.
+
+---
+
+## 15. Disk budget for the persistent cache
+
+**Sizing (rough):** a dense 4B at f16 KV is ~150 KB/token, so 100k cached tokens is ~15 GB, or ~4-8 GB at q8/q4 KV. Hybrids (Qwen3.5, Gemma with sliding windows and KV sharing, LFM2.5) store several times less. A 512 GB NVMe or 256 GB SSD can hold tens to hundreds of sessions. On the MacBook, model files and sidecars take 15-40 GB already, so its cache budget is the tighter one.
+
+**Parameters:** `--cache-dir PATH`, `--cache-quota SIZE` (e.g. `80G`), `--cache-min-free SIZE` (never let the filesystem drop below this, checked with `statvfs` before every write), per-model sub-quotas, a TTL, and pinned entries (e.g. system-prompt caches for pipeline stages). The same settings also come from the registry/config file. On exceeding quota: evict least-recently-used unpinned blocks first, always as whole atomic units.
+
+**Dedicated space (optional, yours to decide):**
+- **Linux:** a separate partition, an LVM volume, or a loopback file formatted as ext4/XFS. A dedicated filesystem gives a **hard quota**, keeps cache churn from fragmenting your main data, and lets you mount with `noatime`. XFS project quotas or btrfs subvolume quotas enforce a limit without a partition.
+- **macOS:** APFS lets you add a volume with a quota (`diskutil apfs addVolume ... -quota`) without repartitioning, which is the macOS equivalent of "create a partition". Disable Spotlight and Time Machine indexing for that volume.
+- **FreeBSD:** a UFS slice, or a ZFS dataset with `quota`/`reservation` (but see the ARC note above).
+- The engine just needs a directory and a quota number. The partition or volume is an operations choice and never required.
+
+**Behavior:** large sequential writes in block units (SSD-friendly), content-addressed dedupe (§6), write at checkpoints, not every turn, `fallocate` where it exists, and avoiding `atime` updates. NVMe wear is a non-issue at this write volume. Expose `cache stat` / `cache gc` / `cache pin` operations (Perl tools plus the engine's `--op` requests).
+
+---
+
+## 16. Suggested phasing (for discussion)
+
+0. **Foundations**: platform abstraction layer (Linux + macOS + FreeBSD stubs), argv-line and record-stream protocol, GGUF reader (hardened), type table, scalar reference kernels, tokenizer (BPE/SentencePiece), machine probe and profile file.
 1. **MiniCPM5 / Qwen3 dense path**: Q4_K/Q8_0 AVX2 kernels, GEMV + GEMM regimes, flash attention, f16/q8 KV, block pool, stdin/stdout protocol, conformance against llama.cpp.
 2. **Memory robustness**: static plan, fault injection, strict-overcommit CI, incremental context growth.
 3. **Persistent prefix cache** and sidecar prepared models.
 4. **Hybrid blocks**: short conv (LFM), GDN (Qwen3.5), recurrent checkpoints.
 5. **Spec decoding** (n-gram first, then draft), constrained decoding, thinking budget, classify/score modes.
 6. **MoE and Ling** (KDA, MLA), then vision.
-7. **Spec generator + validation harness** for new architectures.
+7. **Spec linter, `inspect` coverage report and validation harness** (Perl) for new architectures. Gemma (sandwich norms, SWA ring KV, PLE tables, KV sharing, 262k vocab) is a good test of the spec vocabulary.
 8. **Online tuning** from the run log.
 
 ---
@@ -348,3 +443,5 @@ Sources checked [V]:
 - [LFM2.5 docs (vLLM recipes)](https://docs.vllm.ai/projects/recipes/en/latest/LiquidAI/LFM2.5.html), [LFM2.5 architecture overview](https://lilting.ch/en/articles/lfm-hybrid-architecture)
 - [Ling-3.0-tiny](https://recipes.vllm.ai/inclusionAI/Ling-3.0-tiny)
 - [MiniCPM5-2B](https://huggingface.co/OpenBMB/MiniCPM5-2B)
+- [Ornith 1.5 9B (third-party listing)](https://featherless.ai/models/ornith-ai/Ornith-1.5-9B)
+- [Gemma 4 deep dive](https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-gemma-4), [KV sharing and PLE notes](https://sebastianraschka.com/llm-architecture-gallery/kv-sharing/), [Gemma 3 270M](https://en.immers.cloud/ai/google/gemma-3-270m/)
