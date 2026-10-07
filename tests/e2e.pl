@@ -209,6 +209,24 @@ for my $n (1 .. 40) {
     ok("@pf" eq "20 0 20 19", 'prefix cache: an identical prompt still evaluates its last token');
 }
 
+# fan-out: --n decodes several sequences together; each one equals the single run with its seed (prompt crosses a KV block)
+{
+    my $ids = join(' ', 1 .. 70);
+    ($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '$ids' --temp 5 --seed 7 --max-tokens 10 --n 3 --logprobs 3");
+    my %multi;
+    for my $l (split /\n/, $o) { push @{ $multi{$1} }, "$2" if $l =~ /^\@token seq=(\d) (.*)$/; }
+    my $same = 1;
+    for my $i (0 .. 2) {
+        my ($so) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '$ids' --temp 5 --seed " . (7 + $i) . " --max-tokens 10 --logprobs 3");
+        my @single = map { /^\@token (.*)$/ ? $1 : () } split /\n/, $so;
+        $same = 0 unless @single == 10 && join('|', @single) eq join('|', @{ $multi{$i} || [] });
+    }
+    ok($same, 'fan-out: every sequence equals the single run with its own seed');
+    ok($o =~ /\@genall sequences=3 tokens=30 / && $o =~ /\@gen seq=2 tokens=10 /, 'fan-out: per-sequence and total summaries');
+    ($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '$ids' --n 65");
+    ok($x != 0 && $o =~ /out of range/, 'fan-out: --n above 64 is refused');
+}
+
 # chat templates: segmented tokenization equals tokenizing the formatted string, and user text cannot forge markers
 ($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --chat chatml --system '  Be brief.\n' --prompt '\nHello  world'");
 my ($chat_ids) = $o =~ /ids="([^"]*)"/;

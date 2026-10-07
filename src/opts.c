@@ -53,7 +53,7 @@ static const opt_def defs[] = {
     { "prompt",         K_STR,  OFF(prompt),         S_REQUEST, NOLIM, NULL, "prompt text (short prompts)" },
     { "prompt-file",    K_STR,  OFF(prompt_file),    S_REQUEST, NOLIM, NULL, "prompt from a file" },
     { "prompt-ids",     K_STR,  OFF(prompt_ids),     S_REQUEST, NOLIM, NULL, "prompt as token ids, space or comma separated" },
-    { "n",              K_INT,  OFF(n),              S_REQUEST, 1, 64, NULL, "parallel continuations of one prefix" },
+    { "n",              K_INT,  OFF(n),              S_REQUEST, 1, 64, NULL, "generate: completions decoded together from one prompt (seeds seed, seed+1, ...)" },
     { "temp",           K_DBL,  OFF(temp),           S_REQUEST, 0, 5, NULL, "sampling temperature" },
     { "top-k",          K_INT,  OFF(top_k),          S_REQUEST, 0, 1000000, NULL, "top-k, 0 = off" },
     { "top-p",          K_DBL,  OFF(top_p),          S_REQUEST, 0, 1, NULL, "top-p" },
@@ -96,6 +96,7 @@ void hfc_opts_defaults(hfc_opts *o)
     o->batch = 64;
     o->parse_special = 1;
     o->prefix_cache = 1;
+    o->n = 1;
     o->bench_prompt = 256;
     o->bench_gen = 32;
     o->temp = 0.8;

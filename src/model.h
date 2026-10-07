@@ -61,8 +61,15 @@ size_t     hfc_ctx_pos(const hfc_ctx *c);          /* tokens currently in the KV
 size_t     hfc_ctx_kv_bytes(const hfc_ctx *c);     /* bytes of KV memory allocated */
 void       hfc_ctx_truncate(hfc_ctx *c, size_t n); /* roll back to the first n tokens */
 
+/* Light copy of base sharing its full KV blocks read-only (no scratch of its own); see hfc_ctx_forward_multi. */
+hfc_status hfc_ctx_fork(const hfc_ctx *base, hfc_ctx **out);
+
 /* Process n tokens (n <= max_batch) appended at the current position.
  * If logits_last is non-NULL, it receives n_vocab logits for the LAST token. */
 hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *logits_last);
+
+/* One decode step for n independent sequences: token t extends seqs[t]. scratch (any context created with
+ * max_batch >= n, normally the fork base) supplies the working memory. logits receives n rows of n_vocab. */
+hfc_status hfc_ctx_forward_multi(hfc_ctx *scratch, hfc_ctx **seqs, const uint32_t *tokens, size_t n, float *logits);
 
 #endif

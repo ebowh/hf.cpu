@@ -588,6 +588,24 @@ static hfc_status parse_ids(const char *s, uint32_t **ids, size_t *n, uint32_t n
     return HFC_OK;
 }
 
+#define HFC_MAX_SEQ 64
+
+typedef struct {
+    hfc_rng        rng;
+    hfc_ctx       *ctx;
+    float         *logits;
+    int            active;
+    const char    *stop;
+    size_t         generated, npend;
+    unsigned char  pend[16];
+} gseq;
+
+static void emit_text(hfc_out *o, const char *seq, const void *data, size_t len)
+{
+    if (seq) hfc_out_payload(o, "text", data, len, "seq", seq, (const char *)NULL);
+    else hfc_out_payload(o, "text", data, len, (const char *)NULL);
+}
+
 static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *body, size_t body_len,
                               int has_body, char *msg, size_t cap)
 {
@@ -600,12 +618,13 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     hfc_pool *pool = NULL;
     float *logits = NULL;
     hfc_sampler sp;
-    hfc_rng rng;
+    float *lbuf = NULL, *tmpl = NULL;
+    gseq *gs = NULL;
+    size_t nseq = 1, step;
+    char d_n[24];
     hfc_status rc;
     double t0, t_prefill, t_dec0;
-    unsigned char pend[16];
-    size_t npend = 0, generated = 0;
-    const char *stop = "length";
+    const char *stop0 = "length";
     char a[64], b[64], c[64], d[64], e[64];
     int top_n = eff->logprobs > 64 ? 64 : eff->logprobs;
     size_t batch = (size_t)(s->session->batch > 0 ? s->session->batch : 64);
@@ -638,7 +657,7 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
         rc = HFC_ERANGE; goto out;
     }
     ngen_max = (size_t)eff->max_tokens;
-    if (ngen_max > (size_t)s->session->ctx_max - n_prompt) { ngen_max = (size_t)s->session->ctx_max - n_prompt; stop = "ctx"; }
+    if (ngen_max > (size_t)s->session->ctx_max - n_prompt) { ngen_max = (size_t)s->session->ctx_max - n_prompt; stop0 = "ctx"; }
     if ((rc = session_pool(s, &pool)) != HFC_OK) { snprintf(msg, cap, "cannot start worker threads: %s", hfc_strerror(rc)); goto out; }
     /* one context lives with the resident model; it keeps the KV state of the previous request */
     if (!res->kvctx || res->kv_pool != pool || res->kv_ctx_max != (size_t)s->session->ctx_max || res->kv_batch != batch) {
@@ -683,60 +702,112 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
     hfc_out_event(&s->out, "prefill", "tokens", a, "cached", e, "ms", b, "tok_per_s", c, "kv_bytes", d, (const char *)NULL);
 
     sp.temp = (float)eff->temp; sp.top_k = eff->top_k; sp.top_p = (float)eff->top_p; sp.min_p = (float)eff->min_p;
-    hfc_rng_seed(&rng, eff->seed);
-    t_dec0 = pal_now();
-    for (i = 0; i < ngen_max; i++) {
-        uint32_t tok;
-        const unsigned char *piece;
-        size_t plen, take;
-        if ((rc = hfc_sample(logits, nvocab, &sp, &rng, &tok)) != HFC_OK) { snprintf(msg, cap, "sampling failed"); goto out; }
-        if (res->tok && hfc_tok_is_eog(res->tok, tok)) { stop = "eos"; break; }
-        if (top_n > 0) {
-            hfc_top top[64];
-            char list[64 * 24], *w = list, ids_[24], lp_[32], pos_[24];
-            int j;
-            hfc_top_logprobs(logits, nvocab, top_n, top);
-            *w = '\0';
-            for (j = 0; j < top_n; j++) w += sprintf(w, j ? " %u:%.6f" : "%u:%.6f", top[j].id, top[j].logprob);
-            snprintf(pos_, sizeof pos_, "%lu", (unsigned long)i);
-            snprintf(ids_, sizeof ids_, "%u", tok);
-            snprintf(lp_, sizeof lp_, "%.6f", hfc_logprob(logits, nvocab, tok));
-            hfc_out_event(&s->out, "token", "pos", pos_, "id", ids_, "logprob", lp_, "top", list, (const char *)NULL);
-        } else {
-            char ids_[24], pos_[24];
-            snprintf(pos_, sizeof pos_, "%lu", (unsigned long)i);
-            snprintf(ids_, sizeof ids_, "%u", tok);
-            hfc_out_event(&s->out, "token", "pos", pos_, "id", ids_, (const char *)NULL);
+    nseq = (size_t)eff->n;
+    snprintf(d_n, sizeof d_n, "%lu", (unsigned long)nseq);
+    if (nseq > 1 && nseq > batch) { snprintf(msg, cap, "--n %lu exceeds --batch %lu", (unsigned long)nseq, (unsigned long)batch); rc = HFC_EINVAL; goto out; }
+    gs = (gseq *)hfc_calloc(nseq, sizeof *gs);
+    lbuf = (float *)hfc_malloc(nseq * nvocab * sizeof(float));
+    tmpl = nseq > 1 ? (float *)hfc_malloc(nseq * nvocab * sizeof(float)) : NULL;
+    if (!gs || !lbuf || (nseq > 1 && !tmpl)) { rc = HFC_ENOMEM; snprintf(msg, cap, "out of memory"); goto out; }
+    for (i = 0; i < nseq; i++) {
+        gs[i].logits = lbuf + i * nvocab;
+        gs[i].active = 1;
+        gs[i].stop = stop0;
+        hfc_rng_seed(&gs[i].rng, eff->seed + (uint64_t)i);
+        memcpy(gs[i].logits, logits, nvocab * sizeof(float));
+        if (nseq == 1) gs[i].ctx = ctx;
+        else {
+            if ((rc = hfc_ctx_fork(ctx, &gs[i].ctx)) != HFC_OK) { snprintf(msg, cap, "cannot fork the context: %s", hfc_strerror(rc)); goto out; }
         }
-        generated++;
-        if (res->tok && hfc_tok_piece(res->tok, tok, 0, &piece, &plen) == HFC_OK && plen > 0) {
-            unsigned char *buf = (unsigned char *)hfc_malloc(npend + plen);
-            if (buf) {
-                memcpy(buf, pend, npend);
-                memcpy(buf + npend, piece, plen);
-                take = hfc_utf8_complete_prefix(buf, npend + plen);
-                if (take) hfc_out_payload(&s->out, "text", buf, take, (const char *)NULL);
-                npend = npend + plen - take;
-                if (npend > sizeof pend) { hfc_out_payload(&s->out, "text", buf + take, npend, (const char *)NULL); npend = 0; }
-                else memcpy(pend, buf + take, npend);
-                hfc_free(buf);
-            }
-        }
-        if (i + 1 == ngen_max) break;
-        rc = hfc_ctx_forward(ctx, &tok, 1, logits);
-        if (rc != HFC_OK) { snprintf(msg, cap, "decode failed at token %lu: %s", (unsigned long)i, hfc_strerror(rc)); goto out; }
-        res->kv_ids[res->kv_n++] = tok;
     }
-    if (npend) hfc_out_payload(&s->out, "text", pend, npend, (const char *)NULL);
+    t_dec0 = pal_now();
+    for (step = 0; step < ngen_max; step++) {
+        hfc_ctx *act_ctx[HFC_MAX_SEQ];
+        uint32_t act_tok[HFC_MAX_SEQ];
+        size_t act_idx[HFC_MAX_SEQ], nact = 0, si;
+        for (si = 0; si < nseq; si++) {
+            gseq *g = &gs[si];
+            uint32_t tok;
+            const unsigned char *piece;
+            size_t plen, take;
+            char sq[24], pos_[24], ids_[24], lp_[32];
+            if (!g->active) continue;
+            snprintf(sq, sizeof sq, "%lu", (unsigned long)si);
+            if ((rc = hfc_sample(g->logits, nvocab, &sp, &g->rng, &tok)) != HFC_OK) { snprintf(msg, cap, "sampling failed"); goto out; }
+            if (res->tok && hfc_tok_is_eog(res->tok, tok)) { g->stop = "eos"; g->active = 0; continue; }
+            snprintf(pos_, sizeof pos_, "%lu", (unsigned long)step);
+            snprintf(ids_, sizeof ids_, "%u", tok);
+            if (top_n > 0) {
+                hfc_top top[64];
+                char list[64 * 24], *w = list;
+                int j;
+                hfc_top_logprobs(g->logits, nvocab, top_n, top);
+                *w = '\0';
+                for (j = 0; j < top_n; j++) w += sprintf(w, j ? " %u:%.6f" : "%u:%.6f", top[j].id, top[j].logprob);
+                snprintf(lp_, sizeof lp_, "%.6f", hfc_logprob(g->logits, nvocab, tok));
+                if (nseq > 1) hfc_out_event(&s->out, "token", "seq", sq, "pos", pos_, "id", ids_, "logprob", lp_, "top", list, (const char *)NULL);
+                else hfc_out_event(&s->out, "token", "pos", pos_, "id", ids_, "logprob", lp_, "top", list, (const char *)NULL);
+            } else {
+                if (nseq > 1) hfc_out_event(&s->out, "token", "seq", sq, "pos", pos_, "id", ids_, (const char *)NULL);
+                else hfc_out_event(&s->out, "token", "pos", pos_, "id", ids_, (const char *)NULL);
+            }
+            g->generated++;
+            if (res->tok && hfc_tok_piece(res->tok, tok, 0, &piece, &plen) == HFC_OK && plen > 0) {
+                unsigned char *buf = (unsigned char *)hfc_malloc(g->npend + plen);
+                if (buf) {
+                    memcpy(buf, g->pend, g->npend);
+                    memcpy(buf + g->npend, piece, plen);
+                    take = hfc_utf8_complete_prefix(buf, g->npend + plen);
+                    if (take) emit_text(&s->out, nseq > 1 ? sq : NULL, buf, take);
+                    g->npend = g->npend + plen - take;
+                    if (g->npend > sizeof g->pend) { emit_text(&s->out, nseq > 1 ? sq : NULL, buf + take, g->npend); g->npend = 0; }
+                    else memcpy(g->pend, buf + take, g->npend);
+                    hfc_free(buf);
+                }
+            }
+            if (step + 1 == ngen_max) { g->active = 0; continue; }
+            act_ctx[nact] = g->ctx; act_tok[nact] = tok; act_idx[nact] = si; nact++;
+        }
+        if (nact == 0) break;
+        if (nseq == 1) {
+            rc = hfc_ctx_forward(ctx, &act_tok[0], 1, gs[0].logits);
+            if (rc == HFC_OK) res->kv_ids[res->kv_n++] = act_tok[0];
+        } else {
+            rc = hfc_ctx_forward_multi(ctx, act_ctx, act_tok, nact, tmpl);
+            if (rc == HFC_OK) { size_t j; for (j = 0; j < nact; j++) memcpy(gs[act_idx[j]].logits, tmpl + j * nvocab, nvocab * sizeof(float)); }
+        }
+        if (rc != HFC_OK) { snprintf(msg, cap, "decode failed at token %lu: %s", (unsigned long)step, hfc_strerror(rc)); goto out; }
+    }
     {
         double dt = pal_now() - t_dec0;
-        snprintf(a, sizeof a, "%lu", (unsigned long)generated);
-        snprintf(b, sizeof b, "%.1f", dt * 1000.0);
-        snprintf(c, sizeof c, "%.2f", dt > 0 ? (double)generated / dt : 0.0);
-        hfc_out_event(&s->out, "gen", "tokens", a, "ms", b, "tok_per_s", c, "stop", stop, (const char *)NULL);
+        size_t si, total = 0;
+        for (si = 0; si < nseq; si++) {
+            gseq *g = &gs[si];
+            char sq[24];
+            if (g->npend) { snprintf(sq, sizeof sq, "%lu", (unsigned long)si); emit_text(&s->out, nseq > 1 ? sq : NULL, g->pend, g->npend); }
+            total += g->generated;
+        }
+        for (si = 0; si < nseq; si++) {
+            gseq *g = &gs[si];
+            char sq[24];
+            snprintf(sq, sizeof sq, "%lu", (unsigned long)si);
+            snprintf(a, sizeof a, "%lu", (unsigned long)g->generated);
+            snprintf(b, sizeof b, "%.1f", dt * 1000.0);
+            snprintf(c, sizeof c, "%.2f", dt > 0 ? (double)g->generated / dt : 0.0);
+            if (nseq > 1) hfc_out_event(&s->out, "gen", "seq", sq, "tokens", a, "ms", b, "tok_per_s", c, "stop", g->stop, (const char *)NULL);
+            else hfc_out_event(&s->out, "gen", "tokens", a, "ms", b, "tok_per_s", c, "stop", g->stop, (const char *)NULL);
+        }
+        if (nseq > 1) {
+            snprintf(a, sizeof a, "%lu", (unsigned long)total);
+            snprintf(b, sizeof b, "%.1f", dt * 1000.0);
+            snprintf(c, sizeof c, "%.2f", dt > 0 ? (double)total / dt : 0.0);
+            hfc_out_event(&s->out, "genall", "sequences", d_n, "tokens", a, "ms", b, "tok_per_s", c, (const char *)NULL);
+        }
     }
     rc = HFC_OK;
 out:
+    if (gs) { size_t si; for (si = 0; si < nseq; si++) if (gs[si].ctx != ctx) hfc_ctx_free(gs[si].ctx); }
+    hfc_free(gs); hfc_free(lbuf); hfc_free(tmpl);
     hfc_free(logits);
     if (rc != HFC_OK && res && touched) kv_drop(res);            /* the cached state may be half-written */
     hfc_free(ids);

@@ -201,6 +201,7 @@ struct hfc_ctx {
     uint16_t **blk;                        /* [n_layer * max_blocks]; block = K then V */
     size_t   kvdim, block_u16;
     size_t   kv_bytes;
+    size_t   shared_blocks;                /* leading blocks borrowed from another context (forks) */
     /* scratch */
     float *x, *xn, *q, *kk, *vv, *att, *o, *gate, *up, *cs;      /* [max_batch * dim] */
     float *scores;                                              /* [nth][ctx_max + 1] */
@@ -214,11 +215,11 @@ static void *xmalloc_f(size_t count) { size_t b; return hfc_mul_size(count, size
 
 void hfc_ctx_free(hfc_ctx *c)
 {
-    size_t i;
     if (!c) return;
     if (c->blk) {
-        size_t total = (size_t)c->m->hp.n_layer * c->max_blocks;
-        for (i = 0; i < total; i++) hfc_free(c->blk[i]);
+        size_t nl = (size_t)c->m->hp.n_layer, l, b;
+        for (l = 0; l < nl; l++)
+            for (b = c->shared_blocks; b < c->max_blocks; b++) hfc_free(c->blk[l * c->max_blocks + b]);
         hfc_free(c->blk);
     }
     hfc_free(c->x); hfc_free(c->xn); hfc_free(c->q); hfc_free(c->kk); hfc_free(c->vv); hfc_free(c->att);
@@ -260,6 +261,41 @@ hfc_status hfc_ctx_new(hfc_ctx **out, const hfc_model *m, size_t ctx_max, size_t
     if (!c->blk || !c->x || !c->xn || !c->q || !c->kk || !c->vv || !c->att || !c->o || !c->gate || !c->up ||
         !c->cs || !c->scores || !c->qa || !c->qk || !c->rowbuf) { hfc_ctx_free(c); return HFC_ENOMEM; }
     *out = c;
+    return HFC_OK;
+}
+
+/* A light copy of base that shares its full KV blocks (read-only) and owns a private copy of the
+ * partial last block. It has no scratch of its own: run it through hfc_ctx_forward_multi. The base
+ * must stay alive and must not be rewound below the shared part while the fork exists. */
+hfc_status hfc_ctx_fork(const hfc_ctx *base, hfc_ctx **out)
+{
+    hfc_ctx *f;
+    size_t nl = (size_t)base->m->hp.n_layer, nfull = base->n_pos / HFC_KV_BLOCK_TOKENS, l, b, bytes, total;
+    *out = NULL;
+    f = (hfc_ctx *)hfc_calloc(1, sizeof *f);
+    if (!f) return HFC_ENOMEM;
+    f->m = base->m; f->k = base->k; f->pool = base->pool; f->nth = base->nth; f->ctx_max = base->ctx_max;
+    f->kvdim = base->kvdim; f->block_u16 = base->block_u16; f->max_blocks = base->max_blocks;
+    if (!hfc_mul_size(nl, f->max_blocks, &total)) { hfc_free(f); return HFC_ERANGE; }
+    f->blk = (uint16_t **)hfc_calloc(total, sizeof(uint16_t *));
+    if (!f->blk) { hfc_free(f); return HFC_ENOMEM; }
+    for (l = 0; l < nl; l++)
+        for (b = 0; b < nfull; b++) f->blk[l * f->max_blocks + b] = base->blk[l * base->max_blocks + b];
+    f->shared_blocks = nfull;
+    f->n_blocks = nfull;
+    f->n_pos = base->n_pos;
+    if (base->n_pos % HFC_KV_BLOCK_TOKENS) {            /* partial block: private copy */
+        if (!hfc_mul_size(f->block_u16, sizeof(uint16_t), &bytes)) { hfc_ctx_free(f); return HFC_ERANGE; }
+        for (l = 0; l < nl; l++) {
+            uint16_t *p = (uint16_t *)hfc_malloc(bytes);
+            if (!p) { hfc_ctx_free(f); return HFC_ENOMEM; }
+            memcpy(p, base->blk[l * base->max_blocks + nfull], bytes);
+            f->blk[l * f->max_blocks + nfull] = p;
+        }
+        f->n_blocks = nfull + 1;
+        f->kv_bytes = nl * bytes;
+    }
+    *out = f;
     return HFC_OK;
 }
 
@@ -438,7 +474,7 @@ static void rope_apply(const hfc_hparams *hp, const float *cs, float *v, int nhe
 
 /* ---- attention and SwiGLU tasks ---------------------------------------------------------------- */
 
-typedef struct { hfc_ctx *c; size_t l, n, pos0; } attn_task;
+typedef struct { hfc_ctx *c; hfc_ctx **seqs; size_t l, n, pos0; } attn_task;
 
 static void attn_run(void *vp, int tid, int nth)
 {
@@ -454,17 +490,18 @@ static void attn_run(void *vp, int tid, int nth)
     hfc_split(at->n * (size_t)hp->n_head, tid, nth, &lo, &hi);
     for (item = lo; item < hi; item++) {
         size_t t = item / (size_t)hp->n_head, h = item % (size_t)hp->n_head;
-        size_t len = at->pos0 + t + 1, p, kvh = h / group;
+        const hfc_ctx *sc = at->seqs ? at->seqs[t] : c;
+        size_t len = (at->seqs ? sc->n_pos : at->pos0 + t) + 1, p, kvh = h / group;
         const float *qh = c->q + t * QD + h * hd;
         float *out = c->att + t * QD + h * hd;
         for (p = 0; p < len; p++) {
-            const uint16_t *kb = c->blk[l * c->max_blocks + p / HFC_KV_BLOCK_TOKENS];
+            const uint16_t *kb = sc->blk[l * sc->max_blocks + p / HFC_KV_BLOCK_TOKENS];
             scores[p] = k->dot_f32_f16(qh, kb + (p % HFC_KV_BLOCK_TOKENS) * KD + kvh * hd, hd) * scale;
         }
         hfc_softmax(scores, len);
         memset(out, 0, hd * sizeof(float));
         for (p = 0; p < len; p++) {
-            const uint16_t *vb = c->blk[l * c->max_blocks + p / HFC_KV_BLOCK_TOKENS] + HFC_KV_BLOCK_TOKENS * KD;
+            const uint16_t *vb = sc->blk[l * sc->max_blocks + p / HFC_KV_BLOCK_TOKENS] + HFC_KV_BLOCK_TOKENS * KD;
             k->axpy_f32_f16(out, scores[p], vb + (p % HFC_KV_BLOCK_TOKENS) * KD + kvh * hd, hd);
         }
     }
@@ -482,7 +519,10 @@ static void silu_run(void *vp, int tid, int nth)
 
 /* ---- forward pass ---------------------------------------------------------------------------- */
 
-hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *logits_last)
+/* Core of the forward pass. Either one sequence of n consecutive tokens (seqs == NULL: they extend c),
+ * or one token for each of n different sequences (seqs[t] is token t's sequence; c only supplies the
+ * scratch memory). all_logits selects logits for every token (multi) or for the last one (single). */
+static hfc_status forward_impl(hfc_ctx *c, hfc_ctx **seqs, const uint32_t *tokens, size_t n, float *logits)
 {
     const hfc_model *m = c->m;
     const hfc_hparams *hp = &m->hp;
@@ -492,8 +532,15 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
     hfc_status rc;
 
     if (n == 0 || n > c->max_batch) return HFC_EINVAL;
-    if (pos0 + n > c->ctx_max) return HFC_ERANGE;
-    if ((rc = kv_reserve(c, pos0 + n)) != HFC_OK) return rc;
+    if (seqs) {
+        for (t = 0; t < n; t++) {
+            if (seqs[t]->n_pos + 1 > seqs[t]->ctx_max) return HFC_ERANGE;
+            if ((rc = kv_reserve(seqs[t], seqs[t]->n_pos + 1)) != HFC_OK) return rc;
+        }
+    } else {
+        if (pos0 + n > c->ctx_max) return HFC_ERANGE;
+        if ((rc = kv_reserve(c, pos0 + n)) != HFC_OK) return rc;
+    }
 
     for (t = 0; t < n; t++) {                                   /* embeddings */
         const unsigned char *row;
@@ -515,8 +562,9 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
         if ((rc = matmat(c, qkv, 3, c->xn, n)) != HFC_OK) return rc;
         for (t = 0; t < n; t++) {
             float *q = c->q + t * QD, *kx = c->kk + t * KD;
-            size_t pos = pos0 + t, bi = pos / HFC_KV_BLOCK_TOKENS, off = pos % HFC_KV_BLOCK_TOKENS;
-            uint16_t *kb = c->blk[l * c->max_blocks + bi], *vb = kb + HFC_KV_BLOCK_TOKENS * KD;
+            const hfc_ctx *sc = seqs ? seqs[t] : c;
+            size_t pos = seqs ? sc->n_pos : pos0 + t, bi = pos / HFC_KV_BLOCK_TOKENS, off = pos % HFC_KV_BLOCK_TOKENS;
+            uint16_t *kb = sc->blk[l * sc->max_blocks + bi], *vb = kb + HFC_KV_BLOCK_TOKENS * KD;
             if (hp->has_qk_norm) {
                 for (h = 0; h < (size_t)hp->n_head; h++) hfc_rmsnorm(q + h * hd, L->q_norm, q + h * hd, hd, hp->rms_eps);
                 for (h = 0; h < (size_t)hp->n_head_kv; h++) hfc_rmsnorm(kx + h * hd, L->k_norm, kx + h * hd, hd, hp->rms_eps);
@@ -527,7 +575,7 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
             k->f32_to_f16(kx, kb + off * KD, KD);
             k->f32_to_f16(c->vv + t * KD, vb + off * KD, KD);
         }
-        at.c = c; at.l = l; at.n = n; at.pos0 = pos0;
+        at.c = c; at.seqs = seqs; at.l = l; at.n = n; at.pos0 = pos0;
         hfc_pool_run(c->pool, attn_run, &at);
         one.w = &L->wo; one.bias = NULL; one.y = c->o;
         if ((rc = matmat(c, &one, 1, c->att, n)) != HFC_OK) return rc;
@@ -543,13 +591,25 @@ hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *
         if ((rc = matmat(c, &one, 1, c->gate, n)) != HFC_OK) return rc;
         { size_t i; for (i = 0; i < n * E; i++) c->x[i] += c->o[i]; }
     }
-    c->n_pos = pos0 + n;
+    if (seqs) for (t = 0; t < n; t++) seqs[t]->n_pos++;
+    else c->n_pos = pos0 + n;
 
-    if (logits_last) {
+    if (logits) {
         mm_job lj;
-        hfc_rmsnorm(c->x + (n - 1) * E, m->out_norm, c->xn, E, hp->rms_eps);
-        lj.w = &m->output; lj.bias = NULL; lj.y = logits_last;
-        return matmat(c, &lj, 1, c->xn, 1);
+        size_t first = seqs ? 0 : n - 1;
+        for (t = first; t < n; t++) hfc_rmsnorm(c->x + t * E, m->out_norm, c->xn + (t - first) * E, E, hp->rms_eps);
+        lj.w = &m->output; lj.bias = NULL; lj.y = logits;
+        return matmat(c, &lj, 1, c->xn, n - first);
     }
     return HFC_OK;
+}
+
+hfc_status hfc_ctx_forward(hfc_ctx *c, const uint32_t *tokens, size_t n, float *logits_last)
+{
+    return forward_impl(c, NULL, tokens, n, logits_last);
+}
+
+hfc_status hfc_ctx_forward_multi(hfc_ctx *scratch, hfc_ctx **seqs, const uint32_t *tokens, size_t n, float *logits)
+{
+    return forward_impl(scratch, seqs, tokens, n, logits);
 }
