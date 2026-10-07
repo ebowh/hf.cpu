@@ -294,6 +294,8 @@ static hfc_status kv_reserve(hfc_ctx *c, size_t upto)
 
 /* ---- parallel matrix products ----------------------------------------------------------------- */
 
+#define HFC_TILE_BYTES (96 * 1024)    /* activation bytes kept hot while weight rows stream past */
+
 typedef struct {
     const hfc_mat *w;
     const float   *bias;
@@ -340,20 +342,32 @@ static void mm_run(void *vp, int tid, int nth)
         }
         size_t lo, hi, r, t, n = tk->n;
         hfc_split(rows, tid, nth, &lo, &hi);
-        for (r = lo; r < hi; r++) {
-            const unsigned char *wr = w->data + r * (size_t)w->row_bytes;
-            float b = bias ? bias[r] : 0.0f;
-            if (kdot) {                                           /* Q8_0/Q4_0/Q5_0 pair with Q8_0 activations, K-quants with Q8_K */
-                const unsigned char *xa = use_k ? tk->xk : tk->xq;
-                size_t as = use_k ? kstride : qstride, nbk = use_k ? nkb : nblk;
-                for (t = 0; t + 4 <= n; t += 4) {
-                    float o[4];
-                    kdot4(wr, xa + t * as, as, nbk, o);
-                    y[t * rows + r] = o[0] + b; y[(t + 1) * rows + r] = o[1] + b;
-                    y[(t + 2) * rows + r] = o[2] + b; y[(t + 3) * rows + r] = o[3] + b;
+        if (kdot) {                                               /* Q8_0/Q4_0/Q5_0 pair with Q8_0 activations, K-quants with Q8_K */
+            const unsigned char *xa = use_k ? tk->xk : tk->xq;
+            size_t as = use_k ? kstride : qstride, nbk = use_k ? nkb : nblk;
+            /* Walk the tokens in tiles whose quantized activations stay in the L2 cache while every
+             * weight row of this thread's slice streams past them; otherwise each weight row would
+             * re-fetch all n activation rows from L3. */
+            size_t tile = (HFC_TILE_BYTES / as) & ~(size_t)3, t0;
+            if (tile < 4) tile = 4;
+            for (t0 = 0; t0 < n; t0 += tile) {
+                size_t t1 = t0 + tile < n ? t0 + tile : n;
+                for (r = lo; r < hi; r++) {
+                    const unsigned char *wr = w->data + r * (size_t)w->row_bytes;
+                    float b = bias ? bias[r] : 0.0f;
+                    for (t = t0; t + 4 <= t1; t += 4) {
+                        float o[4];
+                        kdot4(wr, xa + t * as, as, nbk, o);
+                        y[t * rows + r] = o[0] + b; y[(t + 1) * rows + r] = o[1] + b;
+                        y[(t + 2) * rows + r] = o[2] + b; y[(t + 3) * rows + r] = o[3] + b;
+                    }
+                    for (; t < t1; t++) y[t * rows + r] = kdot(wr, xa + t * as, nbk) + b;
                 }
-                for (; t < n; t++) y[t * rows + r] = kdot(wr, xa + t * as, nbk) + b;
-            } else {                                              /* any other type: dequantize the row once */
+            }
+        } else {                                                  /* any other type: dequantize each row once */
+            for (r = lo; r < hi; r++) {
+                const unsigned char *wr = w->data + r * (size_t)w->row_bytes;
+                float b = bias ? bias[r] : 0.0f;
                 if (hfc_dequant_row(w->type, wr, rowbuf, cols) != HFC_OK) { c->err[tid] = HFC_ENOTSUP; return; }
                 for (t = 0; t < n; t++) y[t * rows + r] = k->dot_f32(rowbuf, tk->xf + t * cols, cols) + b;
             }
