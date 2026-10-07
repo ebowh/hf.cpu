@@ -1,7 +1,7 @@
 @begin id="" op=bench
-@bench threads=1 prefill_tok_s=36.41 decode_tok_s=17.48 prompt_tokens=256 gen_tokens=32
-@bench threads=2 prefill_tok_s=56.02 decode_tok_s=27.34 prompt_tokens=256 gen_tokens=32
-@bench threads=3 prefill_tok_s=71.42 decode_tok_s=33.24 prompt_tokens=256 gen_tokens=32
-@bench threads=4 prefill_tok_s=84.73 decode_tok_s=39.08 prompt_tokens=256 gen_tokens=32
-@bench threads=8 prefill_tok_s=89.52 decode_tok_s=40.11 prompt_tokens=256 gen_tokens=32
-@done status=ok ms=26703.1
+@bench threads=1 prefill_tok_s=45.51 decode_tok_s=21.05 prompt_tokens=256 gen_tokens=32
+@bench threads=2 prefill_tok_s=57.90 decode_tok_s=40.48 prompt_tokens=256 gen_tokens=32
+@bench threads=3 prefill_tok_s=78.74 decode_tok_s=39.25 prompt_tokens=256 gen_tokens=32
+@bench threads=4 prefill_tok_s=155.64 decode_tok_s=61.89 prompt_tokens=256 gen_tokens=32
+@bench threads=8 prefill_tok_s=88.89 decode_tok_s=48.54 prompt_tokens=256 gen_tokens=32
+@done status=ok ms=22171.9
