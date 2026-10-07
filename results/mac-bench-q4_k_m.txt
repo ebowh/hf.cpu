@@ -1,5 +1,5 @@
 @begin id="" op=bench
-@bench threads=1 prefill_tok_s=35.37 decode_tok_s=16.80 prompt_tokens=256 gen_tokens=32
-@bench threads=2 prefill_tok_s=70.26 decode_tok_s=31.69 prompt_tokens=256 gen_tokens=32
-@bench threads=4 prefill_tok_s=71.98 decode_tok_s=31.39 prompt_tokens=256 gen_tokens=32
-@done status=ok ms=18437.9
+@bench threads=1 prefill_tok_s=34.98 decode_tok_s=16.42 prompt_tokens=256 gen_tokens=32
+@bench threads=2 prefill_tok_s=68.20 decode_tok_s=30.90 prompt_tokens=256 gen_tokens=32
+@bench threads=4 prefill_tok_s=68.07 decode_tok_s=30.62 prompt_tokens=256 gen_tokens=32
+@done status=ok ms=18924.6
