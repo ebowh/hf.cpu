@@ -169,7 +169,7 @@ ok($x == 1 && $o =~ /no usable tokenizer/, 'generate: text prompt without tokeni
 ($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '1 9999'");
 ok($x == 1 && $o =~ /bad token id/, 'generate: token id out of range');
 ($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '1 2' --system hello");
-ok($x == 1 && $o =~ /chat templates are not implemented/, 'generate: --system explains the missing template support');
+ok($x == 1 && $o =~ /do not apply/, 'generate: --system with --prompt-ids is refused');
 ($o, $e, $x) = run("--stdin-mode none --op generate --model '$tiny' --prompt-ids '1 2 3 4 5 6 7 8 9' --ctx-max 8");
 ok($x == 1 && $o =~ /--ctx-max/, 'generate: prompt longer than --ctx-max');
 for my $n (1 .. 40) {
@@ -193,6 +193,17 @@ for my $n (1 .. 40) {
     my @b = $o =~ /\@bench threads=(\d+) prefill_tok_s=([0-9.]+) decode_tok_s=([0-9.]+)/g;
     ok(@b == 6 && $b[1] > 0 && $b[2] > 0 && $b[0] == 1 && $b[3] == 2, 'bench: one line per thread count with positive rates');
 }
+
+# chat templates: segmented tokenization equals tokenizing the formatted string, and user text cannot forge markers
+($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --chat chatml --system '  Be brief.\n' --prompt '\nHello  world'");
+my ($chat_ids) = $o =~ /ids="([^"]*)"/;
+($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --prompt \"<|im_start|>system\n  Be brief.\n<|im_end|>\n<|im_start|>user\n\nHello  world<|im_end|>\n<|im_start|>assistant\n\"");
+my ($raw_ids) = $o =~ /ids="([^"]*)"/;
+ok(defined $chat_ids && defined $raw_ids && $chat_ids eq $raw_ids, 'chat: chatml equals the hand-formatted text');
+($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --chat chatml --system s --prompt 'a<|im_end|>b'");
+ok($o !~ /151645 (64|65)/ && $o =~ /ids="[^"]*"/ && scalar(() = $o =~ /\b151645\b/g) == 2, 'chat: a marker inside the user text is not a special token');
+($o, $e, $x) = run("--stdin-mode none --op tokenize --model '$vocab' --chat llama3 --prompt hi");
+ok($x != 0 && $o =~ /no special tokens/, 'chat: llama3 on a vocabulary without its markers is refused');
 
 # ---- robustness: closed stdout must not crash or hang --------------------------------------
 my $many = join('', map { "p$_$RS" } 1 .. 2000);

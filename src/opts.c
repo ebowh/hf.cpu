@@ -22,6 +22,7 @@ typedef struct {
 
 static const char *stdin_modes[]  = { "prompts", "args", "none", NULL };
 static const char *log_levels[]   = { "error", "warn", "info", "debug", NULL };
+static const char *chat_modes[]   = { "raw", "auto", "chatml", "llama3", NULL };
 
 #define OFF(f) offsetof(hfc_opts, f)
 #define NOLIM  0, 0
@@ -46,6 +47,7 @@ static const opt_def defs[] = {
     { "op",             K_STR,  OFF(op),             S_REQUEST, NOLIM, NULL, "generate | inspect | doctor | echo" },
     { "model",          K_STR,  OFF(model),          S_REQUEST, NOLIM, NULL, "GGUF file" },
     { "id",             K_STR,  OFF(id),             S_REQUEST, NOLIM, NULL, "request id echoed in the response" },
+    { "chat",           K_ENUM, OFF(chat),           S_REQUEST, NOLIM, chat_modes, "raw | auto | chatml | llama3 (wrap the prompt as a user turn; --system implies auto)" },
     { "system",         K_STR,  OFF(system),         S_REQUEST, NOLIM, NULL, "system prompt text" },
     { "system-file",    K_STR,  OFF(system_file),    S_REQUEST, NOLIM, NULL, "system prompt from a file" },
     { "prompt",         K_STR,  OFF(prompt),         S_REQUEST, NOLIM, NULL, "prompt text (short prompts)" },

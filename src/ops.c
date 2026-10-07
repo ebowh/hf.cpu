@@ -275,6 +275,107 @@ static hfc_status op_inspect(hfc_session *s, const hfc_opts *eff, char *msg, siz
     return HFC_OK;
 }
 
+/* ---- chat templates ------------------------------------------------------------------------
+ * The prompt becomes one user turn (after an optional system turn) followed by the opening of the
+ * assistant turn. Template markers are tokenized as special tokens; the user's text never is
+ * (whatever --parse-special says), so a prompt containing "<|im_end|>" cannot forge a turn boundary. */
+
+typedef struct { uint32_t *ids; size_t n, cap; } idvec;
+
+static hfc_status idvec_text(idvec *v, const hfc_tok *tok, const char *text, size_t len, unsigned flags)
+{
+    uint32_t *part = NULL;
+    size_t np = 0;
+    hfc_status rc;
+    if (len == 0) return HFC_OK;
+    if ((rc = hfc_tok_encode(tok, text, len, flags, &part, &np)) != HFC_OK) return rc;
+    if (v->n + np > v->cap) {
+        size_t nc = v->cap ? v->cap : 64;
+        uint32_t *g;
+        while (nc < v->n + np) nc *= 2;
+        g = (uint32_t *)hfc_realloc(v->ids, nc * sizeof(uint32_t));
+        if (!g) { hfc_free(part); return HFC_ENOMEM; }
+        v->ids = g; v->cap = nc;
+    }
+    memcpy(v->ids + v->n, part, np * sizeof(uint32_t));
+    v->n += np;
+    hfc_free(part);
+    return HFC_OK;
+}
+
+/* tokenize prefix + text as one string so the pre-tokenizer sees what the reference template engine would */
+static hfc_status idvec_cat(idvec *v, const hfc_tok *tok, const char *pre, const char *text, size_t len, unsigned flags)
+{
+    size_t pl = strlen(pre);
+    char *buf = (char *)hfc_malloc(pl + len + 1);
+    hfc_status rc;
+    if (!buf) return HFC_ENOMEM;
+    memcpy(buf, pre, pl); memcpy(buf + pl, text, len);
+    rc = idvec_text(v, tok, buf, pl + len, flags);
+    hfc_free(buf);
+    return rc;
+}
+
+static int tok_has_special(const hfc_tok *tok, const char *s)
+{
+    uint32_t *ids = NULL;
+    size_t n = 0;
+    int ok;
+    if (hfc_tok_encode(tok, s, strlen(s), HFC_TOK_PARSE_SPECIAL, &ids, &n) != HFC_OK) return 0;
+    ok = n == 1;
+    if (ok) {                                     /* a lone token that decodes back to the marker is a real special token */
+        const unsigned char *p; size_t pl;
+        ok = hfc_tok_piece(tok, ids[0], 1, &p, &pl) == HFC_OK && pl == strlen(s) && memcmp(p, s, pl) == 0;
+    }
+    hfc_free(ids);
+    return ok;
+}
+
+static hfc_status build_chat_ids(const hfc_tok *tok, const char *arch, const hfc_opts *eff, int mode, const texts_t *t, uint32_t **out, size_t *nout,
+                                 char *msg, size_t cap)
+{
+    unsigned user_flags = 0;                      /* user text is never parsed for special tokens */
+    const char *sys = t->system;
+    size_t sys_len = t->system_len;
+    idvec v = { NULL, 0, 0 };
+    hfc_status rc = HFC_OK;
+    const char *prompt = t->prompt ? t->prompt : "";
+    (void)eff;
+
+    if (mode == 1) {                              /* auto: pick by the markers the vocabulary knows */
+        if (tok_has_special(tok, "<|im_start|>") && tok_has_special(tok, "<|im_end|>")) mode = 2;
+        else if (tok_has_special(tok, "<|start_header_id|>") && tok_has_special(tok, "<|eot_id|>")) mode = 3;
+        else { snprintf(msg, cap, "--chat auto: no known chat template matches this vocabulary; use --chat chatml|llama3 or --chat raw"); return HFC_ENOTSUP; }
+    }
+    if ((mode == 2 && !(tok_has_special(tok, "<|im_start|>") && tok_has_special(tok, "<|im_end|>"))) ||
+        (mode == 3 && !(tok_has_special(tok, "<|start_header_id|>") && tok_has_special(tok, "<|eot_id|>") && tok_has_special(tok, "<|begin_of_text|>")))) {
+        snprintf(msg, cap, "this vocabulary has no special tokens for the requested chat template");
+        return HFC_ENOTSUP;
+    }
+    if (mode == 2) {
+        static const char dflt[] = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant.";
+        if (!sys && arch && strcmp(arch, "qwen2") == 0) { sys = dflt; sys_len = sizeof dflt - 1; }
+#define MARK(s) if ((rc = idvec_text(&v, tok, s, strlen(s), HFC_TOK_PARSE_SPECIAL)) != HFC_OK) goto fail
+#define TEXT(pre, p, l, f) if ((rc = idvec_cat(&v, tok, pre, p, l, f)) != HFC_OK) goto fail
+        if (sys) { MARK("<|im_start|>"); TEXT("system\n", sys, sys_len, user_flags); MARK("<|im_end|>"); MARK("\n"); }
+        MARK("<|im_start|>"); TEXT("user\n", prompt, t->prompt_len, user_flags); MARK("<|im_end|>"); MARK("\n");
+        MARK("<|im_start|>"); TEXT("assistant\n", "", 0, 0);
+    } else {                                      /* llama3 */
+        MARK("<|begin_of_text|>");
+        if (sys) { MARK("<|start_header_id|>"); MARK("system"); MARK("<|end_header_id|>"); TEXT("\n\n", sys, sys_len, user_flags); MARK("<|eot_id|>"); }
+        MARK("<|start_header_id|>"); MARK("user"); MARK("<|end_header_id|>"); TEXT("\n\n", prompt, t->prompt_len, user_flags); MARK("<|eot_id|>");
+        MARK("<|start_header_id|>"); MARK("assistant"); MARK("<|end_header_id|>"); TEXT("\n\n", "", 0, 0);
+    }
+#undef MARK
+#undef TEXT
+    *out = v.ids; *nout = v.n;
+    return HFC_OK;
+fail:
+    hfc_free(v.ids);
+    snprintf(msg, cap, "chat template tokenization failed: %s", hfc_strerror(rc));
+    return rc;
+}
+
 static hfc_status op_tokenize(hfc_session *s, const hfc_opts *eff, const char *body, size_t body_len,
                             int has_body, char *msg, size_t msgcap)
 {
@@ -284,14 +385,16 @@ static hfc_status op_tokenize(hfc_session *s, const hfc_opts *eff, const char *b
     uint32_t *ids = NULL;
     size_t n = 0, i, cap, pos = 0;
     char *list = NULL, cnt[32];
+    msg[0] = 0;
     hfc_status rc;
 
     if (!eff->model) { snprintf(msg, msgcap, "tokenize needs --model PATH (a GGUF with a tokenizer)"); return HFC_EINVAL; }
     if ((rc = resolve_texts(eff, body, body_len, has_body, &t, msg, msgcap)) != HFC_OK) return rc;
     if ((rc = gguf_open(&g, eff->model, msg, msgcap)) != HFC_OK) { texts_free(&t); return rc; }
     if ((rc = hfc_tok_load(&tok, &g, msg, msgcap)) != HFC_OK) goto out;
-    rc = hfc_tok_encode(tok, t.prompt ? t.prompt : "", t.prompt_len, eff->parse_special ? HFC_TOK_PARSE_SPECIAL : 0, &ids, &n);
-    if (rc != HFC_OK) { snprintf(msg, msgcap, "tokenization failed: %s", hfc_strerror(rc)); goto out; }
+    if (eff->chat != 0 || t.system) rc = build_chat_ids(tok, gguf_get_str(&g, "general.architecture"), eff, eff->chat != 0 ? eff->chat : 1, &t, &ids, &n, msg, msgcap);
+    else rc = hfc_tok_encode(tok, t.prompt ? t.prompt : "", t.prompt_len, eff->parse_special ? HFC_TOK_PARSE_SPECIAL : 0, &ids, &n);
+    if (rc != HFC_OK) { if (!msg[0]) snprintf(msg, msgcap, "tokenization failed: %s", hfc_strerror(rc)); goto out; }
     if (!hfc_mul_size(n, 11, &cap) || !hfc_add_size(cap, 1, &cap)) { rc = HFC_ERANGE; goto out; }
     list = (char *)hfc_malloc(cap);
     if (!list) { rc = HFC_ENOMEM; snprintf(msg, msgcap, "out of memory"); goto out; }
@@ -494,22 +597,25 @@ static hfc_status op_generate(hfc_session *s, const hfc_opts *eff, const char *b
 
     memset(&t, 0, sizeof t);
     if (!eff->model) { snprintf(msg, cap, "generate needs --model PATH"); return HFC_EINVAL; }
-    if (eff->system || eff->system_file) {
-        snprintf(msg, cap, "chat templates are not implemented yet: put the fully formatted text (system prompt included) in the prompt");
-        return HFC_EINVAL;
-    }
     if ((rc = resident_get(s, eff->model, &res, msg, cap)) != HFC_OK) return rc;
     nvocab = (size_t)res->model->hp.n_vocab;
 
     if (eff->prompt_ids) {
         if (has_body || eff->prompt || eff->prompt_file) { snprintf(msg, cap, "--prompt-ids cannot be combined with a text prompt"); return HFC_EINVAL; }
+        if (eff->system || eff->system_file || eff->chat) { snprintf(msg, cap, "--prompt-ids is already tokenized: --system and --chat do not apply"); return HFC_EINVAL; }
         if ((rc = parse_ids(eff->prompt_ids, &ids, &n_prompt, (uint32_t)nvocab, msg, cap)) != HFC_OK) return rc;
     } else {
         if ((rc = resolve_texts(eff, body, body_len, has_body, &t, msg, cap)) != HFC_OK) return rc;
         if (!res->tok) { snprintf(msg, cap, "this model has no usable tokenizer (%s); use --prompt-ids", res->tok_err); rc = HFC_ENOTSUP; goto out; }
-        rc = hfc_tok_encode(res->tok, t.prompt ? t.prompt : "", t.prompt_len,
-                            HFC_TOK_ADD_BOS | (eff->parse_special ? HFC_TOK_PARSE_SPECIAL : 0), &ids, &n_prompt);
-        if (rc != HFC_OK) { snprintf(msg, cap, "tokenization failed: %s", hfc_strerror(rc)); goto out; }
+        if (eff->chat != 0 || t.system) {
+            int mode = eff->chat != 0 ? eff->chat : 1;
+            rc = build_chat_ids(res->tok, res->model->hp.arch, eff, mode, &t, &ids, &n_prompt, msg, cap);
+            if (rc != HFC_OK) goto out;
+        } else {
+            rc = hfc_tok_encode(res->tok, t.prompt ? t.prompt : "", t.prompt_len,
+                                HFC_TOK_ADD_BOS | (eff->parse_special ? HFC_TOK_PARSE_SPECIAL : 0), &ids, &n_prompt);
+            if (rc != HFC_OK) { snprintf(msg, cap, "tokenization failed: %s", hfc_strerror(rc)); goto out; }
+        }
     }
     if (n_prompt == 0) { snprintf(msg, cap, "empty prompt"); rc = HFC_EINVAL; goto out; }
     if (n_prompt >= (size_t)s->session->ctx_max) {

@@ -36,6 +36,7 @@ typedef struct {
     char    *id;
     char    *system;            /* system prompt text */
     char    *system_file;
+    int      chat;             /* hfc_chat: 0 raw, 1 auto, 2 chatml, 3 llama3 */
     char    *prompt;
     char    *prompt_file;
     char    *prompt_ids;        /* prompt as space or comma separated token ids (skips the tokenizer) */
