@@ -179,6 +179,29 @@ static float dot_q5_0_avx2(const void *w, const void *a, size_t nb)
 
 static inline int16_t rd_s16(const unsigned char *p) { return (int16_t)(p[0] | (p[1] << 8)); }
 
+static inline int hsum_epi32(__m256i v)
+{
+    __m128i s = _mm_add_epi32(_mm256_castsi256_si128(v), _mm256_extracti128_si256(v, 1));
+    s = _mm_add_epi32(s, _mm_shuffle_epi32(s, 0x4E));
+    s = _mm_add_epi32(s, _mm_shuffle_epi32(s, 0xB1));
+    return _mm_cvtsi128_si32(s);
+}
+
+/* sum over j < 8 of mn[j] * (bsums[2j] + bsums[2j+1]) -- the Q4_K / Q5_K minimum term */
+static inline int min_term_k(const unsigned char *mn, const unsigned char *bsums)
+{
+    __m256i m32 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i *)mn));
+    __m256i pair = _mm256_madd_epi16(_mm256_loadu_si256((const __m256i *)bsums), _mm256_set1_epi16(1));
+    return hsum_epi32(_mm256_mullo_epi32(m32, pair));
+}
+
+/* sum over j < 16 of sc[j] * bsums[j] -- the Q6_K offset term */
+static inline int off_term_q6(const int8_t *sc, const unsigned char *bsums)
+{
+    __m256i s16 = _mm256_cvtepi8_epi16(_mm_loadu_si128((const __m128i *)sc));
+    return hsum_epi32(_mm256_madd_epi16(s16, _mm256_loadu_si256((const __m256i *)bsums)));
+}
+
 static inline void unpack_k4(const unsigned char *q, unsigned char *sc, unsigned char *mn)
 {
     int j;
@@ -203,7 +226,7 @@ static float dot_q4_K_avx2(const void *w, const void *a, size_t nb)
         const unsigned char *q4 = pw + 16, *q8 = pa + 4;
         __m256i sumi = _mm256_setzero_si256();
         float yd, d, dmin;
-        int imin = 0, jj, j;
+        int imin = 0, jj;
         memcpy(&yd, pa, 4);
         d = yd * rd_h(pw);
         dmin = yd * rd_h(pw + 2);
@@ -217,7 +240,7 @@ static float dot_q4_K_avx2(const void *w, const void *a, size_t nb)
             ph = _mm256_madd_epi16(_mm256_set1_epi16(sc[2 * jj + 1]), ph);
             sumi = _mm256_add_epi32(sumi, _mm256_add_epi32(pl, ph));
         }
-        for (j = 0; j < 8; j++) imin += mn[j] * (rd_s16(pa + 260 + 4 * j) + rd_s16(pa + 262 + 4 * j));
+        imin = min_term_k(mn, pa + 260);
         acc = _mm256_fmadd_ps(_mm256_set1_ps(d), _mm256_cvtepi32_ps(sumi), acc);
         minacc += dmin * (float)imin;
     }
@@ -237,7 +260,7 @@ static float dot_q5_K_avx2(const void *w, const void *a, size_t nb)
         __m256i hbits = _mm256_loadu_si256((const __m256i *)(pw + 16));
         __m256i sumi = _mm256_setzero_si256();
         float yd, d, dmin;
-        int imin = 0, jj, j;
+        int imin = 0, jj;
         memcpy(&yd, pa, 4);
         d = yd * rd_h(pw);
         dmin = yd * rd_h(pw + 2);
@@ -255,7 +278,7 @@ static float dot_q5_K_avx2(const void *w, const void *a, size_t nb)
             p1 = _mm256_madd_epi16(_mm256_set1_epi16(sc[2 * jj + 1]), p1);
             sumi = _mm256_add_epi32(sumi, _mm256_add_epi32(p0, p1));
         }
-        for (j = 0; j < 8; j++) imin += mn[j] * (rd_s16(pa + 260 + 4 * j) + rd_s16(pa + 262 + 4 * j));
+        imin = min_term_k(mn, pa + 260);
         acc = _mm256_fmadd_ps(_mm256_set1_ps(d), _mm256_cvtepi32_ps(sumi), acc);
         minacc += dmin * (float)imin;
     }
@@ -275,10 +298,10 @@ static float dot_q6_K_avx2(const void *w, const void *a, size_t nb)
         const unsigned char *q8 = pa + 4;
         __m256i sumi = _mm256_setzero_si256();
         float yd, d;
-        int off = 0, j, n;
+        int off = 0, n;
         memcpy(&yd, pa, 4);
         d = yd * rd_h(pw + 208);
-        for (j = 0; j < 16; j++) off += sc[j] * rd_s16(pa + 260 + 2 * j);     /* the -32 offset: 32 * sum(scale * bsum) */
+        off = off_term_q6(sc, pa + 260);     /* the -32 offset: 32 * sum(scale * bsum) */
         for (n = 0; n < 2; n++, ql += 64, qh += 32, sc += 8, q8 += 128) {
             __m256i l0 = _mm256_loadu_si256((const __m256i *)ql), l1 = _mm256_loadu_si256((const __m256i *)(ql + 32));
             __m256i hv = _mm256_loadu_si256((const __m256i *)qh);
@@ -393,7 +416,7 @@ static void dot4_q4_K_avx2(const void *w, const void *a, size_t as, size_t nb, f
         const unsigned char *q4 = pw + 16;
         __m256i sumi[NT];
         float dwd = rd_h(pw), dwm = rd_h(pw + 2);
-        int jj, j;
+        int jj;
         unpack_k4(pw + 4, sc, mn);
         for (t = 0; t < NT; t++) sumi[t] = _mm256_setzero_si256();
         for (jj = 0; jj < 4; jj++, q4 += 32) {
@@ -413,7 +436,7 @@ static void dot4_q4_K_avx2(const void *w, const void *a, size_t as, size_t nb, f
             float yd;
             int imin = 0;
             memcpy(&yd, pa[t], 4);
-            for (j = 0; j < 8; j++) imin += mn[j] * (rd_s16(pa[t] + 260 + 4 * j) + rd_s16(pa[t] + 262 + 4 * j));
+            imin = min_term_k(mn, pa[t] + 260);
             acc[t] = _mm256_fmadd_ps(_mm256_set1_ps(yd * dwd), _mm256_cvtepi32_ps(sumi[t]), acc[t]);
             minacc[t] += (yd * dwm) * (float)imin;
             pa[t] += HFC_Q8_K_BLOCK;
@@ -437,7 +460,7 @@ static void dot4_q5_K_avx2(const void *w, const void *a, size_t as, size_t nb, f
         __m256i hbits = _mm256_loadu_si256((const __m256i *)(pw + 16));
         __m256i sumi[NT];
         float dwd = rd_h(pw), dwm = rd_h(pw + 2);
-        int jj, j;
+        int jj;
         unpack_k4(pw + 4, sc, mn);
         for (t = 0; t < NT; t++) sumi[t] = _mm256_setzero_si256();
         for (jj = 0; jj < 4; jj++, ql += 32) {
@@ -460,7 +483,7 @@ static void dot4_q5_K_avx2(const void *w, const void *a, size_t as, size_t nb, f
             float yd;
             int imin = 0;
             memcpy(&yd, pa[t], 4);
-            for (j = 0; j < 8; j++) imin += mn[j] * (rd_s16(pa[t] + 260 + 4 * j) + rd_s16(pa[t] + 262 + 4 * j));
+            imin = min_term_k(mn, pa[t] + 260);
             acc[t] = _mm256_fmadd_ps(_mm256_set1_ps(yd * dwd), _mm256_cvtepi32_ps(sumi[t]), acc[t]);
             minacc[t] += (yd * dwm) * (float)imin;
             pa[t] += HFC_Q8_K_BLOCK;
@@ -483,11 +506,11 @@ static void dot4_q6_K_avx2(const void *w, const void *a, size_t as, size_t nb, f
         const int8_t *sc = (const int8_t *)(pw + 192);
         __m256i sumi[NT];
         float dwd = rd_h(pw + 208);
-        int off[NT], j, n;
+        int off[NT], n;
         for (t = 0; t < NT; t++) {
             sumi[t] = _mm256_setzero_si256();
             off[t] = 0;
-            for (j = 0; j < 16; j++) off[t] += sc[j] * rd_s16(pa[t] + 260 + 2 * j);
+            off[t] = off_term_q6(sc, pa[t] + 260);
         }
         for (n = 0; n < 2; n++, ql += 64, qh += 32, sc += 8) {
             __m256i l0 = _mm256_loadu_si256((const __m256i *)ql), l1 = _mm256_loadu_si256((const __m256i *)(ql + 32));
