@@ -234,7 +234,10 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
   - **`PTQ1_0`, group 128, id 143** (fork-private ternary): `{ uint8 qs[24]; uint8 qh[2]; fp16 d; }` = 28 bytes = **1.75 bpw**. Base-3 packing, five trits per byte (a `TQ1_0` relative, which is 1.6875 bpw), value `(trit - 1) * d`.
   - Mainline `TQ1_0` / `TQ2_0` exist too, but the Bonsai files use the types above.
   - **These are simple codecs.** The 2-bit one is a plain unpack with one multiply by `d`, and it is the same `u8 x s8` `vpmaddubsw` pattern as Q4. So **`Q2_0` g64 is an easy first ternary kernel**, with stock llama.cpp as the oracle, and `PQ2_0` / `PTQ1_0` are small variations.
-- **Hadamard rotation (`prism_hadamard_qwen35`):** the weights were quantized in a Hadamard-rotated basis, so the **activation must be rotated before each ternary matmul**. In the fork's `build_lora_mm`, a per-weight rotation (`hadamard_rotations[w]`, a stored rotation tensor `t.rot` with optional `t.signs`) is applied to the input activation, and memoized so projections sharing an input (Q/K/V, gate/up) rotate once. The config says block size 1024. Cost: a 1024-point fast Walsh-Hadamard transform is ~10 adds per element, under 1% of the matmul, so it is cheap, but it must be **bit-exact in semantics** (block size, normalization, sign tensor, any permutation). Open until the exact definition is read from the GGUF tensors or the fork's rotation code. It also means an upstream-compatible `Q2_g64` file may or may not include the rotation, so check which tensors the file contains.
+- **Hadamard rotation (`prism_hadamard_qwen35`), now read from the included `llama-graph.cpp`:** the weights were quantized in a rotated basis, and the graph compensates at run time. In `build_lora_mm` (and the MoE variant), for every weight tensor `w` that has an entry in `hadamard_rotations`, the **input activation is transformed before the matmul**: (1) optionally permuted from tiled `[hd, nk, rep]` to grouped `[hd, rep, nk]` feature order, (2) optionally multiplied elementwise by a `signs` tensor, (3) multiplied by the rotation `rot` through `llama_mul_mat_hadamard`. The result is **memoized per (activation, rot)** so Q/K/V (or gate/up) sharing an input rotate once. The embedding table is also stored rotated: after `get_rows`, the row is multiplied by `rot` and then by `signs` (`h = s * (H z)`) to restore the original basis. The config gives block 1024 for every projection and the lm_head.
+  - **Still missing from that file** (so Bonsai 2 stays deferred, as you said): the definition of `llama_mul_mat_hadamard` (does `rot` hold a block Hadamard matrix or is it a hint for a fast transform, and is it normalized by 1/sqrt(n)?), the **loader** that fills `hadamard_rotations`/`hadamard_inverses` (GGUF tensor names for `rot`, `signs`, permutation parameters), and which weights get which rotation. Those live in the fork's `llama-model.cpp`/loader and a `hadamard` source file. Asking for those two or three files would be enough to implement it.
+  - **Cost is small** if the transform is a fast Walsh-Hadamard (about 10 adds per element, under 1% of the matmul) and about 2x the matmul work for a 1024x1024 dense multiply if it is not. Either way it is exactly specifiable once the definition is known, and it needs bit-exact semantics.
+  - The same file also shows **mainline llama.cpp's KV-cache rotation**: when KV quantization is on, `q` and `k` are multiplied by `self_k_rot` and `v` by `self_v_rot`, and the attention output is multiplied by `self_v_rot` again. The rotation is orthogonal, so attention is unchanged, but it spreads outliers and makes quantized K/V much more accurate. **Adopt this for our q8/q4 KV cache** (§4.6); it is the "Hadamard-transformed K cache" trick I listed from ik_llama, now confirmed upstream.
 - **AVX2 kernel idea:** the multiply-free trick is to keep weights as unsigned {0,1,2}, use `vpmaddubsw` (u8 x s8) exactly as for Q4, and subtract the precomputed activation block sum (`sum(a*(w-1)) = sum(a*w) - sum(a)`). Decoding 5-trits-per-byte with multiply-and-shift is cheap in SIMD. This puts ternary at roughly Q4's ALU cost per weight, so ternary is **not** faster for prefill. `vpsignb` is an alternative (sign-apply) but needs a signed weight byte. LUT/bit-serial methods (T-MAC, bitnet.cpp) are the research path, and worth a measured trial only after the baseline kernels exist.
 - **Activation quantization** is per-token int8 with block scales (BitNet-style models are trained for this, post-training ternarized ones usually tolerate a finer block scale). Whatever PrismML's fork does is the numerical reference.
 - **Memory:** 5.9 GB of weights plus KV for a 262k-capable hybrid fits 16 GB comfortably if the model is a GDN hybrid with few attention layers. Use incremental context (§5).
@@ -398,18 +401,26 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 
 ## 11. Process model and protocol
 
-**Decided: one resident process that loads once and serves many requests for a long time.** stdin/stdout/stderr only. Two input modes, chosen at startup:
+**Decided: one resident process that loads once and serves many requests for a long time.** stdin/stdout/stderr only.
 
-**Mode A: argv-lines.** Each stdin line is one request, written as command-line parameters (`--n 4 --temp 0.7 --prompt-file /tmp/p.txt`).
+**Everything is an option, and every option can be given on the real command line.** The command line (plus an optional settings file) sets the session: model, threads, cache dir and quota, context policy, sampler, **system prompt** (`--system TEXT` or `--system-file PATH`), `--n`, stop rules, and so on. **`stdin` only augments that.** What stdin carries depends on `--stdin-mode`, and a request's effective options are layered:
+
+`built-in defaults  <  settings file  <  real command line  <  per-request options`
+
+**`--stdin-mode prompts` (record stream, the Emacs and pipeline default).** stdin carries **only the prompts**, one per record, separated by a single `RECORD_SEPARATOR` byte.
+- Suggested separator ASCII 0x1E (RS), configurable with `--record-sep BYTE`. A prompt containing that byte is an error, or escapable with a configurable escape byte. A length-prefixed variant is the fully binary-safe alternative.
+- The system prompt stays on the command line and is therefore the shared, cached prefix of every request. Nothing else is needed per record.
+- **Optional per-record header** for the rare override: a record may start with an argv-style option line terminated by ASCII 0x1F (UNIT_SEPARATOR), then the prompt. No 0x1F means the whole record is the prompt.
+- With no separator before EOF the whole of stdin is one prompt, so a one-shot run is just `engine --model m.gguf --system "Be terse." < prompt.txt`.
+
+**`--stdin-mode args` (argv-lines).** Each stdin line is one request, written as command-line options that override the session options for that request (`--n 4 --temp 0.7 --prompt-file /tmp/p.txt`, or a short `--prompt 'text'`).
 - Parsed with POSIX-shell-style word splitting only: single quotes, double quotes with `\"` and `\\`, backslash. **No expansion** (no `$`, globs, backticks), so request lines are safe to build from untrusted text.
-- The same option parser serves the real command line and each request line. Startup options are the defaults, and request options override them per request. This keeps one flag vocabulary for the whole engine.
-- Prompt text should normally come via `--prompt-file PATH` (or `--prompt-fd`, or `--prompt-inline-hex`), because a newline-terminated line cannot carry arbitrary prompts. A short `--prompt 'text'` is allowed, with `\n` escapes.
-- Fits shell scripts and `perl` pipelines well: `print $fh "--model qwen3 --n 3 --prompt-file $f\n"`.
+- **The same option parser serves the real command line and each request line**, which keeps one flag vocabulary and one set of validation errors for the whole engine.
+- A newline-terminated line cannot carry an arbitrary prompt, so prompts normally come via `--prompt-file PATH` (or `--prompt-fd`, or `--prompt-hex`). Fits shell and Perl pipelines well: `print $fh "--model qwen2.5-7b --n 3 --prompt-file $f\n"`.
 
-**Mode B: record stream.** stdin carries request bodies (prompts) separated by a single `RECORD_SEPARATOR` byte.
-- Suggested value: ASCII 0x1E (RS), configurable with `--record-sep BYTE`. Prompt text containing that byte is an error (or escapable via a configurable escape byte). Using a length-prefixed variant is an alternative for fully binary-safe bodies.
-- Per-request parameters come from the startup command line (applied to every record). To override per record without a second channel, an optional **header**: a record may start with an argv-style parameter line terminated by ASCII 0x1F (UNIT_SEPARATOR), then the body. No 0x1F means the whole record is the body and all params are defaults.
-- Fits Emacs well: it concatenates buffer text + `\x1e` and `process-send-string`.
+**`--prompt TEXT` / `--prompt-file PATH` on the real command line with `--stdin-mode none`** runs a single request and exits, for scripts that want no stdin at all.
+
+Because the system prompt and most options are fixed for a session, **the persistent prefix cache (§6) hits from the first token** of every request after the first, which is why `--system` belongs on the command line and not in each request.
 
 **Common to both modes**
 - **Output** mirrors input framing. In record mode, each response ends with the same RS byte. In argv mode, each response ends with a line `\n`-terminated trailer event, and a request id may be passed with `--id`. Events on stdout: token text deltas, logprobs, branch index (for `--n`), `done` with stats (tokens, prefill and decode rates, cache hit length, KV bytes, timings), or `error` with a code. Log and progress lines go to stderr as `level key=value ...` (prefill progress, cache hit/miss, memory plan, thrash warnings). Emacs can parse either stream with native readers. A machine-readable stats line per request lets pipeline controllers evaluate gates and tuning.
@@ -434,7 +445,9 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 - **Vision can be deferred.** v1 is text-only.
 - **Qwen2.5 matters more than Bonsai 2.** Qwen2.5 becomes the first implementation target; Bonsai 2 is late.
 - **You will try many sizes** of Gemma and the others. One spec per architecture family, not per size, and a `bench` request for any GGUF (§9).
-- For Bonsai 2 you want the **PQ2_0** (group-128) 27B, which needs the PrismML fork.
+- For Bonsai 2 you want the **PQ2_0** (group-128) 27B, which needs the PrismML fork. **Skip Bonsai 2 for now** if the fork's Hadamard definition is not available.
+- **Qwen2.5 default list approved**: 0.5B, 1.5B, 3B, 7B Instruct, plus Coder 7B and R1-Distill 7B as fine-tune checks.
+- **Options model:** every option may be given on the real command line, stdin only augments it (prompts, or per-request option lines). System prompt stays a command-line option (§11).
 
 **Decided (by me, say if you disagree):**
 - OS-identical results (bit-identical logits on the same ISA); only the platform layer differs (§14).
@@ -446,9 +459,8 @@ Parallel sampling of `n` continuations (best-of-n, self-consistency, retries aft
 - **Bonsai 2 plan:** I **corrected my earlier guess** about the formats: `PQ2_0` is the fork-private **group-128** type (id 142), and upstream llama.cpp's type is **`Q2_0` group 64** (id 42). Both use the same 2-bit codec, `(q - 1) * d`. I would implement **`Q2_0` g64 first** (stock llama.cpp is the oracle, no fork needed), then `PQ2_0` (a one-line change in block size) and `PTQ1_0`. The Hadamard rotation is the real work (§4.9).
 
 **Still open (none blocks the start):**
-1. **Hadamard semantics for Bonsai 2**: block size 1024 is in the config, but normalization, the sign tensor, permutations and which tensors are rotated need to be read from the GGUF tensor list or the fork. The fetch tool summarizes pages, so the reliable route is to dump a GGUF with the Perl tool, or for you to drop the relevant fork files (the `hadamard_rotations` code in `src/llama-graph.cpp` and the conversion script) into the repo.
-2. **Which Qwen2.5 sizes and variants** you want first. My default: 0.5B, 1.5B, 3B, 7B Instruct, plus Coder 7B and R1-Distill 7B as fine-tune checks.
-3. **MacBook CPU**: assumed i7-5557U, the probe will confirm.
+1. **Bonsai 2 is deferred.** The included `llama-graph.cpp` shows the structure of the Hadamard rotation (§4.9) but not its definition or loader. If you want it later, add the fork's Hadamard source file(s) and the model loader (`llama-model.cpp` or wherever `hadamard_rotations` is filled).
+2. **MacBook CPU**: assumed i7-5557U, the probe will confirm.
 
 ---
 
