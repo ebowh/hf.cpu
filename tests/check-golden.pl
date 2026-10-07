@@ -14,8 +14,10 @@ use Getopt::Long;
 use File::Temp qw(tempfile);
 
 my ($bin, $mode, $tol, $threads) = ('./hfcpu', 'both', 0.15, undef);
+my $neartie;
 GetOptions('bin=s' => \$bin, 'mode=s' => \$mode, 'tol=f' => \$tol, 'threads=i' => \$threads) or die "bad options\n";
 my ($model, $golden) = @ARGV;
+$neartie = $tol < 0.1 ? 0.1 : $tol;   # a divergence is acceptable when the golden top-2 gap is within the allowed noise
 die "usage: $0 MODEL.gguf GOLDEN [--bin ./hfcpu] [--mode ids|text|both] [--tol 0.05]\n" unless $golden;
 
 open(my $gf, '<', $golden) or die "cannot open $golden\n";
@@ -73,8 +75,8 @@ for my $p (@prompts) {
         if ($agree < $total && $agree < $n + 1 && $p->{lp}[$agree]) {   # diverged: was it a near-tie in the reference?
             my @top = map { (split /:/)[1] } split ' ', $p->{lp}[$agree]{top};
             my $gap = @top > 1 ? $top[0] - $top[1] : 99;
-            if ($gap <= 0.1) { $note = sprintf(" (diverged at a near-tie, gap %.3f)", $gap); }
-            else { $good = 0; }
+            if ($gap <= $neartie) { $note = sprintf(" (diverged at a near-tie, gap %.3f)", $gap); }
+            else { $good = 0; $note = sprintf(" (diverged with gap %.3f > %.3f)", $gap, $neartie); }
         }
         $bad++ unless $good;
         printf "%-8s %-5s %s  agree %2d/%d tokens, max |dlogprob| %.4f, mean %.4f, bias %+.4f%s%s%s\n", $p->{name}, $m, $good ? 'OK  ' : 'FAIL', $agree, $total, $worst,
