@@ -1,14 +1,14 @@
-plain    ids   OK    agree 22/48 tokens, max |dlogprob| 0.0959, mean 0.0229, bias -0.0087 (diverged at a near-tie, gap 0.034)  prefill 14.8 t/s  decode 20.8 t/s
+plain    ids   OK    agree 22/48 tokens, max |dlogprob| 0.0959, mean 0.0229, bias -0.0087 (diverged at a near-tie, gap 0.034)  prefill 26.2 t/s  decode 33.0 t/s
            first difference at token 22: golden 4126, ours 9806
-plain    text  OK    agree 22/48 tokens, max |dlogprob| 0.0959, mean 0.0229, bias -0.0087 (diverged at a near-tie, gap 0.034)  prefill 15.0 t/s  decode 20.8 t/s
+plain    text  OK    agree 22/48 tokens, max |dlogprob| 0.0959, mean 0.0229, bias -0.0087 (diverged at a near-tie, gap 0.034)  prefill 25.9 t/s  decode 33.5 t/s
            first difference at token 22: golden 4126, ours 9806
-code     ids   OK    agree 48/48 tokens, max |dlogprob| 0.0606, mean 0.0112, bias -0.0018  prefill 14.8 t/s  decode 20.5 t/s
-code     text  OK    agree 48/48 tokens, max |dlogprob| 0.0606, mean 0.0112, bias -0.0018  prefill 15.0 t/s  decode 20.3 t/s
-chatml   ids   OK    agree 48/48 tokens, max |dlogprob| 0.0583, mean 0.0131, bias +0.0028  prefill 28.1 t/s  decode 20.3 t/s
-chatml   text  OK    agree 48/48 tokens, max |dlogprob| 0.0583, mean 0.0131, bias +0.0028  prefill 28.1 t/s  decode 20.7 t/s
-unicode  ids   OK    agree 48/48 tokens, max |dlogprob| 0.0974, mean 0.0082, bias -0.0046  prefill 25.2 t/s  decode 20.5 t/s
-unicode  text  OK    agree 48/48 tokens, max |dlogprob| 0.0974, mean 0.0082, bias -0.0046  prefill 24.8 t/s  decode 20.7 t/s
-long     ids   OK    agree 48/48 tokens, max |dlogprob| 0.0705, mean 0.0102, bias +0.0016  prefill 32.9 t/s  decode 18.6 t/s
-long     text  OK    agree 48/48 tokens, max |dlogprob| 0.0705, mean 0.0102, bias +0.0016  prefill 32.6 t/s  decode 18.2 t/s
+code     ids   OK    agree 48/48 tokens, max |dlogprob| 0.0606, mean 0.0112, bias -0.0018  prefill 25.2 t/s  decode 33.2 t/s
+code     text  OK    agree 48/48 tokens, max |dlogprob| 0.0606, mean 0.0112, bias -0.0018  prefill 25.7 t/s  decode 34.1 t/s
+chatml   ids   OK    agree 48/48 tokens, max |dlogprob| 0.0583, mean 0.0131, bias +0.0028  prefill 51.2 t/s  decode 32.9 t/s
+chatml   text  OK    agree 48/48 tokens, max |dlogprob| 0.0583, mean 0.0131, bias +0.0028  prefill 52.4 t/s  decode 33.2 t/s
+unicode  ids   OK    agree 48/48 tokens, max |dlogprob| 0.0974, mean 0.0082, bias -0.0046  prefill 45.4 t/s  decode 33.4 t/s
+unicode  text  OK    agree 48/48 tokens, max |dlogprob| 0.0974, mean 0.0082, bias -0.0046  prefill 46.0 t/s  decode 33.2 t/s
+long     ids   OK    agree 48/48 tokens, max |dlogprob| 0.0705, mean 0.0102, bias +0.0016  prefill 61.8 t/s  decode 30.9 t/s
+long     text  OK    agree 48/48 tokens, max |dlogprob| 0.0705, mean 0.0102, bias +0.0016  prefill 60.0 t/s  decode 30.1 t/s
 
 all checks passed
