@@ -469,7 +469,7 @@ hfc_status hfc_probe_save(const char *dir, const hfc_machine *m)
 #define APP(...) do { int w_ = snprintf(buf + off, cap - off, __VA_ARGS__); \
                       if (w_ < 0 || (size_t)w_ >= cap - off) { hfc_free(buf); return HFC_ERANGE; } \
                       off += (size_t)w_; } while (0)
-    APP("format=1\nsig=%s\nisa=%s\nwhen=%ld\n", m->sig, m->isa, m->when);
+    APP("format=2\nsig=%s\nisa=%s\nwhen=%ld\n", m->sig, m->isa, m->when);
     APP("bw_best_threads=%d\nbw_best_gbps=%.3f\n", m->bw_best_threads, m->bw_best_gbps);
     APP("fma_gflops_1t=%.3f\nfma_gflops_all=%.3f\nfma_gflops_logical=%.3f\n", m->fma_gflops_1t, m->fma_gflops_all, m->fma_gflops_logical);
     for (i = 0; i < m->nbw; i++) APP("bw.%d=%.3f\n", m->bw_threads[i], m->bw_gbps[i]);
@@ -498,7 +498,7 @@ hfc_status hfc_probe_load(const char *dir, const hfc_cpu *c, uint64_t mem_total,
         if (nl) *nl = '\0';
         if (!eq) continue;
         *eq++ = '\0';
-        if (strcmp(line, "format") == 0) saw_format = atoi(eq) == 1;
+        if (strcmp(line, "format") == 0) saw_format = atoi(eq) == 2;     /* bump when the probe changes so stale profiles are re-measured */
         else if (strcmp(line, "sig") == 0) { strncpy(m->sig, eq, 16); m->sig[16] = '\0'; }
         else if (strcmp(line, "isa") == 0) { strncpy(m->isa, eq, sizeof m->isa - 1); }
         else if (strcmp(line, "when") == 0) m->when = atol(eq);
